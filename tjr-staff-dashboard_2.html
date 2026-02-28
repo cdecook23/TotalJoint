@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TJR Hub — Staff Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f1f5f9; --card: #fff; --border: #e2e8f0;
+  --t1: #0f172a; --t2: #334155; --t3: #64748b; --t4: #94a3b8;
+  --blue: #2563eb; --blueL: #eff6ff; --blueD: #1d4ed8;
+  --green: #16a34a; --greenL: #f0fdf4; --greenB: #dcfce7;
+  --yellow: #d97706; --yellowL: #fffbeb; --yellowB: #fef3c7;
+  --red: #dc2626; --redL: #fef2f2; --redB: #fee2e2;
+  --purple: #7c3aed; --purpleL: #f5f3ff;
+  --orange: #ea580c; --orangeL: #fff7ed;
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'DM Sans',-apple-system,system-ui,sans-serif; background:var(--bg); color:var(--t1); min-height:100vh; }
+::selection { background:var(--blue); color:#fff; }
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; }
+
+.topbar { background:#fff; border-bottom:1px solid var(--border); padding:0 24px; height:56px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; }
+.topbar-l { display:flex; align-items:center; gap:12px; }
+.logo { width:32px; height:32px; border-radius:8px; background:linear-gradient(135deg,var(--blue),var(--blueD)); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:12px; }
+.topbar-t { font-weight:700; font-size:16px; }
+.topbar-s { font-size:12px; color:var(--t3); }
+.topbar-r { display:flex; align-items:center; gap:12px; }
+.topbar-r select { padding:6px 10px; border-radius:8px; border:1px solid var(--border); font-size:13px; font-family:inherit; color:var(--t2); background:#fff; cursor:pointer; }
+.topbar-r select:focus { outline:none; border-color:var(--blue); }
+.topbar-user { display:flex; align-items:center; gap:8px; padding:5px 12px 5px 5px; border-radius:20px; background:var(--blueL); }
+.topbar-avatar { width:26px; height:26px; border-radius:50%; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:11px; }
+.topbar-name { font-size:13px; font-weight:600; color:var(--blue); }
+
+.main { max-width:1280px; margin:0 auto; padding:20px 24px 40px; }
+
+.stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px; }
+.stat { background:var(--card); border-radius:12px; padding:16px 18px; box-shadow:var(--shadow); border-left:3px solid transparent; }
+.stat-n { font-size:28px; font-weight:800; line-height:1; margin-bottom:4px; }
+.stat-l { font-size:12px; color:var(--t3); font-weight:500; }
+.stat.s-total { border-left-color:var(--blue); } .stat.s-total .stat-n { color:var(--blue); }
+.stat.s-done { border-left-color:var(--green); } .stat.s-done .stat-n { color:var(--green); }
+.stat.s-prog { border-left-color:var(--yellow); } .stat.s-prog .stat-n { color:var(--yellow); }
+.stat.s-none { border-left-color:var(--red); } .stat.s-none .stat-n { color:var(--red); }
+.stat.s-issue { border-left-color:var(--orange); } .stat.s-issue .stat-n { color:var(--orange); }
+
+.tbl-wrap { background:var(--card); border-radius:14px; box-shadow:var(--shadow); overflow:hidden; }
+.tbl-hdr { padding:16px 20px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); }
+.tbl-title { font-weight:700; font-size:15px; }
+.tbl-actions { display:flex; gap:8px; }
+.btn-sm { padding:6px 14px; border-radius:8px; border:1px solid var(--border); background:#fff; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; color:var(--t2); transition:all .15s; display:inline-flex; align-items:center; gap:5px; }
+.btn-sm:hover { background:var(--blueL); border-color:var(--blue); color:var(--blue); }
+.btn-sm.primary { background:var(--blue); color:#fff; border-color:var(--blue); }
+.btn-sm.primary:hover { background:var(--blueD); }
+.btn-xs { padding:3px 8px; border-radius:5px; border:1px solid var(--border); background:#fff; font-size:10px; font-weight:600; cursor:pointer; font-family:inherit; color:var(--t3); transition:all .12s; display:inline-flex; align-items:center; gap:3px; white-space:nowrap; }
+.btn-xs:hover { background:var(--blueL); border-color:var(--blue); color:var(--blue); }
+.btn-xs.warn { border-color:#fed7aa; color:var(--orange); }
+.btn-xs.warn:hover { background:var(--orangeL); }
+.btn-xs.purple { border-color:#e9d5ff; color:var(--purple); }
+.btn-xs.purple:hover { background:var(--purpleL); }
+
+table { width:100%; border-collapse:collapse; }
+thead th { padding:10px 14px; text-align:left; font-size:10px; font-weight:700; color:var(--t4); text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid var(--border); background:#fafbfc; }
+tbody td { padding:11px 14px; border-bottom:1px solid #f1f5f9; font-size:13px; vertical-align:middle; }
+tbody tr { transition:background .1s; }
+tbody tr:hover { background:#f8fafc; }
+tbody tr:last-child td { border-bottom:none; }
+
+.pt-name { font-weight:600; color:var(--t1); }
+.pt-mrn { font-size:11px; color:var(--t4); margin-top:1px; }
+.pt-time { font-weight:600; font-size:14px; color:var(--t1); }
+
+.badge { padding:4px 10px; border-radius:6px; font-size:11px; font-weight:700; display:inline-flex; align-items:center; gap:4px; white-space:nowrap; }
+.badge-submitted { background:var(--greenB); color:var(--green); }
+.badge-progress { background:var(--yellowB); color:var(--yellow); }
+.badge-opened { background:var(--yellowB); color:var(--yellow); }
+.badge-pending { background:var(--redB); color:var(--red); }
+.badge-failed { background:var(--orangeL); color:var(--orange); border:1px solid #fed7aa; }
+.badge-locked { background:#fae8ff; color:#a21caf; border:1px solid #f0abfc; }
+.badge-inoffice { background:var(--blueL); color:var(--blue); }
+
+.vtag { padding:3px 8px; border-radius:5px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.3px; }
+.vtag-new { background:var(--blueL); color:var(--blue); }
+.vtag-followup { background:var(--greenL); color:var(--green); }
+.vtag-preop { background:var(--purpleL); color:var(--purple); }
+.vtag-postop { background:#fdf4ff; color:#a855f7; }
+
+.flag { padding:2px 6px; border-radius:4px; font-size:10px; font-weight:600; margin-right:3px; display:inline-block; }
+.flag-bt { background:#fef3c7; color:#92400e; }
+.flag-dm { background:#dbeafe; color:#1e40af; }
+.flag-cardiac { background:#fee2e2; color:#991b1b; }
+.flag-bmi { background:#fce7f3; color:#9d174d; }
+
+.intake-prog { width:70px; height:5px; background:#e5e7eb; border-radius:3px; overflow:hidden; display:inline-block; vertical-align:middle; margin-left:6px; }
+.intake-prog-fill { height:100%; border-radius:3px; }
+
+.cc-joint { font-size:10px; font-weight:600; display:inline-block; padding:2px 6px; border-radius:3px; margin:1px 2px 1px 0; }
+.cc-knee { background:#dbeafe; color:#1e40af; }
+.cc-hip { background:#f3e8ff; color:#6b21a8; }
+.cc-postop { background:#dcfce7; color:#166534; font-style:italic; }
+
+.xr-badge { padding:3px 8px; border-radius:5px; font-size:10px; font-weight:700; display:inline-flex; align-items:center; gap:3px; cursor:pointer; transition:all .12s; }
+.xr-done { background:var(--greenB); color:var(--green); }
+.xr-ordered { background:var(--yellowB); color:var(--yellow); }
+.xr-needed { background:var(--redB); color:var(--red); }
+.xr-na { background:#f1f5f9; color:var(--t4); }
+.xr-badge:hover { opacity:.8; }
+
+/* Xray thumbnails */
+.xr-thumbs { display:flex; gap:4px; margin-top:5px; flex-wrap:wrap; }
+.xr-thumb { width:44px; height:54px; border-radius:4px; overflow:hidden; cursor:pointer; position:relative; border:1px solid #1e293b; transition:all .15s; flex-shrink:0; }
+.xr-thumb:hover { transform:scale(1.08); box-shadow:0 4px 12px rgba(0,0,0,.3); z-index:2; }
+.xr-thumb canvas { width:100%; height:100%; display:block; }
+.xr-thumb-label { position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,.7); color:#94a3b8; font-size:7px; font-weight:700; text-align:center; padding:1px 0; letter-spacing:.3px; }
+
+/* Lightbox */
+.lb-ov { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); backdrop-filter:blur(8px); z-index:200; align-items:center; justify-content:center; flex-direction:column; }
+.lb-ov.open { display:flex; }
+.lb-hdr { color:#e2e8f0; font-size:14px; font-weight:700; margin-bottom:16px; display:flex; align-items:center; gap:12px; }
+.lb-close { background:none; border:1px solid #475569; border-radius:8px; color:#e2e8f0; padding:6px 14px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; }
+.lb-close:hover { background:#334155; }
+.lb-images { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; max-width:90vw; }
+.lb-img-wrap { display:flex; flex-direction:column; align-items:center; gap:6px; }
+.lb-img-wrap canvas { border-radius:8px; border:2px solid #334155; }
+.lb-img-label { color:#94a3b8; font-size:11px; font-weight:600; }
+
+.intake-cell { display:flex; flex-direction:column; gap:4px; }
+.intake-actions { display:flex; gap:4px; flex-wrap:wrap; }
+
+.modal-ov { display:none; position:fixed; inset:0; background:rgba(15,23,42,.4); backdrop-filter:blur(4px); z-index:100; align-items:center; justify-content:center; }
+.modal-ov.open { display:flex; }
+.modal { background:#fff; border-radius:16px; max-width:480px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,.2); overflow:hidden; animation:modalIn .2s; }
+@keyframes modalIn { from { opacity:0; transform:scale(.95) translateY(10px); } to { opacity:1; transform:none; } }
+.modal-h { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.modal-h h3 { font-size:15px; font-weight:700; }
+.modal-close { width:28px; height:28px; border-radius:6px; border:none; background:transparent; cursor:pointer; font-size:16px; color:var(--t3); display:flex; align-items:center; justify-content:center; }
+.modal-close:hover { background:#f1f5f9; }
+.modal-body { padding:20px; }
+.modal-body p { font-size:13px; color:var(--t2); line-height:1.6; margin-bottom:12px; }
+.modal-body .field { margin-bottom:14px; }
+.modal-body label { display:block; font-size:12px; font-weight:600; color:var(--t3); margin-bottom:4px; }
+.modal-body input { width:100%; padding:8px 12px; border-radius:8px; border:1px solid var(--border); font-size:13px; font-family:inherit; }
+.modal-body input:focus { outline:none; border-color:var(--blue); }
+.modal-ft { padding:14px 20px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px; }
+
+.qr-box { width:160px; height:160px; margin:16px auto; background:#f8fafc; border:2px dashed var(--border); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:var(--t3); font-size:11px; font-weight:600; }
+.qr-box .qr-icon { font-size:40px; }
+
+@media(max-width:900px) { .stats { grid-template-columns:repeat(3,1fr); } .main { padding:16px; } table { display:block; overflow-x:auto; } }
+@media(max-width:600px) { .stats { grid-template-columns:repeat(2,1fr); } .topbar { padding:0 12px; } .topbar-s { display:none; } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-l">
+    <div class="logo">TJ</div>
+    <div><div class="topbar-t">Staff Dashboard</div><div class="topbar-s">TJR Hub — Northside Clinic</div></div>
+  </div>
+  <div class="topbar-r">
+    <input type="date" id="dateSelect" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);font-size:13px;font-family:inherit;color:var(--t2);cursor:pointer;" onchange="setDate(this.value)">
+    <select id="provSelect" onchange="render()">
+      <option value="all">All Providers</option>
+      <option value="DeCook" selected>Dr. DeCook</option>
+      <option value="Smith">Dr. Smith</option>
+      <option value="Jones">Dr. Jones</option>
+    </select>
+    <div class="topbar-user"><div class="topbar-avatar">JB</div><span class="topbar-name">Jessica B.</span></div>
+  </div>
+</div>
+
+<div class="main" id="main"></div>
+<div class="modal-ov" id="modalOv" onclick="if(event.target===this)closeModal()"><div class="modal" id="modal"></div></div>
+<div class="lb-ov" id="lbOv" onclick="if(event.target===this)closeLB()"><div class="lb-hdr" id="lbHdr"></div><div class="lb-images" id="lbImages"></div></div>
+
+<script>
+const TODAY=new Date();
+
+const SCHEDULE=[
+  { id:1, first:"Margaret", last:"Thompson", mrn:"NTH-2847561", time:"9:00 AM", provider:"DeCook", vt:"new",
+    flags:["bt","dm","cardiac"], cc:[{side:"Left",type:"knee"}],
+    status:"submitted", intake_pct:100, phone:"(770) 555-0143", step:null,
+    xray:"done", xr_views:[{joint:"L Knee",type:"knee",views:["WB AP","Lateral","Rosenberg","Sunrise"],postop:false}] },
+
+  { id:2, first:"Robert", last:"Williams", mrn:"NTH-5518293", time:"9:30 AM", provider:"DeCook", vt:"new",
+    flags:[], cc:[{side:"Right",type:"knee"},{side:"Left",type:"knee"}],
+    status:"progress", intake_pct:65, phone:"(770) 555-0298", step:"Medical History (4/6)",
+    xray:"ordered", xr_views:[] },
+
+  { id:3, first:"Patricia", last:"Garcia", mrn:"NTH-6629104", time:"10:00 AM", provider:"DeCook", vt:"new",
+    flags:[], cc:[{side:"Right",type:"knee"},{side:"Left",type:"hip"}],
+    status:"submitted", intake_pct:100, phone:"(678) 555-0187", step:null,
+    xray:"done", xr_views:[{joint:"R Knee",type:"knee",views:["WB AP","Lateral","Rosenberg","Sunrise"],postop:false},{joint:"L Hip",type:"hip",views:["AP Pelvis","Lateral"],postop:false}] },
+
+  { id:4, first:"James", last:"Mitchell", mrn:"NTH-3915284", time:"10:30 AM", provider:"DeCook", vt:"postop",
+    flags:[], cc:[{side:"Left",type:"hip",postop:true}],
+    status:"submitted", intake_pct:100, phone:"(770) 555-0431", step:null,
+    xray:"done", xr_views:[{joint:"L Hip",type:"hip",views:["AP Pelvis","Lateral"],postop:true}] },
+
+  { id:5, first:"Dorothy", last:"Chen", mrn:"NTH-4428190", time:"11:00 AM", provider:"DeCook", vt:"preop",
+    flags:[], cc:[{side:"Left",type:"knee"}],
+    status:"pending", intake_pct:0, phone:"(770) 555-0190", step:null,
+    xray:"needed", xr_views:[] },
+
+  { id:6, first:"William", last:"Foster", mrn:"NTH-5512837", time:"1:00 PM", provider:"DeCook", vt:"followup",
+    flags:["bt"], cc:[{side:"Right",type:"knee"}],
+    status:"failed", intake_pct:0, phone:"(770) 555-0837", step:null,
+    xray:"needed", xr_views:[] },
+
+  { id:7, first:"Helen", last:"Kowalski", mrn:"NTH-6618492", time:"1:30 PM", provider:"DeCook", vt:"new",
+    flags:["dm","bmi"], cc:[{side:"Right",type:"hip"}],
+    status:"locked", intake_pct:0, phone:"(678) 555-0492", step:null,
+    xray:"ordered", xr_views:[] },
+
+  { id:8, first:"Richard", last:"Park", mrn:"NTH-7729301", time:"2:00 PM", provider:"DeCook", vt:"postop",
+    flags:[], cc:[{side:"Right",type:"knee",postop:true}],
+    status:"submitted", intake_pct:100, phone:"(770) 555-0301", step:null,
+    xray:"done", xr_views:[{joint:"R Knee",type:"knee",views:["WB AP","Lateral","Rosenberg","Sunrise"],postop:true}] },
+
+  { id:9, first:"Maria", last:"Gonzalez", mrn:"NTH-8834127", time:"2:30 PM", provider:"DeCook", vt:"new",
+    flags:["cardiac"], cc:[{side:"Left",type:"hip"}],
+    status:"opened", intake_pct:15, phone:"(678) 555-0127", step:"About You (1/7)",
+    xray:"needed", xr_views:[] },
+];
+
+function esc(s){ const d=document.createElement("div");d.textContent=s;return d.innerHTML; }
+function getFiltered(){ const prov=document.getElementById("provSelect").value; return SCHEDULE.filter(p=>prov==="all"||p.provider===prov); }
+
+function render(){
+  const pts=getFiltered();
+  const submitted=pts.filter(p=>p.status==="submitted").length;
+  const xraysDone=pts.filter(p=>p.xray==="done").length;
+
+  let h=`<div class="stats">
+    <div class="stat s-total"><div class="stat-n">${pts.length}</div><div class="stat-l">Total Patients</div></div>
+    <div class="stat s-done"><div class="stat-n">${submitted} <span style="font-size:14px;font-weight:500;color:var(--t4);">/ ${pts.length}</span></div><div class="stat-l">Intake Complete</div></div>
+    <div class="stat" style="border-left-color:var(--purple);"><div class="stat-n" style="color:var(--purple);">${xraysDone} <span style="font-size:14px;font-weight:500;color:var(--t4);">/ ${pts.length}</span></div><div class="stat-l">X-Rays Completed</div></div>
+  </div>`;
+
+  h+=`<div class="tbl-wrap"><div class="tbl-hdr">
+    <span class="tbl-title">Today's Schedule — ${pts.length} patients</span>
+    <div class="tbl-actions">
+      <button class="btn-sm" onclick="bulkRemind()">📱 Send All Reminders</button>
+      <button class="btn-sm primary" onclick="showAddPatient()">+ Add Walk-In</button>
+    </div>
+  </div><table><thead><tr>
+    <th>Time</th><th>Patient</th><th>Visit</th><th>Chief Complaint</th><th>Flags</th><th>Intake Status</th><th>Radiographs</th>
+  </tr></thead><tbody>`;
+
+  pts.forEach(p=>{
+    h+=`<tr>
+      <td><span class="pt-time">${esc(p.time)}</span></td>
+      <td><div class="pt-name">${esc(p.last)}, ${esc(p.first)}</div><div class="pt-mrn">${esc(p.mrn)}</div></td>
+      <td>${vtTag(p.vt)}</td>
+      <td>${ccCell(p)}</td>
+      <td>${flagsCell(p.flags)}</td>
+      <td>${intakeCell(p)}</td>
+      <td>${xrayCell(p)}</td>
+    </tr>`;
+  });
+  h+=`</tbody></table></div>`;
+  document.getElementById("main").innerHTML=h;
+  requestAnimationFrame(drawThumbs);
+}
+
+function vtTag(vt){
+  const m={new:"vtag-new",followup:"vtag-followup",preop:"vtag-preop",postop:"vtag-postop"};
+  const l={new:"New Patient",followup:"Follow-Up",preop:"Pre-Op",postop:"Post-Op"};
+  return `<span class="vtag ${m[vt]||''}">${l[vt]||vt}</span>`;
+}
+
+function ccCell(p){
+  if(!p.cc||!p.cc.length) return `<span style="color:var(--t4);font-size:11px;">—</span>`;
+  return p.cc.map(j=>{
+    const label=`${j.side} ${j.type.charAt(0).toUpperCase()+j.type.slice(1)}`;
+    if(j.postop) return `<span class="cc-joint cc-postop">S/P ${label}</span>`;
+    return `<span class="cc-joint ${j.type==="knee"?"cc-knee":"cc-hip"}">${label} pain</span>`;
+  }).join(' ');
+}
+
+function flagsCell(flags){
+  if(!flags.length) return `<span style="font-size:11px;color:var(--t4);">—</span>`;
+  const m={bt:["flag-bt","Blood Thin"],dm:["flag-dm","Diabetes"],cardiac:["flag-cardiac","Cardiac"],bmi:["flag-bmi","BMI ≥40"]};
+  return flags.map(f=>{ const d=m[f]; return d?`<span class="flag ${d[0]}">${d[1]}</span>`:`<span class="flag">${f}</span>`; }).join('');
+}
+
+function intakeCell(p){
+  let h='<div class="intake-cell">';
+
+  // Badge
+  const badges={
+    submitted:`<span class="badge badge-submitted">✓ Submitted</span>`,
+    progress:`<span class="badge badge-progress">⏳ In Progress</span>`,
+    opened:`<span class="badge badge-opened">👁 Opened</span>`,
+    pending:`<span class="badge badge-pending">🔴 Not Opened</span>`,
+    failed:`<span class="badge badge-failed">📱 SMS Failed</span>`,
+    locked:`<span class="badge badge-locked">🔒 Locked</span>`,
+    inoffice:`<span class="badge badge-inoffice">🏥 In-Office</span>`,
+  };
+  h+=badges[p.status]||'';
+
+  // Progress bar for in-progress
+  if(p.status==="progress"||p.status==="opened"){
+    h+=`<div class="intake-prog"><div class="intake-prog-fill" style="width:${p.intake_pct}%;background:var(--yellow);"></div></div>`;
+    if(p.step) h+=`<span style="font-size:10px;color:var(--t4);">${esc(p.step)}</span>`;
+  }
+
+  // Action buttons inline
+  h+='<div class="intake-actions">';
+  if(p.status==="submitted"){
+    h+=`<button class="btn-xs" onclick="showIntake(${p.id})">📋 View</button>`;
+  }
+  if(p.status==="pending"||p.status==="progress"||p.status==="opened"){
+    h+=`<button class="btn-xs" onclick="resendSMS(${p.id})">📱 Remind</button>`;
+  }
+  if(p.status==="failed"){
+    h+=`<button class="btn-xs warn" onclick="showUpdatePhone(${p.id})">✏️ Fix Phone</button>`;
+    h+=`<button class="btn-xs" onclick="resendSMS(${p.id})">📱 Resend</button>`;
+  }
+  if(p.status==="locked"){
+    h+=`<button class="btn-xs purple" onclick="unlockToken(${p.id})">🔓 Unlock</button>`;
+  }
+  h+='</div></div>';
+  return h;
+}
+
+function xrayCell(p){
+  if(p.xray==="done"&&p.xr_views?.length){
+    // Show badge + mini thumbnails
+    let h=`<span class="xr-badge xr-done" style="cursor:default;">✓ Taken</span>`;
+    h+=`<div class="xr-thumbs">`;
+    let vi=0;
+    p.xr_views.forEach(jv=>{
+      jv.views.forEach(view=>{
+        h+=`<div class="xr-thumb" onclick="openLB(${p.id})" id="xrt_${p.id}_${vi}"><canvas width="88" height="108"></canvas><div class="xr-thumb-label">${view}</div></div>`;
+        vi++;
+      });
+    });
+    h+=`</div>`;
+    return h;
+  }
+  if(p.xray==="ordered") return `<span class="xr-badge xr-ordered" onclick="cycleXray(${p.id})">⏳ Ordered</span>`;
+  if(p.xray==="needed") return `<span class="xr-badge xr-needed" onclick="cycleXray(${p.id})">✕ Needed</span>`;
+  return `<span class="xr-badge xr-na">—</span>`;
+}
+
+function cycleXray(id){
+  const p=findPt(id); if(!p) return;
+  const order=["needed","ordered","done"];
+  const idx=order.indexOf(p.xray);
+  p.xray=order[(idx+1)%order.length];
+  // Auto-generate views when cycling to done
+  if(p.xray==="done"&&(!p.xr_views||!p.xr_views.length)){
+    p.xr_views=p.cc.map(j=>({
+      joint:`${j.side.charAt(0)} ${j.type.charAt(0).toUpperCase()+j.type.slice(1)}`,
+      type:j.type,
+      views:j.type==="knee"?["WB AP","Lateral","Rosenberg","Sunrise"]:["AP Pelvis","Lateral"],
+      postop:!!j.postop,
+    }));
+  }
+  render();
+}
+
+// ═══════ XRAY CANVAS RENDERING ═══════
+function drawXray(canvas,type,view,postop,seed){
+  const c=canvas.getContext("2d");
+  const w=canvas.width, h=canvas.height;
+  const R=(s)=>{ seed=(seed*9301+49297)%233280; return seed/233280*s; };
+
+  // Dark background with slight variation
+  c.fillStyle="#0a0e14";
+  c.fillRect(0,0,w,h);
+
+  // Film grain
+  for(let i=0;i<300;i++){
+    const gx=R(w),gy=R(h);
+    c.fillStyle=`rgba(${140+R(60)},${150+R(60)},${160+R(50)},${.02+R(.06)})`;
+    c.fillRect(gx,gy,1+R(1),1+R(1));
+  }
+
+  // Soft glow center
+  const grad=c.createRadialGradient(w/2,h/2,0,w/2,h/2,w*.6);
+  grad.addColorStop(0,"rgba(80,90,100,.12)");
+  grad.addColorStop(1,"rgba(0,0,0,0)");
+  c.fillStyle=grad;
+  c.fillRect(0,0,w,h);
+
+  c.save();
+  c.globalAlpha=.85;
+
+  if(type==="knee"){
+    drawKneeXray(c,w,h,view,postop,R);
+  } else {
+    drawHipXray(c,w,h,view,postop,R);
+  }
+  c.restore();
+
+  // Vignette
+  const vig=c.createRadialGradient(w/2,h/2,w*.25,w/2,h/2,w*.75);
+  vig.addColorStop(0,"rgba(0,0,0,0)");
+  vig.addColorStop(1,"rgba(0,0,0,.5)");
+  c.fillStyle=vig;
+  c.fillRect(0,0,w,h);
+}
+
+function drawKneeXray(c,w,h,view,postop,R){
+  const cx=w/2, bone="rgba(190,200,210,.7)", bone2="rgba(160,170,180,.5)", joint="rgba(100,110,120,.3)";
+
+  if(view==="WB AP"||view==="Rosenberg"){
+    // Femur (top bone)
+    c.fillStyle=bone;
+    c.beginPath();
+    c.moveTo(cx-14,2); c.lineTo(cx+14,2);
+    c.lineTo(cx+18,h*.38); c.quadraticCurveTo(cx+22,h*.45,cx+20,h*.48);
+    c.lineTo(cx-20,h*.48); c.quadraticCurveTo(cx-22,h*.45,cx-18,h*.38);
+    c.closePath(); c.fill();
+    // Femoral condyles
+    c.beginPath();
+    c.ellipse(cx-10,h*.49,12,6,0,0,Math.PI); c.fill();
+    c.beginPath();
+    c.ellipse(cx+10,h*.49,12,6,0,0,Math.PI); c.fill();
+    // Joint space
+    c.fillStyle=joint;
+    c.fillRect(cx-22,h*.48,44,postop?2:4+R(3));
+    // Tibia (bottom bone)
+    c.fillStyle=bone;
+    c.beginPath();
+    c.moveTo(cx-20,h*.52); c.lineTo(cx+20,h*.52);
+    c.quadraticCurveTo(cx+22,h*.56,cx+18,h*.6);
+    c.lineTo(cx+14,h-4); c.lineTo(cx-14,h-4);
+    c.lineTo(cx-18,h*.6); c.quadraticCurveTo(cx-22,h*.56,cx-20,h*.52);
+    c.closePath(); c.fill();
+    // Patella shadow
+    c.fillStyle="rgba(150,160,170,.2)";
+    c.beginPath(); c.ellipse(cx,h*.46,8,6,0,0,Math.PI*2); c.fill();
+
+    if(postop){
+      // TKA implant — femoral component
+      c.strokeStyle="rgba(220,230,240,.8)"; c.lineWidth=1.5;
+      c.beginPath(); c.moveTo(cx-18,h*.35); c.lineTo(cx+18,h*.35);
+      c.lineTo(cx+20,h*.48); c.lineTo(cx-20,h*.48); c.closePath(); c.stroke();
+      // Tibial tray
+      c.beginPath(); c.moveTo(cx-18,h*.52); c.lineTo(cx+18,h*.52);
+      c.lineTo(cx+4,h*.75); c.lineTo(cx-4,h*.75); c.closePath(); c.stroke();
+      // Stem
+      c.beginPath(); c.moveTo(cx-3,h*.75); c.lineTo(cx-2,h*.9); c.lineTo(cx+2,h*.9); c.lineTo(cx+3,h*.75); c.stroke();
+    }
+    // Osteophytes (if not postop)
+    if(!postop){
+      c.fillStyle="rgba(170,180,190,.4)";
+      c.beginPath(); c.ellipse(cx-22,h*.47,3+R(2),2,0,0,Math.PI*2); c.fill();
+      c.beginPath(); c.ellipse(cx+22,h*.47,2+R(2),2,0,0,Math.PI*2); c.fill();
+    }
+  } else if(view==="Lateral"){
+    // Femur lateral
+    c.fillStyle=bone;
+    c.beginPath();
+    c.moveTo(cx-6,2); c.lineTo(cx+8,2);
+    c.quadraticCurveTo(cx+14,h*.3,cx+18,h*.45);
+    c.quadraticCurveTo(cx+14,h*.52,cx+6,h*.5);
+    c.quadraticCurveTo(cx-8,h*.52,cx-12,h*.45);
+    c.quadraticCurveTo(cx-10,h*.3,cx-6,2);
+    c.closePath(); c.fill();
+    // Tibia lateral
+    c.beginPath();
+    c.moveTo(cx-14,h*.53); c.lineTo(cx+16,h*.53);
+    c.quadraticCurveTo(cx+12,h*.65,cx+8,h-4);
+    c.lineTo(cx-4,h-4);
+    c.quadraticCurveTo(cx-10,h*.65,cx-14,h*.53);
+    c.closePath(); c.fill();
+    // Patella
+    c.fillStyle=bone2;
+    c.beginPath(); c.ellipse(cx-16,h*.47,7,9,-.2,0,Math.PI*2); c.fill();
+
+    if(postop){
+      c.strokeStyle="rgba(220,230,240,.8)"; c.lineWidth=1.5;
+      c.beginPath(); c.moveTo(cx-10,h*.35); c.quadraticCurveTo(cx+16,h*.44,cx+12,h*.52);
+      c.lineTo(cx-8,h*.52); c.closePath(); c.stroke();
+      c.beginPath(); c.moveTo(cx-10,h*.54); c.lineTo(cx+12,h*.54);
+      c.lineTo(cx+2,h*.85); c.lineTo(cx-2,h*.85); c.closePath(); c.stroke();
+    }
+  } else if(view==="Sunrise"){
+    // Patella axial view
+    c.fillStyle=bone;
+    c.beginPath(); c.ellipse(cx,h*.45,20,14,.0,0,Math.PI*2); c.fill();
+    // Trochlear groove
+    c.fillStyle=joint;
+    c.beginPath(); c.ellipse(cx,h*.58,16,8,0,0,Math.PI); c.fill();
+    // Femoral condyles underneath
+    c.fillStyle=bone2;
+    c.beginPath(); c.ellipse(cx-12,h*.62,10,14,0,0,Math.PI*2); c.fill();
+    c.beginPath(); c.ellipse(cx+12,h*.62,10,14,0,0,Math.PI*2); c.fill();
+  }
+}
+
+function drawHipXray(c,w,h,view,postop,R){
+  const cx=w/2, bone="rgba(190,200,210,.7)", bone2="rgba(160,170,180,.5)";
+
+  if(view==="AP Pelvis"){
+    // Pelvis wings
+    c.fillStyle=bone2;
+    c.beginPath();
+    c.moveTo(4,h*.15); c.quadraticCurveTo(cx,h*.05,w-4,h*.15);
+    c.quadraticCurveTo(w-2,h*.35,w-8,h*.45);
+    c.lineTo(cx+14,h*.5);
+    c.quadraticCurveTo(cx,h*.4,cx-14,h*.5);
+    c.lineTo(8,h*.45);
+    c.quadraticCurveTo(2,h*.35,4,h*.15);
+    c.closePath(); c.fill();
+    // Acetabulum
+    c.fillStyle="rgba(60,70,80,.5)";
+    c.beginPath(); c.arc(cx,h*.48,12,0,Math.PI*2); c.fill();
+    // Femoral head
+    c.fillStyle=bone;
+    c.beginPath(); c.arc(cx,h*.48,10,0,Math.PI*2); c.fill();
+    // Femoral neck + shaft
+    c.beginPath();
+    c.moveTo(cx-4,h*.56); c.lineTo(cx+4,h*.56);
+    c.lineTo(cx+8,h*.65); c.lineTo(cx+7,h-4);
+    c.lineTo(cx-7,h-4); c.lineTo(cx-8,h*.65);
+    c.closePath(); c.fill();
+    // Greater trochanter
+    c.fillStyle=bone2;
+    c.beginPath(); c.ellipse(cx+14,h*.6,6,8,-.3,0,Math.PI*2); c.fill();
+
+    if(postop){
+      c.strokeStyle="rgba(220,230,240,.8)"; c.lineWidth=1.5;
+      // Cup
+      c.beginPath(); c.arc(cx,h*.48,13,Math.PI*.7,Math.PI*2.3); c.stroke();
+      // Stem
+      c.beginPath();
+      c.moveTo(cx-2,h*.55); c.lineTo(cx+2,h*.55);
+      c.lineTo(cx+4,h*.9); c.lineTo(cx-4,h*.9);
+      c.closePath(); c.stroke();
+      // Head
+      c.beginPath(); c.arc(cx,h*.48,7,0,Math.PI*2); c.stroke();
+    }
+  } else if(view==="Lateral"){
+    // Femur lateral view
+    c.fillStyle=bone;
+    // Femoral head
+    c.beginPath(); c.arc(cx-4,h*.3,11,0,Math.PI*2); c.fill();
+    // Neck angled
+    c.beginPath();
+    c.moveTo(cx-10,h*.38); c.lineTo(cx+2,h*.38);
+    c.lineTo(cx+6,h*.5); c.lineTo(cx-6,h*.5);
+    c.closePath(); c.fill();
+    // Shaft
+    c.beginPath();
+    c.moveTo(cx-7,h*.5); c.lineTo(cx+7,h*.5);
+    c.lineTo(cx+6,h-4); c.lineTo(cx-6,h-4);
+    c.closePath(); c.fill();
+    // Acetabulum
+    c.fillStyle=bone2;
+    c.beginPath(); c.arc(cx-4,h*.3,14,Math.PI*.6,Math.PI*1.4); c.lineWidth=3; c.strokeStyle=bone2; c.stroke();
+
+    if(postop){
+      c.strokeStyle="rgba(220,230,240,.8)"; c.lineWidth=1.5;
+      c.beginPath(); c.arc(cx-4,h*.3,14,0,Math.PI*2); c.stroke();
+      c.beginPath(); c.moveTo(cx-3,h*.4); c.lineTo(cx-2,h*.85); c.lineTo(cx+2,h*.85); c.lineTo(cx+3,h*.4); c.closePath(); c.stroke();
+    }
+  }
+}
+
+// Draw thumbnails after render
+function drawThumbs(){
+  SCHEDULE.forEach(p=>{
+    if(p.xray!=="done"||!p.xr_views?.length) return;
+    let vi=0;
+    p.xr_views.forEach(jv=>{
+      jv.views.forEach(view=>{
+        const el=document.getElementById(`xrt_${p.id}_${vi}`);
+        if(el){
+          const canvas=el.querySelector("canvas");
+          drawXray(canvas,jv.type,view,jv.postop,p.id*1000+vi*137);
+        }
+        vi++;
+      });
+    });
+  });
+}
+
+// ═══════ LIGHTBOX ═══════
+function openLB(id){
+  const p=findPt(id); if(!p||!p.xr_views?.length) return;
+  document.getElementById("lbHdr").innerHTML=`
+    <span>${esc(p.first)} ${esc(p.last)} — Radiographs</span>
+    <button class="lb-close" onclick="closeLB()">✕ Close</button>`;
+
+  const cont=document.getElementById("lbImages");
+  cont.innerHTML='';
+
+  p.xr_views.forEach(jv=>{
+    jv.views.forEach((view,vi)=>{
+      const wrap=document.createElement("div");
+      wrap.className="lb-img-wrap";
+      const canvas=document.createElement("canvas");
+      canvas.width=220; canvas.height=280;
+      drawXray(canvas,jv.type,view,jv.postop,p.id*1000+vi*137);
+      wrap.appendChild(canvas);
+      const lbl=document.createElement("div");
+      lbl.className="lb-img-label";
+      lbl.textContent=`${jv.joint} — ${view}`;
+      wrap.appendChild(lbl);
+      cont.appendChild(wrap);
+    });
+  });
+
+  document.getElementById("lbOv").classList.add("open");
+}
+
+function closeLB(){ document.getElementById("lbOv").classList.remove("open"); }
+
+// ═══════ ACTIONS ═══════
+function findPt(id){ return SCHEDULE.find(p=>p.id===id); }
+
+function resendSMS(id){
+  const p=findPt(id); if(!p) return;
+  showModal(`Resend SMS`,`
+    <p>Send a new intake link to <strong>${esc(p.first)} ${esc(p.last)}</strong>?</p>
+    <p style="font-size:12px;color:var(--t3);">New token will be sent to:</p>
+    <div style="padding:10px 14px;background:var(--blueL);border-radius:8px;font-weight:600;font-size:14px;color:var(--blue);margin-bottom:12px;">${esc(p.phone)}</div>
+    <p style="font-size:11px;color:var(--t4);">Previous token will be invalidated.</p>
+  `,[{label:"Cancel",action:"closeModal()"},{label:"Send SMS",primary:true,action:`doResend(${id})`}]);
+}
+function doResend(id){ const p=findPt(id); if(!p) return; p.status="pending"; p.intake_pct=0; p.step=null; closeModal(); render(); }
+
+function showTablet(id){
+  const p=findPt(id); if(!p) return;
+  const token='k8Fj'+Math.random().toString(36).slice(2,10);
+  showModal(`Tablet / QR Link`,`
+    <p>Open intake form for <strong>${esc(p.first)} ${esc(p.last)}</strong> on a tablet.</p>
+    <div class="qr-box"><div class="qr-icon">📱</div><span>QR Code</span></div>
+    <div style="padding:10px 14px;background:#f8fafc;border-radius:8px;font-family:monospace;font-size:11px;word-break:break-all;color:var(--t2);margin-bottom:12px;border:1px solid var(--border);">https://intake.tjrhub.com/i/${token}</div>
+    <p style="font-size:11px;color:var(--t4);">Expires after appointment. DOB verification still required.</p>
+  `,[{label:"Close",action:"closeModal()"},{label:"Copy Link",primary:true,action:"closeModal()"}]);
+}
+
+function showIntake(id){
+  const p=findPt(id); if(!p) return;
+  const secs=["👤 About You","🦴 Joint Selection","📊 Pain Assessment","📋 Medical History","💊 Medications","🏠 Surgical Planning"];
+  showModal(`Intake — ${esc(p.first)} ${esc(p.last)}`,`
+    <div style="padding:12px;background:#f8fafc;border-radius:10px;border:1px solid var(--border);">
+      ${secs.map(s=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e5e7eb;font-size:12px;"><span>${s}</span><span style="color:var(--green);font-weight:600;">✓</span></div>`).join('')}
+    </div>
+    <p style="margin-top:12px;font-size:12px;color:var(--t3);">Full responses in provider workstation.</p>
+  `,[{label:"Close",action:"closeModal()"},{label:"Open in Provider View",primary:true,action:"closeModal()"}]);
+}
+
+function showUpdatePhone(id){
+  const p=findPt(id); if(!p) return;
+  showModal(`Update Phone — ${esc(p.first)} ${esc(p.last)}`,`
+    <p>SMS delivery failed. Update number and resend.</p>
+    <div class="field"><label>Current (failed)</label><input value="${esc(p.phone)}" style="color:var(--red);" disabled></div>
+    <div class="field"><label>New Phone Number</label><input type="tel" id="newPhone" placeholder="(xxx) xxx-xxxx" autofocus></div>
+  `,[{label:"Cancel",action:"closeModal()"},{label:"Update & Resend",primary:true,action:`doUpdatePhone(${id})`}]);
+}
+function doUpdatePhone(id){ const p=findPt(id); const v=document.getElementById("newPhone")?.value; if(!p||!v) return; p.phone=v; p.status="pending"; p.intake_pct=0; closeModal(); render(); }
+
+function unlockToken(id){
+  const p=findPt(id); if(!p) return;
+  showModal(`Unlock — ${esc(p.first)} ${esc(p.last)}`,`
+    <p>Token locked after <strong>3 failed DOB attempts</strong>.</p>
+    <p style="font-size:12px;">Possible reasons: wrong person, incorrect DOB on file, or date picker confusion.</p>
+    <p>Verify identity before unlocking.</p>
+  `,[{label:"Cancel",action:"closeModal()"},{label:"Unlock & Resend",primary:true,action:`doUnlock(${id})`}]);
+}
+function doUnlock(id){ const p=findPt(id); if(!p) return; p.status="pending"; p.intake_pct=0; closeModal(); render(); }
+
+function markInOffice(id){
+  const p=findPt(id); if(!p) return;
+  showModal(`In-Office — ${esc(p.first)} ${esc(p.last)}`,`
+    <p>Mark as <strong>"will complete in office"</strong>?</p>
+    <p style="font-size:12px;color:var(--t3);">Patient completes intake on tablet or during rooming.</p>
+  `,[{label:"Cancel",action:"closeModal()"},{label:"Tablet Link",action:`closeModal();showTablet(${id})`},{label:"Mark In-Office",primary:true,action:`doInOffice(${id})`}]);
+}
+function doInOffice(id){ const p=findPt(id); if(!p) return; p.status="inoffice"; closeModal(); render(); }
+
+function bulkRemind(){
+  const pts=getFiltered().filter(p=>p.status==="pending"||p.status==="progress"||p.status==="opened");
+  if(!pts.length){ showModal("No Reminders Needed",`<p>All patients have submitted or need individual attention.</p>`,[{label:"OK",action:"closeModal()",primary:true}]); return; }
+  showModal("Send Bulk Reminders",`
+    <p>Send reminder SMS to <strong>${pts.length} patient${pts.length>1?'s':''}</strong>:</p>
+    <div style="margin:12px 0;padding:12px;background:#f8fafc;border-radius:10px;border:1px solid var(--border);">
+      ${pts.map(p=>`<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px;"><span>${esc(p.last)}, ${esc(p.first)}</span><span class="badge badge-${p.status==='pending'?'pending':p.status}">${p.status==='pending'?'Not opened':p.intake_pct+'%'}</span></div>`).join('')}
+    </div>
+  `,[{label:"Cancel",action:"closeModal()"},{label:`Send ${pts.length} Reminder${pts.length>1?'s':''}`,primary:true,action:"closeModal()"}]);
+}
+
+function showAddPatient(){
+  showModal("Add Walk-In",`
+    <div class="field"><label>First Name</label><input placeholder="First name"></div>
+    <div class="field"><label>Last Name</label><input placeholder="Last name"></div>
+    <div class="field"><label>Phone</label><input type="tel" placeholder="(xxx) xxx-xxxx"></div>
+    <div class="field"><label>Visit Type</label><select style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border);font-size:13px;font-family:inherit;"><option>New Patient</option><option>Follow-Up</option><option>Pre-Op</option><option>Post-Op</option></select></div>
+  `,[{label:"Cancel",action:"closeModal()"},{label:"Generate Tablet Link",primary:true,action:"closeModal()"}]);
+}
+
+function showModal(title,body,buttons){
+  const m=document.getElementById("modal");
+  let h=`<div class="modal-h"><h3>${title}</h3><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body">${body}</div>`;
+  if(buttons?.length) h+=`<div class="modal-ft">${buttons.map(b=>`<button class="btn-sm ${b.primary?'primary':''}" onclick="${b.action}">${b.label}</button>`).join('')}</div>`;
+  m.innerHTML=h; document.getElementById("modalOv").classList.add("open");
+}
+function closeModal(){ document.getElementById("modalOv").classList.remove("open"); }
+function setDate(v){ render(); }
+
+document.getElementById("dateSelect").valueAsDate=TODAY;
+render();
+</script>
+</body>
+</html>
