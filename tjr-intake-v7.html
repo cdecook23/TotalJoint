@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>TJR Hub — Pre-Visit Intake</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',-apple-system,system-ui,sans-serif;background:linear-gradient(145deg,#f8fafc,#eff6ff 50%,#f0fdf4);min-height:100vh;-webkit-text-size-adjust:100%;color:#1a1a2e;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:2px;}
+button,input,textarea,select{font-family:inherit;}
+.app{display:flex;flex-direction:column;min-height:100vh;}
+.hdr{background:rgba(255,255,255,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid #e5e7eb;padding:14px 16px;position:sticky;top:0;z-index:10;}
+.hdr-in{max-width:480px;margin:0 auto;}
+.hdr-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.logo{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#2563eb,#1d4ed8);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:11px;flex-shrink:0;}
+.hdr-t{font-weight:700;font-size:14px;line-height:1.2;}
+.hdr-s{font-size:11px;color:#6b7280;}
+.prog{display:flex;align-items:center;gap:10px;}
+.prog-bar{flex:1;height:3px;background:#e5e7eb;border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;background:#2563eb;border-radius:2px;transition:width .4s;}
+.prog-txt{font-size:12px;color:#6b7280;font-weight:600;white-space:nowrap;}
+.cnt{flex:1;overflow:auto;padding:20px 16px 140px;}
+.cnt-in{max-width:480px;margin:0 auto;}
+.sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.sec-icon{font-size:26px;}
+.sec-t{font-size:20px;font-weight:700;}
+.fld{margin-bottom:20px;}
+.fld-l{display:block;font-weight:600;font-size:15px;margin-bottom:6px;line-height:1.4;}
+.fld-l .req{color:#ef4444;margin-left:3px;}
+.inp{width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid #e5e7eb;font-size:15px;color:#1a1a2e;background:#fff;outline:none;transition:border-color .15s;}
+.inp:focus{border-color:#2563eb;}
+textarea.inp{resize:vertical;}
+.info{padding:12px 16px;border-radius:12px;margin-bottom:20px;background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:1px solid #dbeafe;display:flex;align-items:flex-start;gap:10px;font-size:14px;color:#374151;line-height:1.5;}
+.info-i{font-size:18px;flex-shrink:0;margin-top:1px;}
+.opts{display:flex;flex-direction:column;gap:6px;}
+.opt{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;text-align:left;font-size:15px;color:#1a1a2e;transition:all .12s;width:100%;}
+.opt.sel{border-color:#2563eb;background:#eff6ff;}
+.opt-c{width:20px;height:20px;border-radius:50%;flex-shrink:0;border:2px solid #d1d5db;display:flex;align-items:center;justify-content:center;transition:all .12s;}
+.opt.sel .opt-c{border-color:#2563eb;background:#2563eb;}
+.opt-c .dot{width:8px;height:8px;border-radius:50%;background:#fff;display:none;}
+.opt.sel .opt-c .dot{display:block;}
+.opt.multi .opt-c{border-radius:4px;}
+.opt.multi.sel .opt-c::after{content:'✓';color:#fff;font-size:13px;}
+.opt.multi .opt-c .dot{display:none !important;}
+.jgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.jbtn{padding:18px 12px;border-radius:12px;border:2px solid #e5e7eb;background:#fff;cursor:pointer;text-align:center;transition:all .12s;}
+.jbtn.sel{border-color:#2563eb;background:#eff6ff;}
+.jbtn-i{font-size:30px;margin-bottom:4px;}
+.jbtn-l{font-weight:600;font-size:14px;color:#1a1a2e;}
+.jbtn.sel .jbtn-l{color:#2563eb;}
+.jbtn-ck{font-size:11px;color:#2563eb;font-weight:700;margin-top:4px;display:none;}
+.jbtn.sel .jbtn-ck{display:block;}
+.pain-row{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;}
+.pain-btn{width:33px;height:33px;border-radius:50%;border:2px solid #d1d5db;background:transparent;font-weight:700;font-size:13px;cursor:pointer;transition:all .12s;}
+.pain-ends{display:flex;justify-content:space-between;font-size:11px;color:#9ca3af;padding:4px 4px 0;}
+.scr-wrap{position:relative;}
+.scr-btn{width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid #e5e7eb;background:#fff;font-size:15px;color:#9ca3af;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
+.scr-btn.has{color:#1a1a2e;}
+.scr-btn.open{border-color:#2563eb;}
+.scr-dd{position:absolute;top:100%;left:0;right:0;max-height:220px;overflow:auto;background:#fff;border:1.5px solid #2563eb;border-radius:10px;margin-top:4px;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,.12);}
+.scr-dd button{width:100%;padding:10px 14px;border:none;background:#fff;color:#1a1a2e;font-size:15px;text-align:left;cursor:pointer;border-bottom:1px solid #f3f4f6;}
+.scr-dd button.sel{background:#eff6ff;}
+.scr-dd button:hover{background:#f8fafc;}
+.scr-ov{position:fixed;inset:0;z-index:99;}
+.dob-row{display:flex;gap:8px;}
+.dob-row select{flex:1;padding:10px 8px;border-radius:10px;border:1.5px solid #e5e7eb;font-size:15px;color:#1a1a2e;background:#fff;outline:none;min-width:0;}
+.dob-row select:first-child{flex:1.4;}
+.dob-row select:last-child{flex:1.1;}
+.med-list{margin-bottom:12px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;}
+.med-hdr{padding:8px 14px;background:#eff6ff;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;font-weight:700;font-size:13px;color:#1e40af;}
+.med-item{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#fff;}
+.med-item+.med-item{border-top:1px solid #e5e7eb;}
+.med-rm{width:26px;height:26px;border-radius:50%;border:none;background:#fee2e2;color:#dc2626;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;margin-left:8px;}
+.med-search{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:1.5px solid #e5e7eb;background:#fff;}
+.med-search.foc{border-color:#2563eb;}
+.med-search.open{border-radius:12px 12px 0 0;}
+.med-search input{flex:1;border:none;outline:none;font-size:15px;color:#1a1a2e;background:transparent;}
+.med-dd{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #2563eb;border-top:1px solid #e5e7eb;border-radius:0 0 12px 12px;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,.1);max-height:260px;overflow:auto;}
+.med-dd button{width:100%;padding:10px 14px;border:none;background:#fff;cursor:pointer;text-align:left;font-size:14px;color:#1a1a2e;}
+.med-dd button+button{border-top:1px solid #f3f4f6;}
+.med-dd button.hi{background:#eff6ff;}
+.med-dd button.cust{background:#eff6ff;font-size:14px;}
+.med-dd button.fallback{background:#f8fafc;font-size:13px;color:#6b7280;border-top:1px solid #e5e7eb;}
+.ftr{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid #e5e7eb;padding:12px 16px;z-index:10;}
+.ftr-in{max-width:480px;margin:0 auto;display:flex;gap:10px;}
+.btn-back{flex:0 0 auto;padding:12px 18px;border-radius:12px;border:1.5px solid #e5e7eb;background:#fff;color:#374151;font-weight:600;font-size:15px;cursor:pointer;}
+.btn-next{flex:1;padding:12px 20px;border-radius:12px;border:none;background:#e5e7eb;color:#9ca3af;font-weight:700;font-size:15px;cursor:not-allowed;transition:all .2s;}
+.btn-next.ok{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;cursor:pointer;box-shadow:0 4px 12px #2563eb4d;}
+.done{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center;}
+.done-in{max-width:480px;width:100%;}
+.done-ck{width:72px;height:72px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:32px;}
+.done h1{font-size:24px;font-weight:700;margin:0 0 8px;}
+.done p{color:#6b7280;font-size:15px;line-height:1.5;margin:0 0 24px;}
+.done-sum{background:#fff;border-radius:14px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:20px;text-align:left;}
+.done-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:14px;color:#374151;}
+.done-row span:last-child{color:#22c55e;font-weight:600;font-size:13px;}
+.done-edit{padding:10px 20px;border-radius:10px;border:none;background:#2563eb;color:#fff;font-weight:600;font-size:14px;cursor:pointer;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const MOS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DYS=Array.from({length:31},(_,i)=>i+1);
+const YRS=(()=>{const y=[];for(let i=2010;i>=1920;i--)y.push(i);return y;})();
+const HT=(()=>{const o=[];for(let f=4;f<=7;f++)for(let i=0;i<12;i++){if(f===4&&i<6)continue;if(f===7&&i>2)continue;o.push({v:`${f}_${i}`,l:`${f}′ ${i}″`});}return o;})();
+const WT=(()=>{const o=[];for(let w=80;w<=400;w+=5)o.push({v:w,l:`${w} lbs`});return o;})();
+
+const JOINTS=[{v:"right_knee",l:"Right Knee",i:"🦵"},{v:"left_knee",l:"Left Knee",i:"🦵"},{v:"right_hip",l:"Right Hip",i:"🦴"},{v:"left_hip",l:"Left Hip",i:"🦴"}];
+const JL=v=>JOINTS.find(j=>j.v===v)?.l||v;
+
+const INS=[{v:"cash",l:"Cash / Self-Pay"},{v:"medicare",l:"Medicare (Traditional)"},{v:"ma_humana",l:"Medicare Adv — Humana"},{v:"ma_uhc",l:"Medicare Adv — UHC"},{v:"ma_aetna",l:"Medicare Adv — Aetna"},{v:"ma_bcbs",l:"Medicare Adv — BCBS"},{v:"ma_cigna",l:"Medicare Adv — Cigna"},{v:"ma_other",l:"Medicare Adv — Other"},{v:"bcbs",l:"Blue Cross Blue Shield"},{v:"uhc",l:"UnitedHealthcare"},{v:"aetna",l:"Aetna"},{v:"cigna",l:"Cigna"},{v:"humana",l:"Humana"},{v:"tricare",l:"TRICARE"},{v:"other",l:"Other"}];
+const CG=[{v:"husband",l:"Husband"},{v:"wife",l:"Wife"},{v:"partner",l:"Partner"},{v:"son",l:"Son"},{v:"daughter",l:"Daughter"},{v:"sibling",l:"Sibling"},{v:"friend",l:"Friend"},{v:"neighbor",l:"Neighbor"},{v:"other",l:"Other"}];
+const CONDS=[{v:"diabetes",l:"Diabetes"},{v:"cardiac_stenting",l:"Cardiac stenting"},{v:"cabg",l:"CABG / Open heart surgery"},{v:"afib",l:"Atrial fibrillation (AFib)"},{v:"blood_clots",l:"History of blood clots (DVT/PE)"},{v:"kidney_disease",l:"Kidney disease"},{v:"lung_disease",l:"Lung disease requiring oxygen"},{v:"sleep_apnea",l:"Sleep apnea requiring CPAP"},{v:"rheumatoid_arthritis",l:"Rheumatoid arthritis"},{v:"mrsa",l:"History of MRSA / Staph"},{v:"depression_anxiety",l:"Depression or anxiety"},{v:"cancer",l:"Cancer (active or remission)"},{v:"bleeding_disorder",l:"Bleeding disorder"},{v:"vascular_disease",l:"Peripheral vascular disease"},{v:"none",l:"None of the above"}];
+const BTO=[{v:"none",l:"No"},{v:"aspirin",l:"Aspirin only"},{v:"warfarin",l:"Warfarin (Coumadin)"},{v:"eliquis",l:"Eliquis (apixaban)"},{v:"xarelto",l:"Xarelto (rivaroxaban)"},{v:"plavix",l:"Plavix (clopidogrel)"},{v:"pradaxa",l:"Pradaxa (dabigatran)"},{v:"other",l:"Other blood thinner"}];
+const TX=[{v:"pt",l:"Physical therapy"},{v:"cortisone",l:"Cortisone injections"},{v:"nsaids",l:"Anti-inflammatory meds"},{v:"gel",l:"Gel injections (Synvisc, etc.)"},{v:"bracing",l:"Bracing / assistive devices"},{v:"weight_loss",l:"Weight loss program"},{v:"none",l:"None of the above"}];
+const LIMS=[{v:"walking",l:"Walking more than a block"},{v:"stairs",l:"Going up/down stairs"},{v:"sitting",l:"Getting up from a chair"},{v:"shoes",l:"Putting on shoes/socks"},{v:"sleeping",l:"Sleeping through the night"},{v:"driving",l:"Getting in/out of a car"},{v:"work",l:"Performing your job"}];
+const GOALS=[{v:"walking",l:"Walking long distances"},{v:"golf",l:"Playing golf"},{v:"gardening",l:"Gardening / yard work"},{v:"grandkids",l:"Playing with grandchildren"},{v:"exercise",l:"Exercising / gym"},{v:"swimming",l:"Swimming"},{v:"cycling",l:"Cycling"},{v:"travel",l:"Traveling comfortably"},{v:"stairs",l:"Stairs easily"},{v:"dancing",l:"Dancing"},{v:"sports",l:"Sports (tennis, pickleball)"},{v:"daily",l:"Daily activities without pain"},{v:"sleep",l:"Sleeping without pain"},{v:"work",l:"Returning to work"}];
+const POCONCERNS=[{v:"fever",l:"Fever or chills"},{v:"redness",l:"Redness around incision"},{v:"drainage",l:"Drainage from incision"},{v:"swelling",l:"Excessive swelling"},{v:"calf_pain",l:"Calf pain or tenderness"},{v:"numbness",l:"Numbness or tingling"},{v:"instability",l:"Feeling of giving way"},{v:"clicking",l:"Clicking or popping"},{v:"none",l:"None of the above"}];
+const PCOLORS=["#22c55e","#4ade80","#86efac","#bef264","#facc15","#fbbf24","#f59e0b","#f97316","#ef4444","#dc2626","#991b1b"];
+
+// Med DB
+const MDB=[{b:"Tylenol",g:"acetaminophen"},{b:"Advil",g:"ibuprofen"},{b:"Aleve",g:"naproxen"},{b:"Mobic",g:"meloxicam"},{b:"Celebrex",g:"celecoxib"},{b:"Tramadol",g:"tramadol"},{b:"Norco",g:"hydrocodone/APAP"},{b:"Neurontin",g:"gabapentin"},{b:"Lyrica",g:"pregabalin"},{b:"Lisinopril",g:"lisinopril"},{b:"Losartan",g:"losartan"},{b:"Amlodipine",g:"amlodipine"},{b:"Norvasc",g:"amlodipine"},{b:"Metoprolol",g:"metoprolol"},{b:"Toprol XL",g:"metoprolol succinate"},{b:"Atenolol",g:"atenolol"},{b:"Carvedilol",g:"carvedilol"},{b:"Coreg",g:"carvedilol"},{b:"Entresto",g:"sacubitril/valsartan"},{b:"Lasix",g:"furosemide"},{b:"Furosemide",g:"furosemide"},{b:"Spironolactone",g:"spironolactone"},{b:"HCTZ",g:"hydrochlorothiazide"},{b:"Warfarin",g:"warfarin"},{b:"Coumadin",g:"warfarin"},{b:"Eliquis",g:"apixaban"},{b:"Xarelto",g:"rivaroxaban"},{b:"Pradaxa",g:"dabigatran"},{b:"Plavix",g:"clopidogrel"},{b:"Brilinta",g:"ticagrelor"},{b:"Aspirin",g:"ASA"},{b:"Lipitor",g:"atorvastatin"},{b:"Atorvastatin",g:"atorvastatin"},{b:"Crestor",g:"rosuvastatin"},{b:"Rosuvastatin",g:"rosuvastatin"},{b:"Simvastatin",g:"simvastatin"},{b:"Pravastatin",g:"pravastatin"},{b:"Zetia",g:"ezetimibe"},{b:"Metformin",g:"metformin"},{b:"Glucophage",g:"metformin"},{b:"Jardiance",g:"empagliflozin"},{b:"Farxiga",g:"dapagliflozin"},{b:"Invokana",g:"canagliflozin"},{b:"Ozempic",g:"semaglutide"},{b:"Wegovy",g:"semaglutide"},{b:"Mounjaro",g:"tirzepatide"},{b:"Zepbound",g:"tirzepatide"},{b:"Trulicity",g:"dulaglutide"},{b:"Victoza",g:"liraglutide"},{b:"Januvia",g:"sitagliptin"},{b:"Lantus",g:"insulin glargine"},{b:"Tresiba",g:"insulin degludec"},{b:"NovoLog",g:"insulin aspart"},{b:"Humalog",g:"insulin lispro"},{b:"Omeprazole",g:"omeprazole"},{b:"Pantoprazole",g:"pantoprazole"},{b:"Protonix",g:"pantoprazole"},{b:"Nexium",g:"esomeprazole"},{b:"Pepcid",g:"famotidine"},{b:"Famotidine",g:"famotidine"},{b:"Sertraline",g:"sertraline"},{b:"Zoloft",g:"sertraline"},{b:"Lexapro",g:"escitalopram"},{b:"Prozac",g:"fluoxetine"},{b:"Cymbalta",g:"duloxetine"},{b:"Duloxetine",g:"duloxetine"},{b:"Effexor",g:"venlafaxine"},{b:"Wellbutrin",g:"bupropion"},{b:"Trazodone",g:"trazodone"},{b:"Xanax",g:"alprazolam"},{b:"Ativan",g:"lorazepam"},{b:"Klonopin",g:"clonazepam"},{b:"Ambien",g:"zolpidem"},{b:"Synthroid",g:"levothyroxine"},{b:"Levothyroxine",g:"levothyroxine"},{b:"Albuterol",g:"albuterol"},{b:"Spiriva",g:"tiotropium"},{b:"Singulair",g:"montelukast"},{b:"Flomax",g:"tamsulosin"},{b:"Tamsulosin",g:"tamsulosin"},{b:"Finasteride",g:"finasteride"},{b:"Cialis",g:"tadalafil"},{b:"Gabapentin",g:"gabapentin"},{b:"Keppra",g:"levetiracetam"},{b:"Lamictal",g:"lamotrigine"},{b:"Prednisone",g:"prednisone"},{b:"Methotrexate",g:"methotrexate"},{b:"Plaquenil",g:"hydroxychloroquine"},{b:"Humira",g:"adalimumab"},{b:"Calcium",g:"calcium"},{b:"Vitamin D",g:"cholecalciferol"},{b:"Vitamin D3",g:"cholecalciferol"},{b:"Fish Oil",g:"omega-3"},{b:"Multivitamin",g:"multivitamin"},{b:"Iron",g:"ferrous sulfate"},{b:"B12",g:"cyanocobalamin"},{b:"Magnesium",g:"magnesium"},{b:"Melatonin",g:"melatonin"},{b:"Potassium",g:"potassium chloride"},{b:"Phentermine",g:"phentermine"},{b:"Amoxicillin",g:"amoxicillin"},{b:"Keflex",g:"cephalexin"},{b:"Doxycycline",g:"doxycycline"},{b:"Azithromycin",g:"azithromycin"},{b:"Clindamycin",g:"clindamycin"},{b:"Zyrtec",g:"cetirizine"},{b:"Claritin",g:"loratadine"},{b:"Flonase",g:"fluticasone nasal"},{b:"Flexeril",g:"cyclobenzaprine"},{b:"Baclofen",g:"baclofen"},{b:"Fosamax",g:"alendronate"},{b:"Prolia",g:"denosumab"}];
+const MI=(()=>{const s=new Set,e=[];MDB.forEach(({b,g})=>{const k=`${b.toLowerCase()}|${g.toLowerCase()}`;if(!s.has(k)){s.add(k);e.push({d:b.toLowerCase()===g.toLowerCase()?b:`${b} (${g})`,s:`${b} ${g}`.toLowerCase(),b,g});}});return e.sort((a,b)=>a.b.localeCompare(b.b));})();
+
+// ─── STATE ───
+let R={blood_thin:"none"}, step=0, done=false, medQ="", medFoc=false, medHi=0, openScr=null;
+
+function esc(s){const d=document.createElement("div");d.textContent=s||"";return d.innerHTML;}
+function u(k,v){R[k]=v;render();}
+
+// ─── SECTION BUILDERS ───
+function getSections(){
+  const S=[], js=R.joints||[];
+  const preOp=js.filter(j=>R[`rep_${j}`]!=="yes");
+  const postOp=js.filter(j=>R[`rep_${j}`]==="yes");
+
+  // 1 ABOUT YOU
+  S.push({id:"about",t:"About You",i:"👤",
+    h:()=>{let h='';
+      h+=fld("First name",true)+inp("first_name","First name");
+      h+=fld("Last name",true)+inp("last_name","Last name");
+      h+=fld("Date of birth",true)+dob();
+      h+=fld("Height",true)+scr("height",HT,"Select height...");
+      h+=fld("Weight",true)+scr("weight",WT,"Select weight...");
+      h+=fld("Best phone number",true)+inp("phone","(xxx) xxx-xxxx","tel");
+      h+=fld("Type of insurance",true)+scr("insurance",INS,"Select insurance...");
+      return h;},
+    ok:()=>R.first_name&&R.last_name&&R.dob_m&&R.dob_d&&R.dob_y&&R.height&&R.weight&&R.phone&&R.insurance});
+
+  // 2 JOINTS
+  S.push({id:"joints",t:"Your Joint Pain",i:"🦴",
+    h:()=>{let h=fld("Which joint(s) are you here for? Select all that apply.",true);
+      h+=`<div class="jgrid">${JOINTS.map(j=>`<button class="jbtn ${js.includes(j.v)?'sel':''}" onclick="togJ('${j.v}')"><div class="jbtn-i">${j.i}</div><div class="jbtn-l">${j.l}</div><div class="jbtn-ck">✓ Selected</div></button>`).join('')}</div></div>`;
+      js.forEach(j=>{h+=fld(`Has your ${JL(j).toLowerCase()} already been replaced?`,true);h+=radio(`rep_${j}`,[{v:"yes",l:"Yes — this is a previous replacement"},{v:"no",l:"No — this is my original joint"}]);});
+      if(preOp.length>0){h+=fld("Have you been told you need surgery?");h+=radio("told_surg",[{v:"yes",l:"Yes"},{v:"no",l:"No"},{v:"unsure",l:"Not sure yet"}]);}
+      return h;},
+    ok:()=>js.length>0&&js.every(j=>R[`rep_${j}`])});
+
+  // 3 PER PRE-OP JOINT
+  preOp.forEach((j,ji)=>{
+    const jl=JL(j),multi=preOp.length>1;
+    S.push({id:`pain_${j}`,t:multi?`${jl} Pain`:"Your Pain",i:multi?(ji===0?"1️⃣":"2️⃣"):"📊",
+      h:()=>{let h='';
+        if(multi)h+=info(`Tell us about your ${jl.toLowerCase()} specifically.`,"👇");
+        h+=fld("How long have you had this pain?",true)+radio(`dur_${j}`,[{v:"lt_3mo",l:"Less than 3 months"},{v:"3_6mo",l:"3–6 months"},{v:"6_12mo",l:"6–12 months"},{v:"1_2yr",l:"1–2 years"},{v:"gt_2yr",l:"More than 2 years"}]);
+        h+=fld("Rate your pain right now",true)+pain(`pn_${j}`);
+        h+=fld("Worst pain in the last week",true)+pain(`pw_${j}`);
+        h+=fld("What have you already tried?")+mradio(`tx_${j}`,TX);
+        h+=fld("What activities are difficult?")+mradio(`lim_${j}`,LIMS);
+        return h;},
+      ok:()=>R[`dur_${j}`]&&R[`pn_${j}`]!==undefined&&R[`pw_${j}`]!==undefined});
+  });
+
+  // 3b POST-OP RECOVERY
+  if(postOp.length>0){
+    S.push({id:"recovery",t:"Your Recovery",i:"💪",
+      h:()=>{let h=info(`Tell us how you're doing after your ${postOp.map(j=>JL(j).toLowerCase()).join(" and ")} replacement.`,"🏥");
+        h+=fld("How long ago was your surgery?",true)+radio("po_timing",[{v:"2wk",l:"About 2 weeks"},{v:"6wk",l:"About 6 weeks"},{v:"3mo",l:"About 3 months"},{v:"6mo",l:"6 months"},{v:"1yr",l:"1 year"},{v:"gt1yr",l:"More than 1 year"}]);
+        h+=fld("Rate your pain right now",true)+pain("po_pain");
+        h+=fld("Compared to before surgery, your pain is:",true)+radio("po_vs",[{v:"much_better",l:"Much better"},{v:"somewhat_better",l:"Somewhat better"},{v:"about_same",l:"About the same"},{v:"worse",l:"Worse than before surgery"}]);
+        h+=fld("Are you currently doing physical therapy?",true)+radio("po_pt",[{v:"virtual",l:"Yes — Virtual / telehealth"},{v:"home",l:"Yes — Home PT"},{v:"outpatient",l:"Yes — Outpatient clinic"},{v:"no",l:"No"}]);
+        h+=fld("How are you getting around?",true)+radio("po_mob",[{v:"none",l:"Walking without assistance"},{v:"cane",l:"Using a cane"},{v:"walker",l:"Using a walker"},{v:"wheelchair",l:"Using a wheelchair"}]);
+        h+=fld("Do you have any of these concerns?",true)+mradio("po_conc",POCONCERNS);
+        h+=fld("Anything else your surgeon should know?")+`<div class="fld"><textarea class="inp" rows="3" placeholder="Additional concerns..." oninput="u('po_notes',this.value)">${esc(R.po_notes||'')}</textarea></div>`;
+        return h;},
+      ok:()=>R.po_timing&&R.po_pain!==undefined&&R.po_vs&&R.po_pt&&R.po_mob&&(R.po_conc||[]).length>0});
+  }
+
+  // 4 MEDICAL HISTORY
+  S.push({id:"medical",t:"Medical History",i:"📋",
+    h:()=>{let h=fld("Do you have any of these conditions?",true)+mradio("conds",CONDS);
+      const hasDM=(R.conds||[]).includes("diabetes");
+      if(hasDM){
+        h+=fld("Do you know your last A1C?")+radio("a1c_known",[{v:"yes",l:"Yes"},{v:"no",l:"No / Not sure"}]);
+        if(R.a1c_known==="yes") h+=fld("What was it?")+inp("a1c_val","e.g. 7.2","number");
+      }
+      h+=fld("Are you on blood thinners?",true)+radio("blood_thin",BTO);
+      h+=fld("List any allergies (medications, latex, foods)")+`<div class="fld"><textarea class="inp" rows="2" placeholder="e.g. Penicillin — rash, Sulfa — hives, or None" oninput="u('allergies',this.value)">${esc(R.allergies||'')}</textarea></div>`;
+      h+=fld("Prior surgery on the affected joint (with approximate year)")+`<div class="fld"><textarea class="inp" rows="2" placeholder="e.g. R knee arthroscopy 2018, L hip resurfacing 2020" oninput="u('surg_hx',this.value)">${esc(R.surg_hx||'')}</textarea></div>`;
+      h+=fld("Tobacco use",true)+radio("tobacco",[{v:"never",l:"Never"},{v:"former",l:"Former smoker"},{v:"current",l:"Current smoker"}]);
+      if(R.tobacco==="former") h+=fld("When did you quit?")+inp("tob_quit","e.g. 2015, 10 years ago");
+      if(R.tobacco==="current") h+=fld("How much per day?")+inp("tob_amt","e.g. half pack, 1 pack");
+      h+=fld("Family history of blood clots?",true)+radio("fam_clots",[{v:"yes",l:"Yes"},{v:"no",l:"No"}]);
+      return h;},
+    ok:()=>(R.conds||[]).length>0&&R.blood_thin&&R.tobacco&&R.fam_clots});
+
+  // 5 MEDICATIONS
+  S.push({id:"meds",t:"Your Medications",i:"💊",
+    h:()=>{let h=info("Search by brand or generic name. Add each medication to build your list.");
+      h+=fld("Search and add your medications")+medWidget();
+      h+=fld("Does this look like your complete list?",true)+radio("med_conf",[{v:"yes",l:"Yes, this is everything"},{v:"plus_otc",l:"Yes, plus some vitamins/supplements"},{v:"unsure",l:"I'm not sure — I'll bring my list"}]);
+      return h;},
+    ok:()=>!!R.med_conf});
+
+  // 6 SURGICAL PLANNING (only pre-op)
+  if(preOp.length>0){
+    S.push({id:"plan",t:"Surgical Planning",i:"🏠",
+      h:()=>{let h=fld("Who will help you at home after surgery?",true)+radio("cg_rel",CG);
+        h+=fld("Caregiver name (who will drive you to/from surgery)",true)+inp("cg_name","Full name");
+        h+=fld("Caregiver phone",true)+inp("cg_phone","(xxx) xxx-xxxx","tel");
+        h+=fld("Do you use any of these to get around?")+mradio("mobility",[{v:"wheelchair",l:"Wheelchair"},{v:"walker",l:"Walker"},{v:"cane",l:"Cane"},{v:"none",l:"None — I walk without assistance"}]);
+        h+=fld("Does your home have any of these?")+mradio("home",[{v:"stairs_bed",l:"Stairs to reach bedroom"},{v:"stairs_entry",l:"Stairs to enter home"},{v:"walk_in_shower",l:"Walk-in shower"},{v:"tub_only",l:"Bathtub only"},{v:"grab_bars",l:"Grab bars installed"}]);
+        h+=fld("What activities do you want to get back to?")+mradio("goals",GOALS);
+        return h;},
+      ok:()=>R.cg_rel&&R.cg_name&&R.cg_phone});
+  }
+
+  return S;
+}
+
+// ─── HTML HELPERS ───
+function fld(l,req){return`<div class="fld"><label class="fld-l">${esc(l)}${req?'<span class="req">*</span>':''}</label>`;}
+function inp(k,ph,type){return`<input class="inp" type="${type||'text'}" value="${esc(R[k]||'')}" placeholder="${esc(ph)}" oninput="u('${k}',this.value)" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#e5e7eb'"></div>`;}
+function info(t,ic){return`<div class="info"><span class="info-i">${ic||'💡'}</span><span>${esc(t)}</span></div>`;}
+
+function radio(k,opts){let h='<div class="opts">';opts.forEach(o=>{const s=R[k]===o.v;h+=`<button class="opt ${s?'sel':''}" onclick="u('${k}','${o.v}')"><span class="opt-c"><span class="dot"></span></span>${esc(o.l)}</button>`;});return h+'</div></div>';}
+
+function mradio(k,opts){const arr=R[k]||[];let h='<div class="opts">';opts.forEach(o=>{const s=arr.includes(o.v);h+=`<button class="opt multi ${s?'sel':''}" onclick="togM('${k}','${o.v}')"><span class="opt-c"><span class="dot"></span></span>${esc(o.l)}</button>`;});return h+'</div></div>';}
+
+function pain(k){const v=R[k];let h='<div class="pain-row">';for(let i=0;i<=10;i++){const s=v===i,c=PCOLORS[i];h+=`<button class="pain-btn" style="border-color:${s?c:'#d1d5db'};background:${s?c:'transparent'};color:${s?(i>6?'#fff':'#1a1a2e'):'#6b7280'};transform:${s?'scale(1.15)':'scale(1)'};box-shadow:${s?`0 2px 8px ${c}44`:'none'}" onclick="u('${k}',${i})">${i}</button>`;}
+  return h+'</div><div class="pain-ends"><span>No pain</span><span>Worst imaginable</span></div></div>';}
+
+function dob(){return`<div class="dob-row"><select onchange="u('dob_m',this.value)"><option value="">Month</option>${MOS.map((m,i)=>`<option value="${i+1}" ${R.dob_m==i+1?'selected':''}>${m}</option>`).join('')}</select><select onchange="u('dob_d',this.value)"><option value="">Day</option>${DYS.map(d=>`<option value="${d}" ${R.dob_d==d?'selected':''}>${d}</option>`).join('')}</select><select onchange="u('dob_y',this.value)"><option value="">Year</option>${YRS.map(y=>`<option value="${y}" ${R.dob_y==y?'selected':''}>${y}</option>`).join('')}</select></div></div>`;}
+
+function scr(k,opts,ph){const sel=opts.find(o=>String(o.v)===String(R[k])),isOpen=openScr===k;
+  let h=`<div class="scr-wrap"><button class="scr-btn ${sel?'has':''} ${isOpen?'open':''}" onclick="openScr=${isOpen?'null':`'${k}'`};render()"><span>${sel?esc(sel.l):esc(ph)}</span><span style="color:#9ca3af;font-size:12px;transform:${isOpen?'rotate(180deg)':'none'};transition:transform .2s">▼</span></button>`;
+  if(isOpen){h+=`<div class="scr-ov" onclick="openScr=null;render()"></div><div class="scr-dd">`;opts.forEach(o=>{h+=`<button class="${R[k]===o.v?'sel':''}" onclick="event.stopPropagation();u('${k}',${typeof o.v==='number'?o.v:`'${o.v}'`});openScr=null;">${esc(o.l)}</button>`;});h+=`</div>`;}
+  return h+'</div></div>';}
+
+function medWidget(){const meds=R.med_list||[];let h='';
+  if(meds.length>0){h+=`<div class="med-list"><div class="med-hdr"><span>💊 Your medications (${meds.length})</span></div>`;meds.forEach((m,i)=>{h+=`<div class="med-item"><span style="font-size:14px;font-weight:500">${esc(m.d)}</span><button class="med-rm" onclick="rmMed(${i})">×</button></div>`;});h+=`</div>`;}
+  const q=medQ,res=q.length>=2?MI.filter(m=>m.s.includes(q.toLowerCase())&&!meds.some(v=>v.d===m.d)).slice(0,8):[];const show=medFoc&&q.length>=2;
+  h+=`<div style="position:relative"><div class="med-search ${medFoc?'foc':''} ${show?'open':''}"><span style="color:#9ca3af;font-size:16px">🔍</span><input type="text" value="${esc(q)}" placeholder="${meds.length===0?'Type a medication name...':'Add another...'}" oninput="medQ=this.value;medHi=0;render()" onfocus="medFoc=true;render()" onblur="setTimeout(()=>{medFoc=false;render()},200)">`;
+  if(q.length>0)h+=`<button style="border:none;background:transparent;color:#9ca3af;font-size:18px;cursor:pointer;padding:0" onclick="medQ='';render()">×</button>`;
+  h+=`</div>`;
+  if(show){h+=`<div class="med-dd">`;res.forEach((m,i)=>{h+=`<button class="${i===medHi?'hi':''}" onmousedown="event.preventDefault()" onclick="addMed('${esc(m.d).replace(/'/g,"\\'")}','${esc(m.b).replace(/'/g,"\\'")}','${esc(m.g).replace(/'/g,"\\'")}')" onmouseenter="medHi=${i};render()"><span style="color:#2563eb;font-size:13px;margin-right:6px">+</span><strong>${esc(m.b)}</strong>${m.b.toLowerCase()!==m.g.toLowerCase()?`<span style="color:#6b7280;font-size:13px"> (${esc(m.g)})</span>`:''}</button>`;});
+    if(res.length===0)h+=`<button class="cust" onmousedown="event.preventDefault()" onclick="addCustomMed()"><span style="color:#2563eb;font-weight:700;margin-right:6px">+</span>Add <strong>"${esc(q)}"</strong> as entered</button>`;
+    if(res.length>0)h+=`<button class="fallback" onmousedown="event.preventDefault()" onclick="addCustomMed()" onmouseenter="medHi=${res.length};render()">Don't see it? Tap to add <strong style="color:#1a1a2e">"${esc(q)}"</strong></button>`;
+    h+=`</div>`;}
+  if(q.length===0&&meds.length===0)h+=`<p style="font-size:13px;color:#9ca3af;margin-top:8px">Search brand (Lipitor) or generic (atorvastatin)</p>`;
+  return h+'</div></div>';}
+
+// ─── ACTIONS ───
+function togJ(v){const js=R.joints||[];R.joints=js.includes(v)?js.filter(x=>x!==v):[...js,v];render();}
+function togM(k,v){const a=R[k]||[];if(v==="none"){R[k]=a.includes("none")?[]:["none"];}else{const w=a.filter(x=>x!=="none");R[k]=w.includes(v)?w.filter(x=>x!==v):[...w,v];}render();}
+function addMed(d,b,g){const m=R.med_list||[];R.med_list=[...m,{d,b,g,s:`${b} ${g}`.toLowerCase()}];medQ="";medHi=0;render();}
+function addCustomMed(){if(medQ.trim().length>=2){const m=R.med_list||[];const c={d:medQ.trim(),b:medQ.trim(),g:"",s:medQ.trim().toLowerCase()};if(!m.some(v=>v.d.toLowerCase()===c.d.toLowerCase()))R.med_list=[...m,c];medQ="";medHi=0;render();}}
+function rmMed(i){R.med_list=(R.med_list||[]).filter((_,j)=>j!==i);render();}
+
+// ─── RENDER ───
+function render(){
+  const secs=getSections(),sec=secs[step];
+  if(done){
+    document.getElementById("app").innerHTML=`<div class="done"><div class="done-in"><div class="done-ck">✓</div><h1>You're all set!</h1><p>Your care team will review your responses before your visit so you can spend more time talking with your surgeon.</p><div class="done-sum">${secs.map(s=>`<div class="done-row"><span>${s.i} ${esc(s.t)}</span><span>✓</span></div>`).join('')}</div><button class="done-edit" onclick="done=false;step=0;render()">← Edit Responses</button></div></div>`;
+    return;
+  }
+  if(!sec)return;
+  const ok=sec.ok();
+  const isLast=step===secs.length-1;
+  document.getElementById("app").innerHTML=`<div class="app">
+    <div class="hdr"><div class="hdr-in"><div class="hdr-top"><div class="logo">TJ</div><div><div class="hdr-t">Pre-Visit Intake</div><div class="hdr-s">Total Joint Replacement Program</div></div></div><div class="prog"><div class="prog-bar"><div class="prog-fill" style="width:${((step+1)/secs.length)*100}%"></div></div><span class="prog-txt">${step+1}/${secs.length}</span></div></div></div>
+    <div class="cnt" id="cnt"><div class="cnt-in"><div class="sec-hdr"><span class="sec-icon">${sec.i}</span><h2 class="sec-t">${esc(sec.t)}</h2></div>${sec.h()}</div></div>
+    <div class="ftr"><div class="ftr-in">${step>0?`<button class="btn-back" onclick="step--;openScr=null;render();document.getElementById('cnt').scrollTop=0">←</button>`:''}
+      <button class="btn-next ${ok?'ok':''}" onclick="${ok?(isLast?'done=true;render()':'step++;openScr=null;render();document.getElementById(\'cnt\').scrollTop=0'):'void(0)'}" ${ok?'':'disabled'}>${isLast?'Submit':'Continue →'}</button></div></div>
+  </div>`;
+}
+render();
+</script>
+</body>
+</html>
