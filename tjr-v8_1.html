@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TJR Hub v8</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+:root{--bg:#0c0f14;--card:#12161e;--card2:#161b26;--border:#1e2533;--border2:#2a3040;--t1:#e4e7ec;--t2:#c8cdd5;--t3:#94a3b8;--t4:#64748b;--blue:#3b82f6;--blueL:#93c5fd;--blueD:#1e3a5f;--purple:#8b5cf6;--purpleL:#c4b5fd;--purpleD:#2e1065;--green:#22c55e;--greenL:#86efac;--greenD:#14532d;--yellow:#fbbf24;--yellowD:#422006;--red:#ef4444;--redD:#450a0a;}
+body{font-family:'DM Sans',-apple-system,system-ui,sans-serif;background:var(--bg);color:var(--t1);overflow:hidden;height:100vh;-webkit-text-size-adjust:100%;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+textarea,input,select,button{font-family:inherit;}
+
+.sc{margin-bottom:10px;border-radius:8px;overflow:hidden;border:1px solid var(--border);background:var(--card);}
+.sc.brd{border-left:3px solid var(--blue);}
+.sh{padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);background:var(--card2);flex-wrap:wrap;gap:4px;cursor:default;}
+.sh.collapsible{cursor:pointer;}
+.st{font-weight:800;font-size:11px;color:var(--t3);letter-spacing:.1em;}
+.sb{padding:10px 12px;}
+.sb.collapsed{display:none;}
+
+.fl{padding:2px 0;font-size:13px;color:var(--t2);line-height:1.6;}
+.fl-label{font-weight:700;color:var(--t4);font-size:10px;letter-spacing:.04em;text-transform:uppercase;}
+.fl-blue{color:var(--blueL);}.fl-ul{text-decoration:underline;text-underline-offset:2px;text-decoration-color:#475569;}
+.fl-indent{padding-left:16px;}.spacer{height:5px;}
+
+.cb{display:inline-flex;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;margin-left:3px;}
+.icd{background:#1e1b4b;color:#a5b4fc;}.cpt{background:var(--greenD);color:var(--greenL);}
+.ca{display:inline-flex;align-items:center;gap:3px;background:#431407;color:var(--yellow);padding:2px 6px;border-radius:3px;font-size:9px;font-weight:700;margin-left:3px;}
+
+.ed{background:transparent;border:none;color:var(--t2);font-size:13px;font-family:inherit;line-height:1.6;width:100%;outline:none;resize:none;overflow:hidden;}
+.ed:focus{background:rgba(59,130,246,0.08);border-radius:4px;}
+
+.rom-box{display:inline-flex;align-items:center;gap:3px;background:var(--card2);border:1px solid var(--border2);border-radius:5px;padding:3px 6px;margin:2px 3px 2px 0;}
+.rom-box:focus-within{border-color:var(--blue);}
+.rom-input{background:transparent;border:none;color:var(--blueL);font-size:14px;font-weight:700;font-family:inherit;width:32px;text-align:center;outline:none;}
+.rom-label{font-size:9px;color:var(--t4);font-weight:600;text-transform:uppercase;}
+.rom-unit{font-size:10px;color:var(--t4);}
+
+.tb{padding:4px 10px;border-radius:5px;border:1px solid var(--border2);background:var(--card2);color:var(--t3);font-size:11px;font-weight:600;cursor:pointer;transition:all .12s;}
+.tb:hover{border-color:var(--blue);color:var(--t2);}.tb.active{background:var(--blueD);border-color:var(--blue);color:var(--blueL);}
+
+.sev-btn{padding:4px 10px;border-radius:5px;border:1px solid var(--border2);background:var(--card2);color:var(--t3);font-size:11px;font-weight:600;cursor:pointer;transition:all .12s;}
+.sev-btn:hover{border-color:var(--blue);}
+.sev-none.active{background:var(--greenD);border-color:var(--green);color:var(--greenL);}
+.sev-mild.active{background:var(--yellowD);border-color:#f59e0b;color:var(--yellow);}
+.sev-moderate.active{background:#431407;border-color:#ea580c;color:#fb923c;}
+.sev-severe.active{background:var(--redD);border-color:var(--red);color:#fca5a5;}
+
+.add-btn{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:4px;border:1px dashed var(--border2);background:transparent;color:var(--t4);font-size:10px;font-weight:600;cursor:pointer;transition:all .12s;margin:3px 2px 0 0;}
+.add-btn:hover{border-color:var(--blue);color:var(--blueL);}
+
+.del-btn{background:none;border:none;color:var(--t4);cursor:pointer;font-size:10px;padding:0 4px;opacity:.5;transition:opacity .12s;}
+.del-btn:hover{opacity:1;color:var(--red);}
+
+.item-row{display:flex;align-items:center;gap:4px;padding:1px 0;}
+.item-row:hover .del-btn{opacity:.8;}
+
+.ol{display:flex;align-items:flex-start;gap:6px;padding:4px 8px;border-radius:4px;background:var(--card2);border:1px solid var(--border);margin-bottom:2px;font-size:11px;color:var(--t2);}
+.ol-ok{color:var(--green);font-weight:700;flex-shrink:0;}.ol-w{color:var(--yellow);font-weight:700;flex-shrink:0;}
+
+.mt{width:100%;border-collapse:collapse;margin:4px 0;font-size:11px;}
+.mt th{text-align:left;font-size:8px;font-weight:700;color:var(--t4);letter-spacing:.06em;text-transform:uppercase;padding:3px 6px;border-bottom:1px solid var(--border2);}
+.mt td{padding:4px 6px;border-bottom:1px solid #1a1f2e;vertical-align:top;color:var(--t2);}
+.mt tr:hover td{background:#1a1f2e;}
+.ac-c{color:var(--greenL);font-weight:600;}.ac-h{color:var(--yellow);font-weight:600;}.ac-s{color:var(--red);font-weight:700;}.ac-m{color:var(--blueL);font-weight:700;}.ac-p{color:var(--purpleL);font-weight:600;}.ac-r{color:var(--t3);font-weight:600;}
+
+.of{display:flex;align-items:flex-start;padding:4px 0;border-bottom:1px solid #1a1f2e;gap:8px;}
+.of-l{font-weight:700;font-size:10px;color:var(--t4);letter-spacing:.05em;text-transform:uppercase;min-width:110px;padding-top:4px;flex-shrink:0;}
+.of-v{flex:1;display:flex;gap:4px;flex-wrap:wrap;}
+
+.clr-grid{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0;}
+.clr-btn{padding:4px 10px;border-radius:5px;border:1px solid var(--border2);background:var(--card2);color:var(--t3);font-size:10px;font-weight:600;cursor:pointer;transition:all .12s;}
+.clr-btn:hover{border-color:var(--blue);}.clr-btn.active{background:var(--blueD);border-color:var(--blue);color:var(--blueL);}
+.clr-btn.auto{background:var(--greenD);border-color:var(--green);color:var(--greenL);}
+
+.ab{border-radius:6px;padding:6px 10px;margin:4px 0;display:flex;align-items:flex-start;gap:6px;font-size:11px;}
+.ab.w{background:#431407;border:1px solid #92400e;color:var(--yellow);}.ab.d{background:var(--redD);border:1px solid #7f1d1d;color:#fca5a5;}
+
+.op-para{background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:12px;color:var(--t2);line-height:1.7;margin-top:8px;white-space:pre-line;}
+
+.chev{font-size:10px;color:var(--t4);transition:transform .2s;display:inline-block;}
+.chev.open{transform:rotate(90deg);}
+
+@media(max-width:768px){.sb{padding:8px 10px;}.sh{padding:6px 10px;}.mt td,.mt th{padding:3px 4px;font-size:10px;}.rom-input{width:28px;font-size:12px;}.of-l{min-width:80px;font-size:9px;}.fl{font-size:12px;}.tb{font-size:10px;padding:3px 7px;}.sev-btn{font-size:10px;padding:3px 7px;}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+
+// ═══════ MED DB ═══════
+const MDB={};function aM(c,n,r){n.forEach(x=>{MDB[x.toLowerCase()]={dc:c,...r};});}
+aM("ACE Inhibitor",["benazepril","captopril","enalapril","fosinopril","lisinopril","zestril","quinapril","ramipril","trandolapril"],{a:"hold",p:"Hold AM/PM day of surgery",r:"Resume POD#1"});
+aM("ARB",["candesartan","irbesartan","losartan","cozaar","olmesartan","telmisartan","valsartan","diovan","entresto"],{a:"hold",p:"Hold AM/PM day of surgery",r:"Resume POD#1"});
+aM("Beta Blocker",["atenolol","tenormin","bisoprolol","metoprolol","lopressor","toprol","nadolol","nebivolol","propranolol","sotalol","carvedilol","coreg"],{a:"must_take",p:"MUST take — cardioprotective",r:"Continue",w:1});
+aM("Antiarrhythmic",["digoxin","amiodarone","flecainide","dronedarone","dofetilide"],{a:"must_take",p:"MUST take — cardioprotective",r:"Continue",w:1});
+aM("Diuretic",["furosemide","lasix","bumetanide","spironolactone","torsemide","triamterene","chlorthalidone","metolazone"],{a:"hold",p:"Hold day of surgery",r:"Resume POD#1"});
+aM("Anticoagulant",["apixaban","eliquis","rivaroxaban","xarelto","edoxaban","warfarin","coumadin","enoxaparin","lovenox","heparin","dabigatran","pradaxa"],{a:"per_specialist",p:"Per Cardiologist/Surgeon — coordinate bridging",r:"Per Cardiologist/Surgeon",cc:1,w:1});
+aM("Antiplatelet",["clopidogrel","plavix","prasugrel","effient","ticagrelor","brillinta","dipyridamole","aggrenox"],{a:"per_specialist",p:"Per Cardiologist/Surgeon",r:"Per Cardiologist/Surgeon",cc:1,w:1});
+aM("NSAID/Antiplatelet",["aspirin"],{a:"continue",p:"Per surgeon",r:"Continue — DVT ppx"});
+const ND={"diclofenac":1,"ibuprofen":1,"advil":1,"motrin":1,"ketorolac":1,"etodolac":2,"indomethacin":2,"celecoxib":2,"celebrex":2,"meloxicam":4,"mobic":4,"naproxen":4,"aleve":4,"sulindac":4,"nabumetone":6,"oxaprozin":10,"piroxicam":10};
+Object.keys(ND).forEach(n=>{const d=ND[n];MDB[n]={dc:"NSAID",a:"hold",p:`Hold ${d}d prior`,r:"Resume per surgeon",hd:d};});
+aM("Metformin",["metformin","glucophage","glumetza"],{a:"hold",p:"Hold 12hr (48hr if CKD)",r:"Resume w/ oral intake + stable renal",w:1});
+aM("SGLT2 Inhibitor",["canagliflozin","invokana","dapagliflozin","farxiga","empagliflozin","jardiance","ertugliflozin","steglatro"],{a:"stop",p:"MUST stop 3-4d prior — DKA risk",r:"Resume when oral baseline",w:1,crit:1});
+aM("GLP-1 RA (Daily)",["liraglutide","victoza","saxenda"],{a:"hold",p:"Hold 1 day prior",r:"Resume w/ oral intake",glp1:1,w:1});
+aM("GLP-1 RA (Weekly)",["semaglutide","ozempic","wegovy","dulaglutide","trulicity","exenatide","tirzepatide","mounjaro","zepbound"],{a:"hold",p:"Hold min 1 week prior",r:"Resume w/ oral diet",glp1:1,w:1});
+aM("Insulin (Rapid)",["humalog","novolog","apidra","humulin r"],{a:"hold",p:"Hold AM DOS",r:"Resume w/ first meal"});
+aM("Insulin (Basal)",["lantus","basaglar","toujeo","levemir","tresiba"],{a:"hold",p:"Take 2/3 dose DOS",r:"Resume normal w/ diet"});
+aM("MAOI",["phenelzine","nardil","tranylcypromine","parnate"],{a:"stop",p:"MUST stop 2wk prior",r:"Per prescriber",w:1,crit:1});
+aM("TCA",["amitriptyline","nortriptyline","imipramine","doxepin","desipramine"],{a:"hold",p:"OK night before. Hold AM.",r:"Resume w/ fluids"});
+aM("SSRI/SNRI",["sertraline","zoloft","fluoxetine","prozac","paroxetine","citalopram","escitalopram","lexapro","venlafaxine","duloxetine","cymbalta","bupropion","wellbutrin","mirtazapine","trazodone"],{a:"continue",p:"Take w/ sip water",r:"Continue"});
+aM("Opioid",["oxycodone","hydrocodone","morphine","tramadol","methadone","codeine","hydromorphone","tapentadol"],{a:"continue",p:"May take DOS",r:"Continue"});
+aM("CCB",["amlodipine","norvasc","diltiazem","cardizem","nifedipine","verapamil"],{a:"continue",p:"Continue",r:"Continue"});
+aM("Antiseizure",["gabapentin","neurontin","pregabalin","lyrica","levetiracetam","keppra","topiramate","lamotrigine","carbamazepine","valproic acid","lorazepam","clonazepam"],{a:"continue",p:"Take w/ sip water",r:"Continue"});
+aM("Thyroid",["levothyroxine","synthroid","armour thyroid","methimazole","liothyronine"],{a:"continue",p:"Continue",r:"Continue"});
+aM("Antireflux",["omeprazole","prilosec","pantoprazole","protonix","lansoprazole","esomeprazole","nexium","famotidine","pepcid"],{a:"continue",p:"Continue",r:"Continue"});
+aM("Statin",["atorvastatin","lipitor","rosuvastatin","crestor","simvastatin","pravastatin","lovastatin","pitavastatin"],{a:"continue",p:"Take night before",r:"Continue"});
+aM("Immunosuppressant",["prednisone","tacrolimus","cyclosporine","mycophenolate","azathioprine","sirolimus"],{a:"continue",p:"Continue — critical",r:"Continue",w:1});
+aM("Vitamin/Supplement",["calcium","vitamin d","vitamin d3","vitamin c","vitamin b12","folic acid","iron","magnesium","zinc","multivitamin","potassium"],{a:"continue",p:"May continue",r:"Continue"});
+aM("Urological",["tamsulosin","flomax","alfuzosin","dutasteride","finasteride"],{a:"continue",p:"Continue",r:"Continue"});
+aM("Antibiotic",["cefdinir","amoxicillin","azithromycin","doxycycline","ciprofloxacin","cephalexin","clindamycin"],{a:"continue",p:"Continue course",r:"Complete"});
+aM("Cholesterol",["ezetimibe","zetia","fenofibrate","gemfibrozil"],{a:"continue",p:"Continue",r:"Continue"});
+aM("OTC Supplement",["garlic","ginkgo","ginseng","vitamin e","fish oil","omega-3","turmeric","saw palmetto"],{a:"hold",p:"Hold DOS",r:"Resume post-op"});
+aM("Weight Loss",["phentermine","qsymia"],{a:"stop",p:"MUST stop 7d prior",r:"Per prescriber",w:1,crit:1});
+aM("PDE-5",["sildenafil","viagra"],{a:"hold",p:"Hold 24hr",r:"Per prescriber"});aM("PDE-5",["tadalafil","cialis"],{a:"hold",p:"Hold 48hr",r:"Per prescriber"});
+
+function cM(n){const l=n.toLowerCase().trim();if(MDB[l])return{...MDB[l],inp:n};for(const[k,v]of Object.entries(MDB)){if(l.includes(k)||k.includes(l))return{...v,inp:n};}const pm=l.match(/\(([^)]+)\)/);if(pm){const g=pm[1].trim();if(MDB[g])return{...MDB[g],inp:n};for(const[k,v]of Object.entries(MDB)){if(g.includes(k)||k.includes(g))return{...v,inp:n};}}const bm=l.match(/^([^(]+)/);if(bm){const b=bm[1].trim();if(MDB[b])return{...MDB[b],inp:n};for(const[k,v]of Object.entries(MDB)){if(b.includes(k)||k.includes(b))return{...v,inp:n};}}return{dc:"Unclassified",a:"review",p:"Review",r:"Per prescriber",inp:n};}
+
+const ICD={"right_knee_oa":{c:"M17.11"},"left_knee_oa":{c:"M17.12"},"right_hip_oa":{c:"M16.11"},"left_hip_oa":{c:"M16.12"},"diabetes":{c:"E11.9"},"cardiac_stenting":{c:"Z95.5"},"cabg":{c:"Z95.1"},"depression_anxiety":{c:"F41.9"},"hypertension":{c:"I10"},"preop":{c:"Z01.818"}};
+const CPT={tka:"27447",tha:"27130",rev_tka:"27487",rev_tha:"27134",cons:"99213"};
+const CARDIAC=["cardiac_stenting","cabg"];
+const CLR_SPECIALTIES=["Cardiac","Hematology","Vascular","Rheumatology","PCP","Dental","Oncology"];
+const LABS_DEFAULT=["CBC","BMP","PT/INR","UA","Type & Screen","EKG","CXR"];
+
+// ═══════ OEM IMPLANT DATA ═══════
+const OEM={
+  "Zimmer Biomet":{knee:{sys:"Persona",fem:["0","1","2","3","4","5","6","7","8","9","10","11","12"],femT:["Std","Narrow"],tib:["A","B","C","D","E","F","G","H"],poly:["10","11","12","13","14","16","18","20"],polyT:["MC","CR","PS"],pat:["None","29","32","35","38","41"]},hip:{sys:"G7/Avenir",shell:["40","42","44","46","48","50","52","54","56","58","60","62","64","66","68","70"],liner:["28","32","36","40","DM"],stem:["0","1","2","3","4","5","6","7","8","9","10","11","12"],neck:["Std","High","CV"],head:["28","32","36","40","DM"]}},
+  "DePuy":{knee:{sys:"Attune",fem:["1","2","3","4","5","6","7","8","9","10"],femT:["Std","Narrow"],tib:["1","2","3","4","5","6","7","8","9","10"],poly:["8","9","10","11","12","14","16","18"],polyT:["CR","PS","RP"],pat:["None","26","29","32","35","38"]},hip:{sys:"Pinnacle/Corail",shell:["44","46","48","50","52","54","56","58","60","62","64","66"],liner:["28","32","36","40","DM"],stem:["6","7","8","9","10","11","12","13","14","15","16","17","18"],neck:["Std","+3.5","+7","−3.5"],head:["28","32","36","40"]}},
+  "Stryker":{knee:{sys:"Triathlon",fem:["1","2","3","4","5","6","7","8","9","10"],femT:["Std","Narrow"],tib:["1","2","3","4","5","6","7","8","9","10"],poly:["9","10","11","12.5","14","16","18","20"],polyT:["CR","PS","CS"],pat:["None","26","29","32","35","38","41"]},hip:{sys:"Trident/Accolade",shell:["44","46","48","50","52","54","56","58","60","62","64"],liner:["28","32","36","40","DM"],stem:["0","1","2","3","4","5","6","7","8"],neck:["Std","Short","Long"],head:["28","32","36","40"]}},
+  "Smith & Nephew":{knee:{sys:"Journey II",fem:["1","2","3","4","5","6","7","8"],femT:["Std"],tib:["1","2","3","4","5","6","7","8"],poly:["9","10","11","12","14","16","18"],polyT:["CR","BCS"],pat:["None","26","29","32","35","38"]},hip:{sys:"Polarstem/R3",shell:["44","46","48","50","52","54","56","58","60"],liner:["28","32","36"],stem:["1","2","3","4","5","6","7","8","9","10"],neck:["Std","Lat","Med"],head:["28","32","36"]}}
+};
+
+const P=[
+{id:"p1",nm:"Margaret Thompson",first:"Margaret",last:"Thompson",age:68,dob:"06/18/1957",mrn:"NTH-2847561",surgeon:"DeCook MD, Charles A",ins:"Medicare",vt:"new",time:"9:00 AM",flags:["blood_thinners","diabetes"],
+  joints:[{side:"Left",type:"knee",key:"lk"}],
+  intake:{tobacco:"Never.",fhx:"Non-contributory",ht:"169 cm",wt:"90.2 kg",bmi:"31.7",
+    cg_rel:"Husband",cg_name:"Thomas Thompson",cg_phone:"(770) 555-0143",
+    pmh:["diabetes","cardiac_stenting","depression_anxiety"],pmhD:["Diabetes","Stenting","Depression/Anxiety"],
+    hba1c:7.2,psh:"None",allergy:["Penicillin — rash"],
+    goals:["Walk without pain","Gardening","Playing with grandchildren"],
+    meds:["Eliquis (apixaban)","Metformin (Glucophage)","atorvastatin","sertraline","pantoprazole","Calcium + Vitamin D","meloxicam","amlodipine","metoprolol","Ozempic (semaglutide)","empagliflozin"],
+    ros:{CONSTITUTIONAL:"No fever, chills.",HEENT:"No new visual loss. No sore throat.",SKIN:"No new rash.",CARDIOVASCULAR:"No new chest pain.",RESPIRATORY:"No shortness of breath.",GASTROINTESTINAL:"No new vomiting.",GENITOURINARY:"No new UTI symptoms.",NEUROLOGICAL:"No new headache.",MUSCULOSKELETAL:"Pain in the affected joint.",HEMATOLOGIC:"No new bleeding.",LYMPHATICS:"No enlarged lymph nodes.",PSYCHIATRIC:"No recent depression.",ENDOCRINOLOGIC:"No polyuria.",ALLERGIES:"No recent asthma exacerbations."}},
+  jd:{lk:{pd:"more than 2 years",pl:7,pw:9,pt:["Physical therapy","Cortisone injections","NSAIDs","Gel injections"],fl:["Walking >1 block","Stairs","Sleeping","Getting in/out of car"],
+    hpi:"Patient reports worsening left knee pain over 2 years, now significantly limiting daily activities. Pain constant, worse with stairs and prolonged walking. Night pain 4-5 nights/week. Exhausted conservative treatment. Risks discussed. Patient understands and wishes to proceed.",
+    exam:{inspect:"Tenderness medial joint line, mild effusion",align:"Varus",ext:"5",flex:"110",stab:"Stable to varus/valgus stress",qstr:"4/5",hstr:"5/5"},sev:"severe"}}
+},
+{id:"p2",nm:"Robert Williams",first:"Robert",last:"Williams",age:71,dob:"03/22/1954",mrn:"NTH-5518293",surgeon:"DeCook MD, Charles A",ins:"Medicare",vt:"new",time:"9:30 AM",flags:[],
+  joints:[{side:"Right",type:"knee",key:"rk"},{side:"Left",type:"knee",key:"lk"}],
+  intake:{tobacco:"Former — quit 10 yrs.",fhx:"Father OA",ht:"175 cm",wt:"95.3 kg",bmi:"31.1",
+    cg_rel:"Wife",cg_name:"Barbara Williams",cg_phone:"(770) 555-0298",
+    pmh:["hypertension"],pmhD:["Hypertension"],hba1c:null,psh:"R knee arthroscopy 2018",allergy:["NKDA"],
+    goals:["Walk 18 holes golf","Stairs without pain"],
+    meds:["atorvastatin","amlodipine","pantoprazole","Vitamin D3"],
+    ros:{CONSTITUTIONAL:"No fever.",HEENT:"No changes.",SKIN:"No rash.",CARDIOVASCULAR:"No CP.",RESPIRATORY:"No SOB.",GASTROINTESTINAL:"No nausea.",GENITOURINARY:"No symptoms.",NEUROLOGICAL:"No HA.",MUSCULOSKELETAL:"Bilateral knee pain.",HEMATOLOGIC:"No bleeding.",LYMPHATICS:"No LAD.",PSYCHIATRIC:"No depression.",ENDOCRINOLOGIC:"No polyuria.",ALLERGIES:"No exacerbations."}},
+  jd:{rk:{pd:"3 years",pl:6,pw:8,pt:["PT","Cortisone","Gel injections"],fl:["Walking","Stairs","Golf"],hpi:"Worsening right knee pain over 3 years. Medial predominant. Worse with activity. Prior arthroscopy 2018 with temporary relief. Conservative treatment exhausted.",exam:{inspect:"Tenderness medial JL, small effusion",align:"Varus",ext:"0",flex:"115",stab:"Stable",qstr:"4+/5",hstr:"5/5"},sev:"severe"},
+    lk:{pd:"18 months",pl:4,pw:6,pt:["NSAIDs","Activity modification"],fl:["Prolonged walking","Stairs"],hpi:"Left knee pain developing over 18 months. Medial predominant. Less severe than right but worsening progressively.",exam:{inspect:"Mild tenderness medial JL, no effusion",align:"Neutral",ext:"0",flex:"125",stab:"Stable",qstr:"5/5",hstr:"5/5"},sev:"moderate"}}
+},
+{id:"p3",nm:"Patricia Garcia",first:"Patricia",last:"Garcia",age:66,dob:"09/14/1959",mrn:"NTH-6629104",surgeon:"DeCook MD, Charles A",ins:"BCBS",vt:"new",time:"10:00 AM",flags:[],
+  joints:[{side:"Right",type:"knee",key:"rk"},{side:"Left",type:"hip",key:"lh"}],
+  intake:{tobacco:"Never.",fhx:"NC",ht:"162 cm",wt:"72 kg",bmi:"27.4",cg_rel:"Daughter",cg_name:"Maria Garcia",cg_phone:"(678) 555-0187",
+    pmh:[],pmhD:[],psh:"None",allergy:["Sulfa — hives"],goals:["Hiking","Grandchildren"],
+    meds:["levothyroxine","atorvastatin","Calcium + Vitamin D","famotidine"],
+    ros:{CONSTITUTIONAL:"No fever.",HEENT:"No changes.",SKIN:"No rash.",CARDIOVASCULAR:"No CP.",RESPIRATORY:"No SOB.",GASTROINTESTINAL:"No nausea.",GENITOURINARY:"No symptoms.",NEUROLOGICAL:"No HA.",MUSCULOSKELETAL:"Pain R knee and L hip.",HEMATOLOGIC:"No bleeding.",LYMPHATICS:"No LAD.",PSYCHIATRIC:"No depression.",ENDOCRINOLOGIC:"No polyuria.",ALLERGIES:"No exacerbations."}},
+  jd:{rk:{pd:"2 years",pl:6,pw:8,pt:["PT","Cortisone"],fl:["Hiking","Walking","Stairs"],hpi:"Right knee pain worsening over 2 years. Medial predominant. PT and injections gave temporary relief.",exam:{inspect:"Tenderness medial JL, trace effusion",align:"Varus",ext:"0",flex:"120",stab:"Stable",qstr:"4+/5",hstr:"5/5"},sev:"moderate"},
+    lh:{pd:"1 year",pl:5,pw:7,pt:["NSAIDs"],fl:["Groin pain walking","Shoes/socks"],hpi:"Left hip pain over the past year. Groin predominant radiating anterior thigh. Worse with walking and pivoting.",exam:{inspect:"No TTP greater trochanter",pain:"Yes — groin",flex:"90",abd:"25",add:"15",er:"20",ir:"10",fstr:"4+/5",astr:"5/5"},sev:"moderate"}}
+},
+{id:"p4",nm:"James Mitchell",first:"James",last:"Mitchell",age:72,dob:"11/08/1953",mrn:"NTH-3915284",surgeon:"DeCook MD, Charles A",ins:"Medicare Adv",vt:"post_op",time:"10:30 AM",flags:[],
+  joints:[{side:"Left",type:"hip",key:"lh",impl:true}],
+  intake:{tobacco:"Never.",fhx:"NC",ht:"180 cm",wt:"88.6 kg",bmi:"27.2",cg_rel:"Wife",cg_name:"Carol Mitchell",cg_phone:"(770) 555-0431",psh:"L THA 2wk ago",allergy:["NKDA"],pmh:[],pmhD:[],
+    meds:["Aspirin 81mg","lisinopril","atorvastatin","Vitamin D3","tamsulosin"],ros:{}},
+  jd:{lh:{hpi:"2 weeks post left THA. Doing well. Pain controlled with Tylenol. Walking walker → cane. Incision clean. No fevers, calf pain, or drainage.",
+    exam:{wound:"Anterior incision well-approximated, no erythema/drainage, staples ready for removal",rom:"Flex 95°, ext 0°, abd 30°",gait:"Walker, stable",str:"4/5 hip flex/abd",nv:"DP 2+, sensation intact",dvt:"No calf tenderness, Homans negative."},sev:null}}
+},
+{id:"p5",nm:"Dorothy Chen",first:"Dorothy",last:"Chen",age:65,dob:"06/22/1960",mrn:"NTH-4428190",surgeon:"DeCook MD, Charles A",ins:"BCBS",vt:"op_tka",time:"—",flags:[],
+  joints:[{side:"Left",type:"knee",key:"lk"}],intake:{allergy:["Sulfa — hives"],pmh:[],pmhD:[],meds:["Levothyroxine","Calcium + Vitamin D"]},jd:{},
+  op:{side:"Left",proc:"tka",assists:["Joey Kanclerz"],anes:"Spinal",tourn:"No",ebl:"See Nursing Record",find:"Knee arthritis",drain:"None",spec:"None",comp:"None",oem:"Zimmer Biomet",fs:"5",ft:"Std",ts:"D",ps:"10",pt2:"MC",pas:"35",piq:"No",guid:"Manual",arth:"Medial Parapatellar",pcl:"Intact",dfc:"7",ptc:"2",ldf:"7",mdf:"7",lpf:"8",mpf:"8",mr:"None",lr:"None",pres:"Yes",fix:"Cemented",irr:"Saline",dress:"Aquacel",impFix:"Cemented"}
+},
+{id:"p6",nm:"William Foster",first:"William",last:"Foster",age:70,dob:"09/03/1955",mrn:"NTH-5512837",surgeon:"DeCook MD, Charles A",ins:"Medicare",vt:"op_tha",time:"—",flags:[],
+  joints:[{side:"Right",type:"hip",key:"rh"}],intake:{allergy:["None"],pmh:[],pmhD:[],meds:["atorvastatin","tamsulosin"]},jd:{},
+  op:{side:"Right",proc:"tha",assists:["Joey Kanclerz"],anes:"Spinal",ebl:"See Nursing Record",find:"Hip arthritis",drain:"None",spec:"None",comp:"None",oem:"Zimmer Biomet",sh:"54",lin:"36",st:"5",neck:"Std",hd:"36",app:"Anterior",inc:"Horizontal",cap:"Incised",ream:"1mm under",flu:"Yes",scr:"No",fr:"No",irr:"Saline",dress:"Tegaderm",impFix:"Cemented"}
+}];
+
+const VL={new:"New Examination",post_op:"Post-Op Visit",op_tka:"OP Report — TKA",op_tha:"OP Report — THA"};
+
+// ═══════ STATE ═══════
+let S={p:P[0],locked:false,col:false,sevs:{},plans:{},ptT:{},fuW:{},op:null,rosOpen:false,clrs:{}};
+function initS(pt){const s={},pl={},ptt={},fw={},cl={};pt.joints.forEach(j=>{const jd=pt.jd[j.key];if(jd?.sev)s[j.key]=jd.sev;pl[j.key]=(jd?.sev==='severe'||jd?.sev==='moderate')?'replacement':'conservative';ptt[j.key]='Virtual';fw[j.key]='6';});
+  const cardiac=pt.intake?.pmh?.some(c=>CARDIAC.includes(c));
+  CLR_SPECIALTIES.forEach(c=>{if(c==='Cardiac'&&cardiac)cl[c]=true;else if(c==='PCP')cl[c]=true;else if(c==='Dental')cl[c]=true;else cl[c]=false;});
+  return{sevs:s,plans:pl,ptT:ptt,fuW:fw,op:pt.op?{...pt.op}:null,rosOpen:false,clrs:cl};}
+Object.assign(S,initS(P[0]));
+
+function ss(u){Object.assign(S,typeof u==='function'?u(S):u);render();}
+function selP(pt){ss({p:pt,locked:false,...initS(pt)});}
+function setSev(k,v){const s={...S.sevs};s[k]=v;const pl={...S.plans};pl[k]=(v==='severe'||v==='moderate')?'replacement':'conservative';ss({sevs:s,plans:pl});}
+function setPlan(k,v){const pl={...S.plans};pl[k]=v;ss({plans:pl});}
+function setPT(k,v){const pt={...S.ptT};pt[k]=v;ss({ptT:pt});}
+function setFU(k,v){const fw={...S.fuW};fw[k]=v;ss({fuW:fw});}
+function togClr(c){const cl={...S.clrs};cl[c]=!cl[c];ss({clrs:cl});}
+function uOp(k,v){const d={...S.op};d[k]=v;ss({op:d});}
+function addAssist(){const n=prompt('Add assistant name:');if(n){const d={...S.op};d.assists=[...d.assists,n];ss({op:d});}}
+function rmAssist(i){const d={...S.op};d.assists=d.assists.filter((_,j)=>j!==i);ss({op:d});}
+
+function esc(s){const d=document.createElement("div");d.textContent=s||"";return d.innerHTML;}
+function icd(k){const c=ICD[k];return c?`<span class="cb icd">${c.c}</span>`:'';}
+function cpb(c){return`<span class="cb cpt">CPT ${c}</span>`;}
+function sec(t,body,cls='',ex='',coll=false,open=true){const bodyId='sec_'+Math.random().toString(36).slice(2,8);return`<div class="sc ${cls}"><div class="sh ${coll?'collapsible':''}" ${coll?`onclick="document.getElementById('${bodyId}').classList.toggle('collapsed');this.querySelector('.chev').classList.toggle('open');"`:''} ><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">${coll?`<span class="chev ${open?'open':''}">▶</span>`:''}<span class="st">${t}</span></div>${ex}</div><div class="sb ${!open&&coll?'collapsed':''}" id="${bodyId}">${body}</div></div>`;}
+function romBox(l,v,id){return`<span class="rom-box"><span class="rom-label">${l}</span><input class="rom-input" id="rom_${id}" value="${v}"><span class="rom-unit">°</span></span>`;}
+function itemRow(text,onDel){return`<div class="item-row"><span style="flex:1;">${text}</span><button class="del-btn" onclick="${onDel}" title="Remove">✕</button></div>`;}
+const dosStr=new Date().toLocaleDateString()+' '+new Date().toLocaleTimeString();
+
+function medTbl(meds,po){const cl=meds.map(m=>cM(m)),so={stop:0,per_specialist:1,must_take:2,hold:3,continue:4,review:5};cl.sort((a,b)=>(so[a.a]||5)-(so[b.a]||5));const g1=cl.some(m=>m.glp1),sg=cl.some(m=>m.crit&&m.dc.includes('SGLT2'));let h='';if(!po&&g1)h+=`<div class="ab w"><b>⚠ GLP-1 RA</b> — Clear liquid diet 24hr prior (aspiration risk)</div>`;if(!po&&sg)h+=`<div class="ab d"><b>🛑 SGLT2</b> — MUST stop 3-4d prior (DKA risk)</div>`;h+=`<table class="mt"><thead><tr><th>Medication</th><th>Class</th><th>Action</th><th>${po?'Post-Op':'Pre-Op'}</th><th>Restart</th></tr></thead><tbody>`;cl.forEach(m=>{const ac=m.a==='must_take'?'ac-m':m.a==='stop'?'ac-s':m.a==='per_specialist'?'ac-p':m.a==='hold'?'ac-h':m.a==='continue'?'ac-c':'ac-r';const lb=m.a==='must_take'?'MUST TAKE':m.a==='per_specialist'?'PER SPEC':m.a.toUpperCase();h+=`<tr><td style="font-weight:600;">${esc(m.inp)}</td><td style="font-size:10px;color:var(--t4);">${esc(m.dc)}</td><td class="${ac}">${lb}</td><td style="font-size:10px;">${esc(po?m.r:m.p)}</td><td style="font-size:10px;">${esc(m.r)}</td></tr>`;});h+=`</tbody></table>`;return{html:h,cl,g1,sg};}
+
+function radKnee(side,sev,impl,jk){if(impl)return`<div class="fl"><b>EXAM:</b> 4 views: WB AP, lateral, Rosenberg, Sunrise</div><div class="fl"><b>INDICATION:</b> Joint Implant</div><div class="fl"><b>FINDINGS:</b> ${side} knee arthroplasty present. Components in expected position. No periprosthetic fracture. No loosening. No dislocation.</div><div class="fl"><b>IMPRESSION:</b></div><div class="fl fl-indent">1. ${side} knee arthroplasty <b>without acute complication</b>.</div><div class="fl fl-indent">2. No periprosthetic fracture.</div>`;
+  return`<div class="fl"><b>EXAM:</b> 4 views: WB AP, lateral, Rosenberg, Sunrise</div><div class="fl"><b>INDICATION:</b> Knee pain / DJD evaluation</div><div class="fl"><b>FINDINGS:</b> WB alignment assessed. No acute fracture or dislocation. <span style="display:inline-flex;gap:4px;vertical-align:middle;"><button class="sev-btn sev-none ${sev==='none'?'active':''}" onclick="setSev('${jk}','none')">None</button><button class="sev-btn sev-mild ${sev==='mild'?'active':''}" onclick="setSev('${jk}','mild')">Mild</button><button class="sev-btn sev-moderate ${sev==='moderate'?'active':''}" onclick="setSev('${jk}','moderate')">Moderate</button><button class="sev-btn sev-severe ${sev==='severe'?'active':''}" onclick="setSev('${jk}','severe')">Severe</button></span> degenerative change with joint space narrowing, osteophytes, subchondral sclerosis. No aggressive osseous lesion.</div><div class="fl"><b>IMPRESSION:</b></div><div class="fl fl-indent">1. <b>${(sev||'___').charAt(0).toUpperCase()+(sev||'___').slice(1)}</b> OA of the ${side.toLowerCase()} knee on WB radiographs. ${icd(side.toLowerCase()+'_knee_oa')}</div><div class="fl fl-indent">2. No acute osseous abnormality.</div>`;}
+
+function radHip(side,sev,impl,jk){if(impl)return`<div class="fl"><b>EXAM:</b> 2 views: standing AP, lateral</div><div class="fl"><b>INDICATION:</b> Hip implant</div><div class="fl"><b>FINDINGS:</b> ${side} THA present. Components in expected position. No periprosthetic fracture. No dislocation. No loosening.</div><div class="fl"><b>IMPRESSION:</b></div><div class="fl fl-indent">1. ${side} hip arthroplasty <b>without acute complication</b>.</div><div class="fl fl-indent">2. No periprosthetic fracture or dislocation.</div>`;
+  return`<div class="fl"><b>EXAM:</b> 2 views: standing AP, lateral</div><div class="fl"><b>INDICATION:</b> Hip pain / DJD evaluation</div><div class="fl"><b>FINDINGS:</b> No acute fracture or dislocation. <span style="display:inline-flex;gap:4px;vertical-align:middle;"><button class="sev-btn sev-none ${sev==='none'?'active':''}" onclick="setSev('${jk}','none')">None</button><button class="sev-btn sev-mild ${sev==='mild'?'active':''}" onclick="setSev('${jk}','mild')">Mild</button><button class="sev-btn sev-moderate ${sev==='moderate'?'active':''}" onclick="setSev('${jk}','moderate')">Moderate</button><button class="sev-btn sev-severe ${sev==='severe'?'active':''}" onclick="setSev('${jk}','severe')">Severe</button></span> degenerative change of the ${side.toLowerCase()} hip with joint space narrowing, osteophytes, subchondral sclerosis.</div><div class="fl"><b>IMPRESSION:</b></div><div class="fl fl-indent">1. <b>${(sev||'___').charAt(0).toUpperCase()+(sev||'___').slice(1)}</b> OA of the ${side.toLowerCase()} hip. ${icd(side.toLowerCase()+'_hip_oa')}</div><div class="fl fl-indent">2. No acute osseous abnormality.</div>`;}
+
+// ═══════ OP NARRATIVE ═══════
+function genTKANarrative(d,o){const oe=OEM[d.oem]||OEM["Zimmer Biomet"];return`The patient was identified in the preoperative area. The operative extremity was confirmed and marked. The patient was brought to the operating room and placed supine on the operative table. ${d.anes} anesthesia was administered. A ${d.tourn==='Yes'?'tourniquet was applied to the proximal thigh and inflated':'tourniquet was not used'}. The ${d.side.toLowerCase()} lower extremity was prepped and draped in the usual sterile fashion.\n\nA ${d.arth.toLowerCase()} arthrotomy was performed. Inspection of the knee revealed ${d.find.toLowerCase()}. The tibial and femoral cuts were performed using ${d.guid.toLowerCase()} guidance. The distal femoral cut was ${d.dfc}mm and the proximal tibial cut was ${d.ptc}mm. The PCL was ${d.pcl.toLowerCase()}.\n\nTrial components were placed and the knee was taken through a range of motion and assessed for stability. Balance was achieved in flexion and extension.\n\nThe ${oe.knee.sys} components were implanted: Femur size ${d.fs} ${d.ft}, Tibia size ${d.ts}, Poly ${d.ps}mm ${d.pt2}${d.pas!=='None'?`, Patella ${d.pas}mm`:' (patella not resurfaced)'}. Fixation: ${d.impFix||d.fix}.\n\nThe wound was irrigated with ${d.irr.toLowerCase()}. The arthrotomy, subcutaneous tissue, and skin were closed in layered fashion. ${d.dress} dressing was applied. The patient tolerated the procedure well without complication and was transferred to the recovery area in stable condition.`;}
+
+function genTHANarrative(d,o){const oe=OEM[d.oem]||OEM["Zimmer Biomet"];return`The patient was identified in the preoperative area. The operative extremity was confirmed and marked. The patient was brought to the operating room and placed supine on the operative table. ${d.anes} anesthesia was administered. The ${d.side.toLowerCase()} lower extremity was prepped and draped in the usual sterile fashion.\n\nA ${d.app.toLowerCase()} approach was utilized with a ${d.inc.toLowerCase()} incision. The capsule was ${d.cap.toLowerCase()}. The femoral head was dislocated and the femoral neck osteotomy was performed.\n\nThe acetabulum was prepared with sequential reaming ${d.ream}. ${d.flu==='Yes'?'Fluoroscopy was used to confirm component positioning.':''} The ${oe.hip.sys} components were implanted: Shell size ${d.sh}, Liner ${d.lin}mm, Stem size ${d.st}, Neck ${d.neck}, Head ${d.hd}mm. ${d.scr!=='No'?`${d.scr} acetabular screw(s) placed.`:'No supplemental screws.'} Fixation: ${d.impFix||'Cemented'}.\n\nTrial reduction was performed assessing stability, leg length, and offset. Final components were implanted and reduction confirmed stable.\n\nThe wound was irrigated with ${d.irr.toLowerCase()}. The capsule, fascia, subcutaneous tissue, and skin were closed in layered fashion. ${d.dress} dressing was applied. The patient tolerated the procedure well without complication and was transferred to the recovery area in stable condition.`;}
+
+function opT(l,k,opts,cur){return`<div class="of"><div class="of-l">${l}</div><div class="of-v">${opts.map(o=>`<button class="tb ${cur===o?'active':''}" onclick="uOp('${k}','${o}')">${o}</button>`).join('')}</div></div>`;}
+function opS(l,k,sizes,cur){return`<div class="of"><div class="of-l">${l}</div><div class="of-v">${sizes.map(s=>`<button class="tb ${String(cur)===String(s)?'active':''}" onclick="uOp('${k}','${s}')" style="min-width:26px;text-align:center;">${s}</button>`).join('')}</div></div>`;}
+
+// ═══════ RENDER NEW EXAM ═══════
+function renderNew(p){const i=p.intake,cardiac=i.pmh?.some(c=>CARDIAC.includes(c)),mr=medTbl(i.meds,false);const cc=p.joints.map(j=>`${j.side} ${j.type==='knee'?'Knee':'Hip'} pain`).join(', ');let h='';
+  h+=sec('DEMOGRAPHICS',`<div class="fl"><span class="fl-label">Patient: </span><span class="fl-blue">${esc(p.last)}, ${esc(p.first)}</span> &nbsp; <span class="fl-label">DOB: </span>${esc(p.dob)} &nbsp; <span class="fl-label">Age: </span>${p.age} &nbsp; <span class="fl-label">MRN: </span>${esc(p.mrn)}</div><div class="fl"><span class="fl-label">Insurance: </span>${esc(p.ins)} &nbsp; <span class="fl-label">Surgeon: </span>${esc(p.surgeon)} &nbsp; <span class="fl-label">DOS: </span>${dosStr}</div><div class="fl"><span class="fl-label">Vitals: </span>Ht ${esc(i.ht)} / Wt ${esc(i.wt)} / BMI ${esc(i.bmi)} kg/m²</div><div class="fl"><span class="fl-label">Caregiver: </span>${esc(i.cg_rel||'')} — <span class="fl-blue">${esc(i.cg_name||'')}</span> &nbsp; ${esc(i.cg_phone||'')}</div>`);
+
+  h+=sec('CHIEF COMPLAINT',`<div class="fl" style="font-size:14px;font-weight:600;color:var(--blueL);">${esc(cc)}</div>`,'brd');
+
+  let hpiH='';p.joints.forEach((j,ji)=>{const jd=p.jd[j.key];if(!jd)return;const isK=j.type==='knee',lb=`${j.side} ${isK?'Knee':'Hip'}`;if(p.joints.length>1)hpiH+=`<div style="font-weight:700;font-size:12px;color:${isK?'var(--blueL)':'var(--purpleL)'};margin-top:${ji?'8':'0'}px;">${lb}</div>`;hpiH+=`<textarea class="ed" rows="3" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';">${esc(`${p.first} ${p.last} is a ${p.age}-year-old presenting with ${lb.toLowerCase()} pain of ${jd.pd} duration. Pain ${jd.pl}/10, worst ${jd.pw}/10. ${jd.hpi}`)}</textarea>`;if(jd.pt)hpiH+=`<div class="fl"><span class="fl-label">Prior Tx: </span><input class="ed" value="${esc(jd.pt.join(', '))}" style="width:100%;"></div>`;if(jd.fl)hpiH+=`<div class="fl"><span class="fl-label">Limitations: </span><input class="ed" value="${esc(jd.fl.join(', '))}" style="width:100%;"></div>`;});
+  hpiH+=`<div class="fl"><span class="fl-label">Goals: </span><input class="ed" value="${esc(i.goals?.join(', ')||'')}" style="width:100%;"></div>`;
+  h+=sec('HPI',hpiH,'brd');
+
+  let mhH='';
+  if(!i.pmhD?.length)mhH+=`<div class="fl fl-indent" style="color:var(--t4);">None reported</div>`;
+  (i.pmhD||[]).forEach((c,ci)=>{mhH+=itemRow(`${esc(c)} ${icd(i.pmh[ci])}${CARDIAC.includes(i.pmh[ci])?` <span class="ca">⚠ CARDIAC</span>`:''}`,`alert('Removed: ${esc(c)}')`);});
+  if(i.hba1c)mhH+=`<div class="fl fl-indent">HbA1c: <span class="fl-blue">${i.hba1c}%</span></div>`;
+  mhH+=`<button class="add-btn" onclick="prompt('Add diagnosis:')">+ Add Diagnosis</button><div class="spacer"></div>`;
+  mhH+=`<div class="fl"><span class="fl-label">Surgical Hx: </span><input class="ed" value="${esc(i.psh||'None')}" style="width:100%;"></div>`;
+  mhH+=`<div class="fl"><span class="fl-label">Allergies:</span></div>`;
+  (i.allergy||[]).forEach(a=>{mhH+=itemRow(`<span class="fl-indent">${esc(a)}</span>`,`alert('Removed')`);});
+  mhH+=`<button class="add-btn" onclick="prompt('Add allergy:')">+ Add Allergy</button>`;
+  h+=sec('MEDICAL HISTORY',mhH,'brd');
+
+  let medH='';i.meds.forEach(m=>{medH+=itemRow(`<span class="fl-indent" style="font-size:12px;color:var(--t3);">${esc(m)}</span>`,`alert('Removed')`);});
+  medH+=`<button class="add-btn" onclick="prompt('Add medication:')">+ Add Medication</button>`;
+  h+=sec('MEDICATIONS',medH,'brd');
+
+  let rosH='';if(i.ros){Object.entries(i.ros).forEach(([k,v])=>{rosH+=itemRow(`<span class="fl-indent"><span style="font-weight:600;font-size:10px;color:var(--t4);text-transform:uppercase;">${k}: </span><input class="ed" value="${esc(v)}" style="width:60%;display:inline;"></span>`,`alert('Removed')`);});}
+  rosH+=`<button class="add-btn" onclick="prompt('Add ROS:')">+ Add System</button>`;
+  h+=sec('REVIEW OF SYSTEMS',rosH,'brd','',true,S.rosOpen);
+
+  // PE
+  let peH=`<div class="fl"><span class="fl-label">General:</span></div><textarea class="ed" rows="2" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';">Awake, alert, NAD. RRR no murmurs. CTA bilat. Abdomen soft. Sensation intact. DP pulses 2+ bilat.</textarea><div class="spacer"></div>`;
+  p.joints.forEach(j=>{const jd=p.jd[j.key];if(!jd)return;const isK=j.type==='knee',lb=`${j.side} ${isK?'Knee':'Hip'}`;
+    peH+=`<div style="font-weight:700;font-size:12px;color:${isK?'var(--blueL)':'var(--purpleL)'};">${lb}</div>`;
+    if(isK){const e=jd.exam;
+      peH+=`<div class="fl fl-indent"><span class="fl-label">Inspection: </span><input class="ed" value="${esc(e.inspect)}" style="width:100%;"></div>`;
+      peH+=`<div class="fl fl-indent" style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;">`;
+      peH+=romBox('Ext',e.ext,'ext_'+j.key)+romBox('Flex',e.flex,'flex_'+j.key);
+      peH+=`<span class="rom-box"><span class="rom-label">Align</span><select class="rom-input" style="width:auto;font-size:11px;background:var(--card2);color:var(--blueL);border:none;"><option ${e.align==='Varus'?'selected':''}>Varus</option><option ${e.align==='Valgus'?'selected':''}>Valgus</option><option ${e.align==='Neutral'?'selected':''}>Neutral</option></select></span></div>`;
+      peH+=`<div class="fl fl-indent"><span class="fl-label">Stability: </span><input class="ed" value="${esc(e.stab)}" style="width:100%;"></div>`;
+      peH+=`<div class="fl fl-indent"><span class="fl-label">Strength: </span>Quads <input class="ed" value="${esc(e.qstr)}" style="width:40px;display:inline;"> Hams <input class="ed" value="${esc(e.hstr)}" style="width:40px;display:inline;"></div>`;
+    } else {const e=jd.exam;
+      if(e.wound){peH+=`<textarea class="ed" rows="4" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';">Wound: ${e.wound}\nROM: ${e.rom}\nGait: ${e.gait}\nStrength: ${e.str}\nNV: ${e.nv}\nDVT: ${e.dvt}</textarea>`;}
+      else{peH+=`<div class="fl fl-indent"><span class="fl-label">Inspection: </span><input class="ed" value="${esc(e.inspect)}" style="width:100%;"></div>`;
+        peH+=`<div class="fl fl-indent" style="display:flex;flex-wrap:wrap;gap:3px;">`;
+        peH+=romBox('Flex',e.flex,'flex_'+j.key)+romBox('Abd',e.abd,'abd_'+j.key)+romBox('Add',e.add,'add_'+j.key)+romBox('ER',e.er,'er_'+j.key)+romBox('IR',e.ir,'ir_'+j.key)+`</div>`;
+        peH+=`<div class="fl fl-indent"><span class="fl-label">Strength: </span>Flex <input class="ed" value="${esc(e.fstr)}" style="width:40px;display:inline;"> Add <input class="ed" value="${esc(e.astr)}" style="width:40px;display:inline;"></div>`;}}
+    peH+=`<div class="spacer"></div>`;});
+  h+=sec('PHYSICAL EXAMINATION',peH,'brd');
+
+  // RADIOGRAPHS
+  let radH='';p.joints.forEach(j=>{const jd=p.jd[j.key];if(!jd)return;const isK=j.type==='knee',lb=`${j.side} ${isK?'Knee':'Hip'}`;if(p.joints.length>1)radH+=`<div style="font-weight:700;font-size:12px;color:${isK?'var(--blueL)':'var(--purpleL)'};">${lb}</div>`;radH+=(isK?radKnee:radHip)(j.side,S.sevs[j.key],j.impl,j.key)+`<div class="spacer"></div>`;});
+  h+=sec('RADIOGRAPHIC FINDINGS',radH,'brd');
+
+  // ASSESSMENT & PLAN
+  let apH=`<div class="fl" style="font-weight:700;font-size:14px;">Assessment</div><div class="spacer"></div>`;let dx=1;
+  p.joints.forEach(j=>{const sev=S.sevs[j.key]||'moderate';const isK=j.type==='knee';apH+=itemRow(`${dx++}. ${sev.charAt(0).toUpperCase()+sev.slice(1)} OA, ${j.side.toLowerCase()} ${isK?'knee':'hip'} ${icd(j.side.toLowerCase()+'_'+(isK?'knee':'hip')+'_oa')}`,`alert('Removed')`);});
+  apH+=`<div class="fl fl-indent" style="color:var(--t4);">${dx++}. Pre-operative exam ${icd('preop')}</div>`;
+  (i.pmh||[]).forEach((c,ci)=>{apH+=itemRow(`${dx++}. ${esc(i.pmhD[ci])} ${icd(c)}`,`alert('Removed')`);});
+  apH+=`<button class="add-btn" onclick="prompt('Add Dx:')">+ Add Diagnosis</button><div class="spacer"></div>`;
+
+  apH+=`<div class="fl" style="font-weight:700;font-size:14px;">Plan</div><div class="spacer"></div>`;
+  p.joints.forEach(j=>{const isK=j.type==='knee',lb=`${j.side} ${isK?'Knee':'Hip'}`,plan=S.plans[j.key]||'replacement',ptType=S.ptT[j.key]||'Virtual',fuWk=S.fuW[j.key]||'6';
+    if(p.joints.length>1)apH+=`<div style="font-weight:700;font-size:12px;color:${isK?'var(--blueL)':'var(--purpleL)'};">${lb}</div>`;
+    apH+=`<div style="display:flex;gap:4px;flex-wrap:wrap;margin:4px 0;"><button class="tb ${plan==='replacement'?'active':''}" onclick="setPlan('${j.key}','replacement')">${isK?'TKA':'THA'} ${cpb(isK?CPT.tka:CPT.tha)}</button><button class="tb ${plan==='revision'?'active':''}" onclick="setPlan('${j.key}','revision')">Revision ${cpb(isK?CPT.rev_tka:CPT.rev_tha)}</button><button class="tb ${plan==='conservative'?'active':''}" onclick="setPlan('${j.key}','conservative')">Conservative ${cpb(CPT.cons)}</button></div>`;
+    if(plan!=='conservative'){
+      apH+=`<div class="fl fl-indent">1. Disposition: Home same day — <span class="fl-blue">${esc(i.cg_rel)} ${esc(i.cg_name)}</span></div>`;
+      apH+=`<div class="fl fl-indent">2. DVT: ASA 81mg BID × 6 weeks.</div>`;
+      apH+=`<div class="fl fl-indent">3. Pain: Multimodal — Tylenol, oxycodone, ibuprofen, Lyrica, cefdinir, Protonix.</div>`;
+      apH+=`<div class="fl fl-indent">4. PT: <span style="display:inline-flex;gap:3px;">${['Virtual','Home','Outpatient'].map(o=>`<button class="tb ${ptType===o?'active':''}" onclick="setPT('${j.key}','${o}')" style="font-size:10px;padding:2px 7px;">${o}</button>`).join('')}</span></div>`;
+      apH+=`<div class="fl fl-indent">5. Post-op in <span class="rom-box" style="display:inline-flex;"><input class="rom-input" value="${fuWk}" style="width:22px;" onchange="setFU('${j.key}',this.value)"><span class="rom-unit">wks</span></span></div>`;
+      apH+=`<div class="fl fl-indent">6. Goal: <span class="fl-blue">${esc(i.goals?.[0]||'Walk without pain')}</span></div>`;
+      apH+=`<div class="fl fl-indent">7. Pre-op education.</div>`;
+    } else {apH+=`<div class="fl fl-indent">1. Continue conservative management.</div><div class="fl fl-indent">2. PT: <span style="display:inline-flex;gap:3px;">${['Virtual','Home','Outpatient'].map(o=>`<button class="tb ${ptType===o?'active':''}" onclick="setPT('${j.key}','${o}')" style="font-size:10px;padding:2px 7px;">${o}</button>`).join('')}</span></div><div class="fl fl-indent">3. Follow-up in <span class="rom-box" style="display:inline-flex;"><input class="rom-input" value="${fuWk}" style="width:22px;" onchange="setFU('${j.key}',this.value)"><span class="rom-unit">wks</span></span></div>`;}
+    apH+=`<div class="spacer"></div>`;});
+  apH+=`<button class="add-btn" onclick="prompt('Add plan item:')">+ Add Plan Item</button>`;
+  h+=sec('ASSESSMENT & PLAN',apH,'brd');
+
+  h+=sec('PERIOPERATIVE MEDICATION PLAN',mr.html,'brd');
+
+  // CLEARANCES
+  let clH=`<div class="fl"><span class="fl-label">Specialty Clearances:</span></div><div class="clr-grid">`;
+  CLR_SPECIALTIES.forEach(c=>{const on=S.clrs[c];clH+=`<button class="clr-btn ${on?'active':''}" onclick="togClr('${c}')">${on?'✓ ':''}${c}</button>`;});
+  clH+=`</div>`;
+  const acMeds=mr.cl.filter(m=>m.cc);if(acMeds.length)clH+=`<div class="spacer"></div><div class="fl"><span class="fl-label">Medication-Specific:</span></div>`;
+  acMeds.forEach(m=>{clH+=`<div class="ol"><span class="ol-w">⚠</span> Coordinate ${esc(m.inp)} hold/bridge</div>`;});
+  if(mr.g1)clH+=`<div class="ol"><span class="ol-w">⚠</span> GLP-1 RA: hold per protocol + liquid diet 24hr</div>`;
+  if(mr.sg)clH+=`<div class="ol"><span class="ol-w">⚠</span> SGLT2: discontinued ≥3-4 days prior</div>`;
+  clH+=`<button class="add-btn" onclick="prompt('Add clearance:')">+ Add Clearance</button>`;
+  h+=sec('CLEARANCES',clH,'brd');
+
+  // LABS
+  let labH=`<div class="fl"><span class="fl-label">Pre-Op Labs:</span></div>`;
+  LABS_DEFAULT.forEach(l=>{labH+=itemRow(`<span class="fl-indent">${l}</span>`,`alert('Removed')`);});
+  if(i.pmh?.includes('diabetes'))labH+=itemRow(`<span class="fl-indent">HbA1c (diabetic)</span>`,`alert('Removed')`);
+  labH+=`<button class="add-btn" onclick="prompt('Add lab:')">+ Add Lab</button>`;
+  labH+=`<div class="spacer"></div><div class="fl"><span class="fl-label">Additional:</span></div>`;
+  labH+=itemRow(`<span class="fl-indent">MRSA nasal screen</span>`,`alert('Removed')`);
+  labH+=itemRow(`<span class="fl-indent">CHG wash × 3 days</span>`,`alert('Removed')`);
+  labH+=itemRow(`<span class="fl-indent">Pre-op education class</span>`,`alert('Removed')`);
+  h+=sec('LABS & PRE-OP ORDERS',labH,'brd');
+
+  // DOS
+  let dos=["NPO after midnight","Arrive 2hr prior","Spinal + regional block","Ancef 2g IV within 60min","TXA 1g IV + 1g topical","SCDs bilateral","Foley per anesthesia","WBAT postop","PT eval POD#0","DVT: ASA 81mg BID × 6wk","Pain: Tylenol, Ibuprofen, Lyrica, Oxycodone PRN, Cefdinir, Protonix","Ice/elevation","DC: pain controlled, ambulating, voiding"];
+  if(i.allergy?.some(a=>a.toLowerCase().includes('penicillin')))dos[3]="Clindamycin 900mg IV (PCN ALLERGY)";
+  if(mr.g1)dos.splice(1,0,"⚠ VERIFY GLP-1 held + liquid diet 24hr");
+  if(cardiac)dos.push("⚠ VERIFY cardiac clearance on file");
+  h+=sec('DAY-OF-SURGERY ORDERS (ASC)',dos.map(o=>{const w=o.startsWith("⚠");return`<div class="ol">${w?'<span class="ol-w">⚠</span>':'<span class="ol-ok">✓</span>'} ${esc(o.replace("⚠ ",""))}</div>`;}).join(''),'brd');
+  return h;}
+
+// POST OP
+function renderPostOp(p){const i=p.intake,mr=medTbl(i.meds,true);let h='';
+  h+=sec('DEMOGRAPHICS',`<div class="fl"><span class="fl-label">Patient: </span><span class="fl-blue">${esc(p.last)}, ${esc(p.first)}</span> &nbsp; DOB: ${esc(p.dob)} &nbsp; Age: ${p.age} &nbsp; MRN: ${esc(p.mrn)} &nbsp; DOS: ${dosStr}</div><div class="fl"><span class="fl-label">Caregiver: </span>${esc(i.cg_rel||'')} — <span class="fl-blue">${esc(i.cg_name||'')}</span> ${esc(i.cg_phone||'')}</div>`);
+  const cc=p.joints.map(j=>`S/P ${j.side} ${j.type==='knee'?'TKA':'THA'}`).join(', ');
+  h+=sec('CHIEF COMPLAINT',`<div class="fl" style="font-weight:600;color:var(--blueL);">${esc(cc)}</div>`,'brd');
+  let hpi='';p.joints.forEach(j=>{const jd=p.jd[j.key];if(jd)hpi+=`<textarea class="ed" rows="2" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';">${esc(jd.hpi)}</textarea>`;});
+  h+=sec('SUBJECTIVE',hpi,'brd');
+  let pe='';p.joints.forEach(j=>{const jd=p.jd[j.key];if(!jd)return;const e=jd.exam;pe+=`<textarea class="ed" rows="4" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';">Wound: ${e.wound||''}\nROM: ${e.rom||''}\nGait: ${e.gait||''}\nStrength: ${e.str||''}\nNV: ${e.nv||''}\nDVT: ${e.dvt||''}</textarea>`;});
+  h+=sec('PHYSICAL EXAMINATION',pe,'brd');
+  let rad='';p.joints.forEach(j=>{rad+=(j.type==='knee'?radKnee:radHip)(j.side,null,j.impl,j.key);});
+  h+=sec('RADIOGRAPHIC FINDINGS',rad,'brd');
+  const ptType=S.ptT[p.joints[0]?.key]||'Virtual',fuWk=S.fuW[p.joints[0]?.key]||'6';
+  h+=sec('ASSESSMENT & PLAN',`<div class="fl" style="font-weight:700;">Impression:</div>${p.joints.map(j=>`<div class="fl fl-indent">S/P ${j.side.toLowerCase()} total ${j.type==='knee'?'knee':'hip'} arthroplasty — progressing well.</div>`).join('')}<div class="spacer"></div><div class="fl" style="font-weight:700;">Plan:</div><div class="fl fl-indent">1. Wound: Staples removed. Steri-strips. Shower 48hr.</div><div class="fl fl-indent">2. WBAT. Walker → cane.</div><div class="fl fl-indent">3. DVT: ASA 81mg BID through 6wk.</div><div class="fl fl-indent">4. Pain: Tylenol PRN. Ice.</div><div class="fl fl-indent">5. PT: <span style="display:inline-flex;gap:3px;">${['Virtual','Home','Outpatient'].map(o=>`<button class="tb ${ptType===o?'active':''}" onclick="setPT('${p.joints[0]?.key}','${o}')" style="font-size:10px;padding:2px 7px;">${o}</button>`).join('')}</span></div><div class="fl fl-indent">6. Follow-up: <span class="rom-box" style="display:inline-flex;"><input class="rom-input" value="${fuWk}" style="width:22px;" onchange="setFU('${p.joints[0]?.key}',this.value)"><span class="rom-unit">wks</span></span> with X-rays.</div>`,'brd');
+  h+=sec('MEDICATIONS',mr.html,'brd');
+  return h;}
+
+// OP REPORTS
+function renderOpTKA(p){const d=S.op;if(!d)return'';const oe=OEM[d.oem]||OEM["Zimmer Biomet"];let h='';
+  let s1='';s1+=opT("Side","side",["Right","Left"],d.side);
+  s1+=`<div class="of"><div class="of-l">PRE-OP DX</div><div class="of-v">Knee OA ${icd(d.side.toLowerCase()+'_knee_oa')}</div></div>`;
+  s1+=`<div class="of"><div class="of-l">PROCEDURE</div><div class="of-v">TKA ${cpb(CPT.tka)}</div></div>`;
+  s1+=`<div class="of"><div class="of-l">ASSISTANTS</div><div class="of-v" style="flex-direction:column;gap:2px;">${d.assists.map((a,i)=>`<div class="item-row"><span>${esc(a)}</span><button class="del-btn" onclick="rmAssist(${i})">✕</button></div>`).join('')}<button class="add-btn" onclick="addAssist()">+ Add</button></div></div>`;
+  s1+=opT("Anesthesia","anes",["Spinal","General"],d.anes);s1+=opT("Tourniquet","tourn",["No","Yes"],d.tourn);s1+=opT("EBL","ebl",["See Nursing Record"],d.ebl);s1+=opT("Drains","drain",["None"],d.drain);s1+=opT("Specimens","spec",["None"],d.spec);s1+=opT("Complications","comp",["None"],d.comp);
+  h+=sec('OPERATIVE REPORT — TKA',s1,'brd');
+
+  let s2=`<div class="of"><div class="of-l">OEM</div><div class="of-v">${Object.keys(OEM).map(o=>`<button class="tb ${d.oem===o?'active':''}" onclick="uOp('oem','${o}')">${o}</button>`).join('')}</div></div>`;
+  s2+=`<div class="of"><div class="of-l">SYSTEM</div><div class="of-v" style="color:var(--blueL);font-weight:600;">${oe.knee.sys}</div></div>`;
+  s2+=opS("Femur","fs",oe.knee.fem,d.fs);s2+=opT("Type","ft",oe.knee.femT,d.ft);s2+=opS("Tibia","ts",oe.knee.tib,d.ts);s2+=opS("Poly","ps",oe.knee.poly,d.ps);s2+=opT("Poly Type","pt2",oe.knee.polyT,d.pt2);s2+=opS("Patella","pas",oe.knee.pat,d.pas);s2+=opT("PIQ","piq",["Yes","No"],d.piq);
+  s2+=opT("Fixation","impFix",["Cemented","Press-fit","Hybrid"],d.impFix||"Cemented");
+  h+=sec(`IMPLANTS — ${d.oem.toUpperCase()}`,s2,'brd');
+
+  let s3='';s3+=opT("Guidance","guid",["Manual","Robot","Navigation"],d.guid);s3+=opT("Arthrotomy","arth",["Medial Parapatellar","Mid-vastus","Sub-vastus"],d.arth);s3+=opT("PCL","pcl",["Intact","Excised","Titrated"],d.pcl);s3+=opS("Dist Fem","dfc",["2","3","4","5","6","7","8","9","10","11","12"],d.dfc);s3+=opS("Prox Tib","ptc",["0","1","2","3","4","5","6","7","8"],d.ptc);s3+=opS("Lat DF","ldf",["6","7","8","9"],d.ldf);s3+=opS("Med DF","mdf",["6","7","8","9"],d.mdf);s3+=opS("Lat PF","lpf",["6","7","8","9","10"],d.lpf);s3+=opS("Med PF","mpf",["6","7","8","9","10"],d.mpf);s3+=opT("Med Release","mr",["None","Superficial MCL","Deep MCL"],d.mr);s3+=opT("Lat Release","lr",["None","PLC","LCL","ITB"],d.lr);s3+=opT("Patella Resurfaced","pres",["Yes","No"],d.pres);s3+=opT("Irrigation","irr",["Saline","Betadine"],d.irr);s3+=opT("Dressing","dress",["Aquacel"],d.dress);
+  h+=sec('TECHNIQUE',s3,'brd');
+
+  h+=sec('OPERATIVE NOTE',`<div class="op-para">${esc(genTKANarrative(d,oe))}</div>`,'brd');
+  return h;}
+
+function renderOpTHA(p){const d=S.op;if(!d)return'';const oe=OEM[d.oem]||OEM["Zimmer Biomet"];let h='';
+  let s1='';s1+=opT("Side","side",["Right","Left"],d.side);s1+=opT("Pre-op Dx","find",["Hip arthritis","AVN"],d.find);
+  s1+=`<div class="of"><div class="of-l">PROCEDURE</div><div class="of-v">THA ${cpb(CPT.tha)}</div></div>`;
+  s1+=`<div class="of"><div class="of-l">ASSISTANTS</div><div class="of-v" style="flex-direction:column;gap:2px;">${d.assists.map((a,i)=>`<div class="item-row"><span>${esc(a)}</span><button class="del-btn" onclick="rmAssist(${i})">✕</button></div>`).join('')}<button class="add-btn" onclick="addAssist()">+ Add</button></div></div>`;
+  s1+=opT("Anesthesia","anes",["Spinal","General"],d.anes);s1+=opT("EBL","ebl",["See Nursing Record"],d.ebl);s1+=opT("Drains","drain",["None"],d.drain);s1+=opT("Specimens","spec",["None"],d.spec);s1+=opT("Complications","comp",["None"],d.comp);
+  h+=sec('OPERATIVE REPORT — THA',s1,'brd');
+
+  let s2=`<div class="of"><div class="of-l">OEM</div><div class="of-v">${Object.keys(OEM).map(o=>`<button class="tb ${d.oem===o?'active':''}" onclick="uOp('oem','${o}')">${o}</button>`).join('')}</div></div>`;
+  s2+=`<div class="of"><div class="of-l">SYSTEM</div><div class="of-v" style="color:var(--blueL);font-weight:600;">${oe.hip.sys}</div></div>`;
+  s2+=opS("Shell","sh",oe.hip.shell,d.sh);s2+=opS("Liner","lin",oe.hip.liner,d.lin);s2+=opS("Stem","st",oe.hip.stem,d.st);s2+=opT("Neck","neck",oe.hip.neck,d.neck);s2+=opS("Head","hd",oe.hip.head,d.hd);
+  s2+=opT("Fixation","impFix",["Cemented","Press-fit","Hybrid"],d.impFix||"Cemented");
+  h+=sec(`IMPLANTS — ${d.oem.toUpperCase()}`,s2,'brd');
+
+  let s3='';s3+=opT("Approach","app",["Anterior","Posterior","Anterolateral"],d.app);s3+=opT("Incision","inc",["Horizontal","Vertical"],d.inc);s3+=opT("Capsule","cap",["Incised","Excised"],d.cap);s3+=opT("Reaming","ream",["1mm under","Line to Line"],d.ream);s3+=opT("Fluoro","flu",["Yes","No"],d.flu);s3+=opT("Screws","scr",["No","1","2"],d.scr);s3+=opT("Fem Release","fr",["No","Conjoined","Piriformis"],d.fr);s3+=opT("Irrigation","irr",["Saline","Betadine"],d.irr);s3+=opT("Dressing","dress",["Tegaderm"],d.dress);
+  h+=sec('TECHNIQUE',s3,'brd');
+
+  h+=sec('OPERATIVE NOTE',`<div class="op-para">${esc(genTHANarrative(d,oe))}</div>`,'brd');
+  return h;}
+
+// ═══════ MAIN ═══════
+function render(){const p=S.p,vBg=p.vt==="new"?"#1e3a5f":p.vt.includes("op_")?"#312e81":"#1a2e1a",vC=p.vt==="new"?"#93c5fd":p.vt.includes("op_")?"#a5b4fc":"#86efac";
+  let noteH='';if(p.vt==='new')noteH=renderNew(p);else if(p.vt==='post_op')noteH=renderPostOp(p);else if(p.vt==='op_tka')noteH=renderOpTKA(p);else if(p.vt==='op_tha')noteH=renderOpTHA(p);
+
+  document.getElementById("app").innerHTML=`<div style="display:flex;height:100vh;overflow:hidden;">
+    <div style="width:${S.col?0:240}px;min-width:${S.col?0:240}px;background:#12161e;border-right:1px solid var(--border);display:flex;flex-direction:column;transition:all .2s;overflow:hidden;">
+      <div style="padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;"><div style="display:flex;align-items:center;gap:6px;"><div style="width:22px;height:22px;border-radius:4px;background:linear-gradient(135deg,#2563eb,#1d4ed8);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:8px;">TJ</div><span style="font-weight:700;font-size:12px;">Schedule</span></div><button onclick="ss({col:true})" style="background:none;border:none;color:var(--t4);cursor:pointer;font-size:12px;">✕</button></div>
+      <div style="flex:1;overflow:auto;padding:4px;">${P.map((pt,i)=>{const a=p.id===pt.id;const js=pt.joints.map(j=>`${j.side[0]} ${j.type==='knee'?'K':'H'}`).join('+');const b=pt.vt==="new"?"#1e3a5f":pt.vt.includes("op_")?"#312e81":"#1a2e1a";const c=pt.vt==="new"?"#93c5fd":pt.vt.includes("op_")?"#a5b4fc":"#86efac";
+        return`<button onclick="selP(P[${i}])" style="width:100%;padding:8px 10px;border-radius:6px;border:none;background:${a?'#1e2a40':'transparent'};cursor:pointer;text-align:left;margin-bottom:2px;font-family:inherit;"><div style="display:flex;justify-content:space-between;"><span style="font-weight:600;font-size:11px;color:${a?'var(--blueL)':'var(--t2)'};">${esc(pt.nm)}</span><span style="font-size:9px;color:var(--t4);">${pt.time}</span></div><div style="display:flex;gap:4px;align-items:center;margin-top:2px;"><span style="font-size:8px;font-weight:600;padding:1px 4px;border-radius:2px;background:${b};color:${c};">${VL[pt.vt]}</span><span style="font-size:9px;color:var(--t4);">${js}</span>${pt.flags.length?`<span style="font-size:8px;color:var(--yellow);">⚠${pt.flags.length}</span>`:''}</div></button>`;}).join('')}</div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+      <div style="padding:6px 12px;background:#12161e;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          ${S.col?`<button onclick="ss({col:false})" style="background:none;border:none;color:var(--t4);cursor:pointer;font-size:16px;">☰</button>`:''}
+          <span style="font-weight:700;font-size:14px;">${esc(p.nm)}</span><span style="font-size:11px;color:var(--t4);">${p.age}y • ${esc(p.mrn)}</span>
+          <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;background:${vBg};color:${vC};">${VL[p.vt]}</span>
+          ${p.joints.map(j=>{const k=j.type==='knee';return`<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;background:${k?'var(--blueD)':'var(--purpleD)'};color:${k?'var(--blueL)':'var(--purpleL)'};">${j.side} ${k?'Knee':'Hip'}</span>`;}).join('')}
+          ${p.flags.map(f=>`<span style="font-size:8px;font-weight:700;padding:2px 5px;border-radius:3px;background:#431407;color:var(--yellow);">⚠ ${esc(f.replace(/_/g,' '))}</span>`).join('')}
+        </div>
+        <div>${S.locked?`<div style="display:flex;gap:4px;"><span style="padding:5px 12px;border-radius:5px;background:#065f46;color:#6ee7b7;font-weight:700;font-size:11px;">✓ Signed</span><button onclick="ss({locked:false})" style="padding:5px 10px;border-radius:5px;border:1px solid #065f46;background:transparent;color:#34d399;font-size:10px;font-weight:600;cursor:pointer;">Unlock</button></div>`:`<button onclick="ss({locked:true})" style="padding:5px 16px;border-radius:5px;border:none;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;font-weight:700;font-size:11px;cursor:pointer;">Sign Note</button>`}</div>
+      </div>
+      <div style="flex:1;overflow:auto;padding:12px;-webkit-overflow-scrolling:touch;"><div style="max-width:820px;margin:0 auto;">${noteH}${S.locked?`<div style="margin-top:12px;padding:10px 14px;border-radius:8px;background:#0d2818;border:1px solid #065f46;"><div style="font-weight:700;font-size:13px;color:#6ee7b7;">✓ Electronically signed by ${esc(p.surgeon)}</div><div style="font-size:11px;color:#34d399;margin-top:2px;">${dosStr} • TJR Hub</div></div>`:''}</div></div>
+    </div>
+  </div>`;
+}
+render();
+</script>
+</body>
+</html>
