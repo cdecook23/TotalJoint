@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TJR Hub · Medication Library</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080808; --card: #0d0d0d; --card2: #111; --border: #1a1a1a; --border2: #222;
+    --text: #e0e0e0; --dim: #5a5a5a; --muted: #3a3a3a;
+    --green: #2a6b3f; --green-bg: rgba(42,107,63,0.10); --green-soft: #3a8b5f;
+    --yellow: #8a6d2b; --yellow-bg: rgba(138,109,43,0.08);
+    --red: #8b2d2d; --red-bg: rgba(139,45,45,0.08); --red-soft: #cf6b6b;
+    --blue: #3b6b8f; --blue-bg: rgba(59,107,143,0.10);
+    --purple: #6b4f8f; --purple-bg: rgba(107,79,143,0.08);
+    --orange: #8f6b3b; --orange-bg: rgba(143,107,59,0.10);
+    --mono: 'DM Mono', monospace; --sans: 'IBM Plex Sans', sans-serif;
+    --knee: #3b82f6; --hip: #a855f7;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; }
+  .shell { display: grid; grid-template-columns: 300px 1fr; grid-template-rows: auto 1fr; min-height: 100vh; }
+  .top-bar { grid-column: 1 / -1; padding: 16px 24px 12px; border-bottom: 1px solid #141414; display: flex; justify-content: space-between; align-items: flex-end; }
+  .sidebar { border-right: 1px solid var(--border); overflow-y: auto; }
+  .main { overflow-y: auto; padding: 20px 24px; }
+  .top-sub { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; font-family: var(--mono); margin-bottom: 3px; }
+  .top-title { font-size: 18px; font-weight: 700; }
+  .sb-label { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; font-family: var(--mono); padding: 12px 16px 8px; }
+  .pt-card { padding: 10px 16px; cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s; display: flex; align-items: center; gap: 10px; }
+  .pt-card:hover { background: rgba(255,255,255,0.02); }
+  .pt-card.active { background: rgba(255,255,255,0.03); border-left-color: var(--green); }
+  .pt-jbar { width: 3px; height: 36px; border-radius: 2px; flex-shrink: 0; }
+  .pt-name { font-size: 13px; font-weight: 600; }
+  .pt-detail { font-size: 10px; color: var(--dim); font-family: var(--mono); margin-top: 1px; }
+  .pt-stats { flex-shrink: 0; text-align: right; }
+  .pt-stat-num { font-size: 12px; font-family: var(--mono); font-weight: 700; }
+
+  /* ── Allergy Panel ── */
+  .allergy-panel { margin-bottom: 16px; border: 1px solid rgba(139,45,45,0.25); border-radius: 8px; overflow: hidden; }
+  .allergy-panel.nkda { border-color: rgba(42,107,63,0.25); }
+  .allergy-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; cursor: pointer; }
+  .allergy-header.has-allergy { background: rgba(139,45,45,0.08); }
+  .allergy-header.nkda-header { background: rgba(42,107,63,0.06); }
+  .allergy-title { font-size: 12px; font-weight: 700; font-family: var(--mono); display: flex; align-items: center; gap: 6px; }
+  .allergy-toggle { font-size: 10px; color: var(--dim); font-family: var(--mono); cursor: pointer; }
+  .allergy-body { display: none; padding: 0 14px 10px; }
+  .allergy-body.open { display: block; }
+  .allg-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .allg-table th { text-align: left; padding: 6px 8px; font-size: 10px; font-weight: 700; font-family: var(--mono); color: #6a6a6a; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+  .allg-table td { padding: 6px 8px; border-bottom: 1px solid #0e0e0e; vertical-align: middle; }
+  .allg-allergen { font-weight: 600; }
+  .allg-sev { font-size: 10px; padding: 2px 7px; border-radius: 6px; font-family: var(--mono); font-weight: 700; display: inline-block; }
+  .sev-severe { background: var(--red-bg); color: var(--red-soft); border: 1px solid rgba(139,45,45,0.2); }
+  .sev-moderate { background: var(--orange-bg); color: var(--orange); border: 1px solid rgba(143,107,59,0.2); }
+  .sev-mild { background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(138,109,43,0.2); }
+  .allg-xr-banner { margin-top: 8px; padding: 8px 10px; background: rgba(139,45,45,0.12); border: 1px solid rgba(139,45,45,0.3); border-radius: 6px; font-size: 11px; color: var(--red-soft); font-family: var(--mono); font-weight: 600; }
+  .allg-add-btn { font-size: 10px; padding: 4px 10px; border-radius: 5px; border: 1px solid rgba(139,45,45,0.25); background: transparent; color: #8a5a5a; font-family: var(--mono); cursor: pointer; font-weight: 600; }
+  .allg-add-btn:hover { background: var(--red-bg); }
+
+  /* Search */
+  .search-wrap { position: relative; margin-bottom: 16px; }
+  .search-input { width: 100%; padding: 10px 14px 10px 36px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; font-family: var(--sans); outline: none; }
+  .search-input:focus { border-color: #2a2a2a; }
+  .search-input::placeholder { color: var(--muted); }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; pointer-events: none; }
+  .search-results { position: absolute; top: 100%; left: 0; right: 0; background: #111; border: 1px solid var(--border2); border-radius: 0 0 8px 8px; z-index: 100; max-height: 360px; overflow-y: auto; display: none; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+  .search-results.open { display: block; }
+  .sr-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #1a1a1a; }
+  .sr-item:last-child { border-bottom: none; }
+  .sr-item:hover { background: rgba(255,255,255,0.04); }
+  .sr-name { font-size: 13px; font-weight: 600; }
+  .sr-name .match { color: var(--green-soft); text-decoration: underline; }
+  .sr-meta { font-size: 10px; color: var(--dim); font-family: var(--mono); margin-top: 2px; }
+  .sr-tag { font-size: 9px; padding: 1px 6px; border-radius: 8px; font-family: var(--mono); font-weight: 600; display: inline-block; margin-top: 3px; }
+  .sr-empty { padding: 16px; color: var(--dim); font-size: 12px; font-family: var(--mono); text-align: center; }
+
+  .sec-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); margin-top: 20px; }
+  .sec-header:first-child { margin-top: 0; }
+  .sec-title { font-size: 12px; font-weight: 700; color: #7a7a7a; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.06em; }
+  .sec-count { font-size: 10px; color: var(--dim); font-family: var(--mono); margin-left: auto; }
+
+  /* Med Table */
+  .med-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .med-table thead th { position: sticky; top: 0; z-index: 10; text-align: left; padding: 8px 8px; font-size: 9px; font-weight: 700; font-family: var(--mono); color: #6a6a6a; text-transform: uppercase; letter-spacing: 0.05em; background: var(--bg); border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .med-table thead th.ctr { text-align: center; }
+  .med-table tbody tr { transition: background 0.1s; }
+  .med-table tbody tr:hover { background: rgba(255,255,255,0.015); }
+  .med-table tbody td { padding: 8px 8px; border-bottom: 1px solid #0e0e0e; vertical-align: top; font-size: 12px; }
+  .med-table tbody td.ctr { text-align: center; vertical-align: middle; }
+  .mname { font-size: 13px; font-weight: 600; }
+  .mgen { font-size: 10px; color: #5a5a5a; font-family: var(--mono); margin-top: 1px; }
+  .mtags { display: flex; gap: 3px; margin-top: 4px; flex-wrap: wrap; }
+  .mtag { font-size: 8px; padding: 1px 5px; border-radius: 6px; font-family: var(--mono); font-weight: 700; border: 1px solid; }
+  .mtag-cls { background: var(--purple-bg); color: var(--purple); border-color: rgba(107,79,143,0.15); }
+  .mtag-rx { background: var(--blue-bg); color: var(--blue); border-color: rgba(59,107,143,0.15); }
+  .mtag-otc { background: var(--green-bg); color: var(--green); border-color: rgba(42,107,63,0.15); }
+  .mtag-herb { background: var(--orange-bg); color: var(--orange); border-color: rgba(143,107,59,0.15); }
+  .mtag-pt { background: rgba(255,255,255,0.03); color: var(--dim); border-color: var(--border); }
+  .msig { color: #8a8a8a; font-family: var(--mono); font-size: 11px; }
+  .mindication { font-size: 10px; color: #6a6a6a; font-style: italic; margin-top: 3px; }
+  .mprescriber { font-size: 9px; color: var(--muted); font-family: var(--mono); margin-top: 1px; }
+
+  .plan-select { padding: 3px 5px; background: #111; border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-family: var(--mono); font-size: 10px; outline: none; cursor: pointer; width: 100%; }
+  .plan-select:focus { border-color: var(--green); }
+  .plan-note { font-size: 9px; color: #5a5a5a; font-family: var(--mono); margin-top: 3px; line-height: 1.4; }
+
+  /* Last Dose */
+  .last-dose { margin-top: 4px; }
+  .last-dose-input { padding: 3px 5px; background: #0a0a0a; border: 1px solid rgba(143,107,59,0.3); border-radius: 4px; color: var(--orange); font-family: var(--mono); font-size: 10px; width: 100%; outline: none; }
+  .last-dose-input::placeholder { color: rgba(143,107,59,0.4); }
+  .last-dose-label { font-size: 8px; color: var(--orange); font-family: var(--mono); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+  .last-dose-confirmed { font-size: 10px; color: var(--orange); font-family: var(--mono); padding: 3px 6px; background: var(--orange-bg); border-radius: 4px; border: 1px solid rgba(143,107,59,0.2); display: inline-block; }
+
+  .confirm-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; transition: all 0.15s; color: var(--muted); }
+  .confirm-btn:hover { border-color: var(--green); background: var(--green-bg); color: var(--green); }
+  .confirm-btn.done { border-color: var(--green); background: var(--green-bg); color: var(--green); cursor: default; }
+  .confirm-time { font-size: 8px; color: var(--dim); font-family: var(--mono); margin-top: 2px; display: block; }
+
+  .bulk-btns { display: flex; gap: 10px; margin-top: 10px; justify-content: flex-end; }
+  .bulk-btn { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border2); background: transparent; font-family: var(--mono); font-size: 11px; cursor: pointer; font-weight: 600; }
+  .bulk-btn:hover { background: rgba(255,255,255,0.04); }
+
+  .surg-row { display: flex; align-items: center; gap: 14px; padding: 10px 14px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; border-left: 3px solid var(--blue); }
+  .surg-row.given { border-left-color: var(--green); }
+  .surg-name { font-size: 13px; font-weight: 600; }
+  .surg-sig { font-size: 11px; color: #7a7a7a; font-family: var(--mono); margin-top: 1px; }
+  .surg-tags { display: flex; gap: 4px; margin-top: 4px; }
+  .surg-tag { font-size: 9px; padding: 2px 7px; border-radius: 8px; font-family: var(--mono); font-weight: 600; }
+  .admin-btn { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border2); background: transparent; color: var(--dim); font-family: var(--mono); font-size: 11px; cursor: pointer; font-weight: 600; }
+  .admin-btn:hover { background: var(--blue-bg); color: var(--blue); border-color: rgba(59,107,143,0.3); }
+  .admin-btn.done { background: var(--green-bg); color: var(--green); border-color: rgba(42,107,63,0.2); cursor: default; }
+
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #111; border: 1px solid var(--border2); border-radius: 10px; padding: 20px 24px; width: 560px; max-width: 94vw; max-height: 90vh; overflow-y: auto; }
+  .modal h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .modal .msub2 { font-size: 11px; color: var(--dim); font-family: var(--mono); margin-bottom: 14px; }
+  .modal label { font-size: 10px; color: #7a7a7a; font-family: var(--mono); display: block; margin-bottom: 3px; font-weight: 600; }
+  .modal input, .modal select { width: 100%; padding: 7px 9px; background: #0d0d0d; border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: var(--mono); font-size: 12px; outline: none; margin-bottom: 8px; }
+  .modal .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .modal .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .modal .row4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+  .modal-btns { display: flex; gap: 8px; margin-top: 10px; }
+  .modal-btn { flex: 1; padding: 9px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--dim); font-family: var(--mono); font-size: 12px; cursor: pointer; font-weight: 600; text-align: center; }
+  .modal-btn.primary { background: var(--green-bg); color: var(--green); border-color: rgba(42,107,63,0.3); }
+  .modal-btn.primary:hover { background: rgba(42,107,63,0.2); }
+  .modal-btn:hover { background: rgba(255,255,255,0.04); }
+  .modal-section { font-size: 10px; font-weight: 700; color: #5a5a5a; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.06em; margin: 10px 0 6px; padding-top: 8px; border-top: 1px solid var(--border); }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="top-bar">
+    <div>
+      <div class="top-sub">TJR HUB · MEDICATION LIBRARY</div>
+      <div class="top-title">Unified Medication Management</div>
+    </div>
+    <div style="font-size:11px;color:var(--dim);font-family:var(--mono)">
+      <span style="color:var(--green)">●</span> RxNorm Linked · <span id="dbCount">0</span> in formulary
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="sb-label">Surgery Day Patients</div>
+    <div id="ptList"></div>
+    <div style="padding:14px 16px;border-top:1px solid var(--border);margin-top:12px">
+      <div class="sb-label" style="padding:0 0 8px">Source Types</div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <div style="display:flex;align-items:center;gap:6px"><span class="mtag mtag-rx" style="font-size:8px">Rx</span><span style="font-size:10px;color:var(--dim);font-family:var(--mono)">Prescription</span></div>
+        <div style="display:flex;align-items:center;gap:6px"><span class="mtag mtag-otc" style="font-size:8px">OTC</span><span style="font-size:10px;color:var(--dim);font-family:var(--mono)">Over-the-Counter</span></div>
+        <div style="display:flex;align-items:center;gap:6px"><span class="mtag mtag-herb" style="font-size:8px">HERB</span><span style="font-size:10px;color:var(--dim);font-family:var(--mono)">Herbal / Supplement</span></div>
+        <div style="display:flex;align-items:center;gap:6px"><span class="mtag mtag-pt" style="font-size:8px">PT-RPT</span><span style="font-size:10px;color:var(--dim);font-family:var(--mono)">Patient-Reported Only</span></div>
+      </div>
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+        <div class="sb-label" style="padding:0 0 6px">Dual Confirmation</div>
+        <div style="font-size:10px;color:#5a5a5a;font-family:var(--mono);line-height:1.5">
+          <strong style="color:#7a7a7a">PAC</strong> — plan reviewed pre-op<br>
+          <strong style="color:#7a7a7a">ASC</strong> — confirmed day-of<br>
+          Editing plan resets both.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div id="ptHeader"></div>
+    <div id="allergyView"></div>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input class="search-input" id="searchInput" type="text" placeholder="Add medication — type generic or brand name..." autocomplete="off">
+      <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <div id="medContent"></div>
+  </div>
+</div>
+
+<!-- Add Med Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <h3 id="modalTitle">Add Medication</h3>
+    <div class="msub2" id="modalSub"></div>
+
+    <div class="modal-section">Drug & Dosing</div>
+    <div class="row3">
+      <div><label>Strength</label><select id="addStr"></select></div>
+      <div><label>Frequency</label><select id="addFreq"><option>Daily</option><option>BID</option><option>TID</option><option>QID</option><option>QHS</option><option>PRN</option><option>Weekly</option></select></div>
+      <div><label>Route</label><select id="addRoute"><option>PO</option><option>IV</option><option>SQ</option><option>IM</option><option>Topical</option><option>Patch</option></select></div>
+    </div>
+    <div class="row3">
+      <div><label>Source Type</label><select id="addSrc"><option value="rx">Rx — Prescription</option><option value="otc">OTC</option><option value="herb">Herbal / Supplement</option><option value="pt-rpt">Patient-Reported</option></select></div>
+      <div><label>Indication (what for?)</label><input type="text" id="addInd" placeholder="e.g. Hypertension, AFib..."></div>
+      <div><label>Prescriber</label><input type="text" id="addPres" placeholder="e.g. Dr. Smith (PCP)"></div>
+    </div>
+
+    <div class="modal-section">Perioperative Plan</div>
+    <div class="row3">
+      <div><label>Pre-Op Plan</label><select id="addPP"><option value="continue">Continue</option><option value="hold">Hold</option><option value="discontinue">Discontinue</option></select></div>
+      <div><label>Hold Days</label><select id="addHD"><option value="0">N/A</option><option>1</option><option>3</option><option>5</option><option>7</option><option>10</option><option>14</option></select></div>
+      <div><label>Post-Op Resumption</label><select id="addPOP"><option value="resume_immediate">Resume immediately</option><option value="resume_pod1">Resume POD#1</option><option value="resume_delayed">Resume when cleared</option><option value="provider_decision">Per provider</option><option value="new_rx">New Rx post-op</option><option value="discontinue">Discontinue</option></select></div>
+    </div>
+    <div><label>Resumption Notes</label><input type="text" id="addPOPN" placeholder="e.g. Resume once tolerating PO"></div>
+
+    <div class="modal-btns">
+      <div class="modal-btn" onclick="closeModal()">Cancel</div>
+      <div class="modal-btn primary" onclick="confirmAdd()">Add Medication</div>
+    </div>
+  </div>
+</div>
+
+<!-- Allergy Modal -->
+<div class="modal-overlay" id="allgModal">
+  <div class="modal" style="width:440px">
+    <h3>Add Allergy</h3>
+    <div class="msub2">Record allergen with reaction details</div>
+    <div><label>Allergen</label><input type="text" id="allgName" placeholder="e.g. Penicillin, Latex, Iodine..."></div>
+    <div class="row2">
+      <div><label>Reaction Type</label><select id="allgReaction"><option>Anaphylaxis</option><option>Rash / Urticaria</option><option>Angioedema</option><option>GI Upset</option><option>Bronchospasm</option><option>Other / Unknown</option></select></div>
+      <div><label>Severity</label><select id="allgSev"><option value="severe">Severe</option><option value="moderate">Moderate</option><option value="mild">Mild</option></select></div>
+    </div>
+    <div class="row2">
+      <div><label>Source</label><select id="allgSource"><option>Patient-Reported</option><option>Chart-Documented</option><option>Observed in Facility</option><option>Outside Records</option></select></div>
+      <div><label>Year (if known)</label><input type="text" id="allgYear" placeholder="e.g. 2019"></div>
+    </div>
+    <div class="modal-btns">
+      <div class="modal-btn" onclick="closeAllgModal()">Cancel</div>
+      <div class="modal-btn primary" onclick="confirmAllg()" style="background:var(--red-bg);color:var(--red-soft);border-color:rgba(139,45,45,0.3)">Add Allergy</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ Formulary ═══
+const DB=[
+  {g:"apixaban",b:"Eliquis",s:["2.5mg","5mg"],c:"Anticoagulant",sc:"Factor Xa Inhibitor",dh:3,dr:"resume_delayed",dn:"Resume POD#1 per surgeon",di:"AFib / VTE prophylaxis"},
+  {g:"rivaroxaban",b:"Xarelto",s:["10mg","15mg","20mg"],c:"Anticoagulant",sc:"Factor Xa Inhibitor",dh:3,dr:"resume_delayed",dn:"Resume per surgeon",di:"AFib / VTE"},
+  {g:"warfarin",b:"Coumadin",s:["1mg","2mg","2.5mg","5mg","7.5mg","10mg"],c:"Anticoagulant",sc:"Vitamin K Antagonist",dh:5,dr:"resume_delayed",dn:"Resume when INR therapeutic",di:"AFib / DVT prophylaxis"},
+  {g:"aspirin",b:"Aspirin",s:["81mg","325mg"],c:"Antiplatelet",sc:"NSAID",dh:7,dr:"resume_pod1",dn:"81mg for VTE prophylaxis",di:"Cardioprotection"},
+  {g:"clopidogrel",b:"Plavix",s:["75mg"],c:"Antiplatelet",sc:"P2Y12 Inhibitor",dh:7,dr:"provider_decision",dn:"Cardiology to advise restart",di:"CAD / Stent"},
+  {g:"enoxaparin",b:"Lovenox",s:["30mg","40mg","60mg","80mg"],c:"Anticoagulant",sc:"LMWH",dh:1,dr:"resume_pod1",dn:"Bridge dose per protocol",di:"VTE prophylaxis / bridge"},
+  {g:"metformin",b:"Glucophage",s:["500mg","850mg","1000mg"],c:"Antidiabetic",sc:"Biguanide",dh:1,dr:"resume_immediate",dn:"Resume when tolerating PO",di:"Type 2 DM"},
+  {g:"glipizide",b:"Glucotrol",s:["5mg","10mg"],c:"Antidiabetic",sc:"Sulfonylurea",dh:1,dr:"resume_immediate",dn:"Resume when tolerating PO",di:"Type 2 DM"},
+  {g:"empagliflozin",b:"Jardiance",s:["10mg","25mg"],c:"Antidiabetic",sc:"SGLT2 Inhibitor",dh:3,dr:"resume_delayed",dn:"Hold until adequate PO intake",di:"Type 2 DM"},
+  {g:"semaglutide",b:"Ozempic",s:["0.25mg","0.5mg","1mg","2mg"],c:"Antidiabetic",sc:"GLP-1 Agonist",dh:7,dr:"resume_delayed",dn:"Resume at next scheduled dose",di:"Type 2 DM / Weight mgmt"},
+  {g:"insulin glargine",b:"Lantus",s:["100u/mL"],c:"Antidiabetic",sc:"Long-Acting Insulin",dh:0,dr:"resume_immediate",dn:"Half dose night before, full post-op",di:"DM — basal insulin"},
+  {g:"insulin lispro",b:"Humalog",s:["100u/mL"],c:"Antidiabetic",sc:"Rapid-Acting Insulin",dh:1,dr:"resume_immediate",dn:"Resume with meals",di:"DM — mealtime insulin"},
+  {g:"lisinopril",b:"Zestril",s:["5mg","10mg","20mg","40mg"],c:"Cardiovascular",sc:"ACE Inhibitor",dh:1,dr:"resume_pod1",dn:"Hold morning of surgery, resume POD#1",di:"Hypertension"},
+  {g:"losartan",b:"Cozaar",s:["25mg","50mg","100mg"],c:"Cardiovascular",sc:"ARB",dh:1,dr:"resume_pod1",dn:"Hold morning of surgery",di:"Hypertension"},
+  {g:"metoprolol succinate",b:"Toprol-XL",s:["25mg","50mg","100mg","200mg"],c:"Cardiovascular",sc:"Beta Blocker",dh:0,dr:"resume_immediate",dn:"DO NOT HOLD — take AM of surgery",di:"Hypertension / Rate control"},
+  {g:"atenolol",b:"Tenormin",s:["25mg","50mg","100mg"],c:"Cardiovascular",sc:"Beta Blocker",dh:0,dr:"resume_immediate",dn:"DO NOT HOLD",di:"Hypertension"},
+  {g:"amlodipine",b:"Norvasc",s:["2.5mg","5mg","10mg"],c:"Cardiovascular",sc:"CCB",dh:0,dr:"resume_immediate",dn:"Continue through surgery",di:"Hypertension"},
+  {g:"atorvastatin",b:"Lipitor",s:["10mg","20mg","40mg","80mg"],c:"Cardiovascular",sc:"Statin",dh:0,dr:"resume_immediate",dn:"Continue",di:"Hyperlipidemia"},
+  {g:"rosuvastatin",b:"Crestor",s:["5mg","10mg","20mg","40mg"],c:"Cardiovascular",sc:"Statin",dh:0,dr:"resume_immediate",dn:"Continue",di:"Hyperlipidemia"},
+  {g:"furosemide",b:"Lasix",s:["20mg","40mg","80mg"],c:"Cardiovascular",sc:"Loop Diuretic",dh:1,dr:"resume_pod1",dn:"Hold morning of surgery",di:"CHF / Edema"},
+  {g:"hydrochlorothiazide",b:"Microzide",s:["12.5mg","25mg","50mg"],c:"Cardiovascular",sc:"Thiazide Diuretic",dh:1,dr:"resume_pod1",dn:"Hold morning of surgery",di:"Hypertension"},
+  {g:"celecoxib",b:"Celebrex",s:["100mg","200mg"],c:"Pain",sc:"COX-2 Inhibitor",dh:0,dr:"resume_immediate",dn:"Multimodal pain protocol",di:"OA pain / Periop analgesia"},
+  {g:"acetaminophen",b:"Tylenol",s:["325mg","500mg","1000mg"],c:"Pain",sc:"Non-Opioid",dh:0,dr:"resume_immediate",dn:"Multimodal pain protocol",di:"Pain"},
+  {g:"gabapentin",b:"Neurontin",s:["100mg","300mg","600mg","800mg"],c:"Pain",sc:"Gabapentinoid",dh:0,dr:"resume_immediate",dn:"Part of pain protocol",di:"Neuropathic pain"},
+  {g:"pregabalin",b:"Lyrica",s:["25mg","50mg","75mg","150mg","300mg"],c:"Pain",sc:"Gabapentinoid",dh:0,dr:"resume_immediate",dn:"Continue",di:"Neuropathic pain / Fibromyalgia"},
+  {g:"ibuprofen",b:"Advil",s:["200mg","400mg","600mg","800mg"],c:"Pain",sc:"NSAID",dh:7,dr:"provider_decision",dn:"Avoid post-op unless directed",di:"Pain / Inflammation"},
+  {g:"tramadol",b:"Ultram",s:["50mg","100mg"],c:"Pain",sc:"Opioid-like",dh:0,dr:"new_rx",dn:"New Rx if needed",di:"Pain"},
+  {g:"omeprazole",b:"Prilosec",s:["20mg","40mg"],c:"GI",sc:"PPI",dh:0,dr:"resume_immediate",dn:"Continue",di:"GERD"},
+  {g:"pantoprazole",b:"Protonix",s:["20mg","40mg"],c:"GI",sc:"PPI",dh:0,dr:"resume_immediate",dn:"Continue",di:"GERD"},
+  {g:"sertraline",b:"Zoloft",s:["25mg","50mg","100mg"],c:"Psychiatric",sc:"SSRI",dh:0,dr:"resume_immediate",dn:"DO NOT HOLD",di:"Depression / Anxiety"},
+  {g:"escitalopram",b:"Lexapro",s:["5mg","10mg","20mg"],c:"Psychiatric",sc:"SSRI",dh:0,dr:"resume_immediate",dn:"DO NOT HOLD",di:"Depression / Anxiety"},
+  {g:"duloxetine",b:"Cymbalta",s:["20mg","30mg","60mg"],c:"Psychiatric",sc:"SNRI",dh:0,dr:"resume_immediate",dn:"DO NOT HOLD",di:"Depression / Neuropathic pain"},
+  {g:"levothyroxine",b:"Synthroid",s:["25mcg","50mcg","75mcg","88mcg","100mcg","112mcg","125mcg","150mcg"],c:"Endocrine",sc:"Thyroid Hormone",dh:0,dr:"resume_immediate",dn:"Take AM of surgery with sip of water",di:"Hypothyroidism"},
+  {g:"alendronate",b:"Fosamax",s:["35mg","70mg"],c:"Bone",sc:"Bisphosphonate",dh:0,dr:"resume_immediate",dn:"Resume at next scheduled dose",di:"Osteoporosis"},
+  {g:"calcium + vitamin D",b:"Caltrate + D3",s:["600mg/400IU","600mg/800IU"],c:"Supplement",sc:"Bone Health",dh:0,dr:"resume_immediate",dn:"Continue",di:"Bone health / Osteoporosis prevention"},
+  {g:"fish oil (omega-3)",b:"Fish Oil",s:["1000mg","1200mg"],c:"Supplement",sc:"Omega-3",dh:7,dr:"resume_delayed",dn:"Resume 1 week post-op",di:"Cardiovascular / general wellness"},
+  {g:"ferrous sulfate",b:"Iron Supplement",s:["325mg"],c:"Supplement",sc:"Iron",dh:0,dr:"resume_immediate",dn:"Continue — may increase post-op",di:"Iron deficiency anemia"},
+  {g:"vitamin E",b:"Vitamin E",s:["400IU"],c:"Supplement",sc:"Antioxidant",dh:7,dr:"resume_delayed",dn:"Antiplatelet effect",di:"Supplement"},
+];
+document.getElementById("dbCount").textContent=DB.length;
+
+// Cephalosporin cross-reactivity data
+const CROSS_REACT = {
+  "Penicillin": { drugs:["Ancef (cefazolin)","Keflex (cephalexin)"], note:"Cephalosporin cross-reactivity — assess reaction type. If anaphylaxis: substitute Vancomycin or Clindamycin. If rash only: cephalosporin may be used with provider approval.", severity:"Anaphylaxis" }
+};
+
+// ═══ Patient Data ═══
+const P=[
+  { id:1,fn:"Margaret",ln:"Thompson",age:68,sex:"F",mrn:"TJR-20241",wt:82,joint:"Knee",lat:"Right",proc:"Right TKA",surg:"Dr. Henderson",or:"07:30",
+    allergies:[
+      {allergen:"Penicillin",reaction:"Rash / Urticaria",severity:"moderate",source:"Chart-Documented",year:"2015"},
+      {allergen:"Sulfa",reaction:"GI Upset",severity:"mild",source:"Patient-Reported",year:"2010"},
+    ],
+    meds:[
+      {n:"Eliquis",g:"apixaban",str:"5mg",sig:"5mg PO BID",cls:"Anticoagulant",src:"rx",ind:"AFib",prescriber:"Dr. Rao (Cardiology)",pp:"hold",hd:3,pop:"resume_delayed",pon:"Resume POD#1 per surgeon",pac:true,pact:"02/25 14:20",asc:false,asct:null,lastDose:"02/25 evening"},
+      {n:"Toprol-XL",g:"metoprolol succinate",str:"50mg",sig:"50mg PO daily",cls:"Cardiovascular",src:"rx",ind:"Hypertension",prescriber:"Dr. Adams (PCP)",pp:"continue",hd:0,pop:"resume_immediate",pon:"Take morning of surgery",pac:true,pact:"02/25 14:20",asc:false,asct:null,lastDose:null},
+      {n:"Lipitor",g:"atorvastatin",str:"40mg",sig:"40mg PO QHS",cls:"Cardiovascular",src:"rx",ind:"Hyperlipidemia",prescriber:"Dr. Adams (PCP)",pp:"continue",hd:0,pop:"resume_immediate",pon:"Continue",pac:true,pact:"02/25 14:20",asc:false,asct:null,lastDose:null},
+      {n:"Zestril",g:"lisinopril",str:"20mg",sig:"20mg PO daily",cls:"Cardiovascular",src:"rx",ind:"Hypertension",prescriber:"Dr. Adams (PCP)",pp:"hold",hd:1,pop:"resume_pod1",pon:"Resume POD#1",pac:true,pact:"02/25 14:22",asc:false,asct:null,lastDose:"02/27 morning"},
+      {n:"Prilosec",g:"omeprazole",str:"20mg",sig:"20mg PO daily",cls:"GI",src:"rx",ind:"GERD",prescriber:"Dr. Adams (PCP)",pp:"continue",hd:0,pop:"resume_immediate",pon:"Continue",pac:true,pact:"02/25 14:22",asc:false,asct:null,lastDose:null},
+      {n:"Synthroid",g:"levothyroxine",str:"75mcg",sig:"75mcg PO daily",cls:"Endocrine",src:"rx",ind:"Hypothyroidism",prescriber:"Dr. Kim (Endocrine)",pp:"continue",hd:0,pop:"resume_immediate",pon:"Take AM of surgery with sip of water",pac:true,pact:"02/25 14:22",asc:false,asct:null,lastDose:null},
+      {n:"Fosamax",g:"alendronate",str:"70mg",sig:"70mg PO weekly",cls:"Bone",src:"rx",ind:"Osteoporosis",prescriber:"Dr. Adams (PCP)",pp:"continue",hd:0,pop:"resume_immediate",pon:"Resume at next scheduled dose",pac:true,pact:"02/25 14:23",asc:false,asct:null,lastDose:null},
+      {n:"Calcium + D3",g:"calcium + vitamin D",str:"600mg/800IU",sig:"1 tab PO daily",cls:"Supplement",src:"otc",ind:"Bone health",prescriber:"Self",pp:"continue",hd:0,pop:"resume_immediate",pon:"Continue",pac:true,pact:"02/25 14:23",asc:false,asct:null,lastDose:null},
+    ],
+    smeds:[
+      {n:"Ancef (cefazolin)",str:"2g IV",sig:"2g IV × 1 — 30min pre-incision",gv:false,gvt:null},
+      {n:"Celebrex (celecoxib)",str:"200mg",sig:"200mg PO × 1 pre-op",gv:false,gvt:null},
+      {n:"Tylenol (acetaminophen)",str:"1000mg",sig:"1000mg PO × 1 pre-op",gv:false,gvt:null},
+      {n:"Zofran (ondansetron)",str:"4mg IV",sig:"4mg IV PRN nausea",gv:false,gvt:null},
+    ]},
+  { id:2,fn:"James",ln:"Rodriguez",age:72,sex:"M",mrn:"TJR-20242",wt:95,joint:"Hip",lat:"Left",proc:"Left THA",surg:"Dr. Patel",or:"09:00",
+    allergies:[],
+    meds:[
+      {n:"Aspirin",g:"aspirin",str:"81mg",sig:"81mg PO daily",cls:"Antiplatelet",src:"rx",ind:"Cardioprotection — post-stent",prescriber:"Dr. Rao (Cardiology)",pp:"hold",hd:7,pop:"resume_pod1",pon:"81mg for VTE prophylaxis",pac:true,pact:"02/26 10:00",asc:false,asct:null,lastDose:"02/21 morning"},
+      {n:"Toprol-XL",g:"metoprolol succinate",str:"100mg",sig:"100mg PO daily",cls:"Cardiovascular",src:"rx",ind:"Hypertension / Rate control",prescriber:"Dr. Adams (PCP)",pp:"continue",hd:0,pop:"resume_immediate",pon:"Take morning of surgery",pac:true,pact:"02/26 10:00",asc:false,asct:null,lastDose:null},
+      {n:"Microzide",g:"hydrochlorothiazide",str:"25mg",sig:"25mg PO daily",cls:"Cardiovascular",src:"rx",ind:"Hypertension",prescriber:"Dr. Adams (PCP)",pp:"hold",hd:1,pop:"resume_pod1",pon:"Hold morning of surgery",pac:true,pact:"02/26 10:01",asc:false,asct:null,lastDose:"02/27 morning"},
+      {n:"Crestor",g:"rosuvastatin",str:"10mg",sig:"10mg PO QHS",cls:"Cardiovascular",src:"rx",ind:"Hyperlipidemia",prescriber:"Dr. Adams (PCP)",pp:"continue",hd:0,pop:"resume_immediate",pon:"Continue",pac:true,pact:"02/26 10:01",asc:false,asct:null,lastDose:null},
+      {n:"Prilosec",g:"omeprazole",str:"40mg",sig:"40mg PO daily",cls:"GI",src:"rx",ind:"GERD",prescriber:"Dr. Adams (PCP)",pp:"continue",hd:0,pop:"resume_immediate",pon:"Continue",pac:true,pact:"02/26 10:02",asc:false,asct:null,lastDose:null},
+    ],
+    smeds:[
+      {n:"Ancef (cefazolin)",str:"2g IV",sig:"2g IV × 1 — 30min pre-incision",gv:false,gvt:null},
+      {n:"Zofran (ondansetron)",str:"4mg IV",sig:"4mg IV PRN nausea",gv:false,gvt:null},
+    ]},
+  { id:3,fn:"Dorothy",ln:"Chen",age:65,sex:"F",mrn:"TJR-20243",wt:88,joint:"Knee",lat:"Left",proc:"Left TKA",surg:"Dr. Henderson",or:"11:00",
+    allergies:[
+      {allergen:"Latex",reaction:"Anaphylaxis",severity:"severe",source:"Observed in Facility",year:"2018"},
+    ],
+    meds:[
+      {n:"Glucophage",g:"metformin",str:"1000mg",sig:"1000mg PO BID",cls:"Antidiabetic",src:"rx",ind:"Type 2 DM",prescriber:"Dr. Park (Endocrine)",pp:"hold",hd:1,pop:"resume_immediate",pon:"Resume when tolerating PO",pac:false,pact:null,asc:false,asct:null,lastDose:null},
+      {n:"Jardiance",g:"empagliflozin",str:"25mg",sig:"25mg PO daily",cls:"Antidiabetic",src:"rx",ind:"Type 2 DM",prescriber:"Dr. Park (Endocrine)",pp:"hold",hd:3,pop:"resume_delayed",pon:"Hold until adequate PO intake",pac:false,pact:null,asc:false,asct:null,lastDose:null},
+      {n:"Lantus",g:"insulin glargine",str:"100u/mL",sig:"22 units SQ QHS",cls:"Antidiabetic",src:"rx",ind:"Type 2 DM — basal insulin",prescriber:"Dr. Park (Endocrine)",pp:"continue",hd:0,pop:"resume_immediate",pon:"Half dose night before, full post-op",pac:false,pact:null,asc:false,asct:null,lastDose:null},
+      {n:"Zestril",g:"lisinopril",str:"10mg",sig:"10mg PO daily",cls:"Cardiovascular",src:"rx",ind:"Hypertension",prescriber:"Dr. Lee (PCP)",pp:"hold",hd:1,pop:"resume_pod1",pon:"Resume POD#1",pac:false,pact:null,asc:false,asct:null,lastDose:null},
+      {n:"Norvasc",g:"amlodipine",str:"5mg",sig:"5mg PO daily",cls:"Cardiovascular",src:"rx",ind:"Hypertension",prescriber:"Dr. Lee (PCP)",pp:"continue",hd:0,pop:"resume_immediate",pon:"Continue through surgery",pac:false,pact:null,asc:false,asct:null,lastDose:null},
+      {n:"Lipitor",g:"atorvastatin",str:"20mg",sig:"20mg PO QHS",cls:"Cardiovascular",src:"rx",ind:"Hyperlipidemia",prescriber:"Dr. Lee (PCP)",pp:"continue",hd:0,pop:"resume_immediate",pon:"Continue",pac:false,pact:null,asc:false,asct:null,lastDose:null},
+      {n:"Neurontin",g:"gabapentin",str:"300mg",sig:"300mg PO TID",cls:"Pain",src:"rx",ind:"Neuropathic pain — diabetic",prescriber:"Dr. Park (Endocrine)",pp:"continue",hd:0,pop:"resume_immediate",pon:"Part of pain protocol",pac:false,pact:null,asc:false,asct:null,lastDose:null},
+      {n:"Cymbalta",g:"duloxetine",str:"60mg",sig:"60mg PO daily",cls:"Psychiatric",src:"rx",ind:"Depression / Neuropathic pain",prescriber:"Dr. Lee (PCP)",pp:"continue",hd:0,pop:"resume_immediate",pon:"DO NOT HOLD",pac:false,pact:null,asc:false,asct:null,lastDose:null},
+      {n:"Protonix",g:"pantoprazole",str:"40mg",sig:"40mg PO daily",cls:"GI",src:"rx",ind:"GERD",prescriber:"Dr. Lee (PCP)",pp:"continue",hd:0,pop:"resume_immediate",pon:"Continue",pac:false,pact:null,asc:false,asct:null,lastDose:null},
+      {n:"Calcium + D3",g:"calcium + vitamin D",str:"600mg/400IU",sig:"1 tab PO BID",cls:"Supplement",src:"otc",ind:"Bone health",prescriber:"Self",pp:"continue",hd:0,pop:"resume_immediate",pon:"Continue",pac:false,pact:null,asc:false,asct:null,lastDose:null},
+      {n:"Fish Oil",g:"fish oil (omega-3)",str:"1200mg",sig:"1200mg PO daily",cls:"Supplement",src:"herb",ind:"General wellness",prescriber:"Self",pp:"hold",hd:7,pop:"resume_delayed",pon:"Resume 1 week post-op",pac:false,pact:null,asc:false,asct:null,lastDose:null},
+    ],
+    smeds:[
+      {n:"Ancef (cefazolin)",str:"2g IV",sig:"2g IV × 1 — 30min pre-incision",gv:false,gvt:null},
+      {n:"Celebrex (celecoxib)",str:"200mg",sig:"200mg PO × 1 pre-op",gv:false,gvt:null},
+      {n:"Tylenol (acetaminophen)",str:"1000mg",sig:"1000mg PO × 1 pre-op",gv:false,gvt:null},
+      {n:"Zofran (ondansetron)",str:"4mg IV",sig:"4mg IV PRN nausea",gv:false,gvt:null},
+    ]},
+];
+
+let sel=1, addData=null;
+const now=()=>new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+const td=()=>new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit"});
+
+// Source type tag HTML
+function srcTag(src){
+  const map={rx:{l:"Rx",c:"mtag-rx"},otc:{l:"OTC",c:"mtag-otc"},herb:{l:"HERB",c:"mtag-herb"},"pt-rpt":{l:"PT-RPT",c:"mtag-pt"}};
+  const t=map[src]||map.rx;
+  return `<span class="mtag ${t.c}">${t.l}</span>`;
+}
+
+// ── Search ──
+const si=document.getElementById("searchInput"),sr=document.getElementById("searchResults");
+si.addEventListener("input",()=>{
+  const q=si.value.trim().toLowerCase();
+  if(q.length<2){sr.classList.remove("open");return}
+  const seen=new Set();
+  const m=DB.filter(d=>{const hit=d.g.toLowerCase().includes(q)||d.b.toLowerCase().includes(q);if(!hit)return false;const k=d.g+d.b;if(seen.has(k))return false;seen.add(k);return true}).slice(0,10);
+  window._sm=m;
+  if(!m.length){sr.innerHTML=`<div class="sr-empty">No matches for "${q}"</div>`}
+  else{sr.innerHTML=m.map((d,i)=>{
+    const hl=t=>{const x=t.toLowerCase().indexOf(q);if(x===-1)return t;return t.slice(0,x)+`<span class="match">${t.slice(x,x+q.length)}</span>`+t.slice(x+q.length)};
+    return`<div class="sr-item" onclick="openModal(${i})"><div class="sr-name">${hl(d.b)} <span style="color:#6a6a6a;font-weight:400">(${hl(d.g)})</span></div><div class="sr-meta">${d.s.join(" · ")}${d.di?` · ${d.di}`:""}</div><span class="sr-tag" style="background:var(--purple-bg);color:var(--purple)">${d.sc}</span>${d.dh?`<span class="sr-tag" style="background:var(--orange-bg);color:var(--orange);margin-left:4px">Hold ${d.dh}d</span>`:""}</div>`}).join("")}
+  sr.classList.add("open");
+});
+si.addEventListener("blur",()=>setTimeout(()=>sr.classList.remove("open"),200));
+
+window.openModal=function(i){
+  addData=window._sm[i];if(!addData)return;
+  document.getElementById("modalTitle").textContent=`${addData.b} (${addData.g})`;
+  document.getElementById("modalSub").textContent=`${addData.sc} · ${addData.c}`;
+  document.getElementById("addStr").innerHTML=addData.s.map(s=>`<option>${s}</option>`).join("");
+  document.getElementById("addPP").value=addData.dh?"hold":"continue";
+  document.getElementById("addHD").value=String(addData.dh||0);
+  document.getElementById("addPOP").value=addData.dr||"resume_immediate";
+  document.getElementById("addPOPN").value=addData.dn||"";
+  document.getElementById("addInd").value=addData.di||"";
+  document.getElementById("addPres").value="";
+  document.getElementById("addSrc").value="rx";
+  sr.classList.remove("open");si.value="";
+  document.getElementById("addModal").classList.add("open");
+};
+window.closeModal=function(){document.getElementById("addModal").classList.remove("open");addData=null};
+window.confirmAdd=function(){
+  if(!addData)return;const pt=P.find(p=>p.id===sel);
+  pt.meds.push({n:addData.b,g:addData.g,str:document.getElementById("addStr").value,
+    sig:`${document.getElementById("addStr").value} ${document.getElementById("addRoute").value} ${document.getElementById("addFreq").value}`,
+    cls:addData.c,src:document.getElementById("addSrc").value,
+    ind:document.getElementById("addInd").value,prescriber:document.getElementById("addPres").value||"—",
+    pp:document.getElementById("addPP").value,hd:parseInt(document.getElementById("addHD").value)||0,
+    pop:document.getElementById("addPOP").value,pon:document.getElementById("addPOPN").value,
+    pac:false,pact:null,asc:false,asct:null,lastDose:null});
+  closeModal();render();
+};
+
+// Allergy modal
+window.openAllgModal=function(){document.getElementById("allgModal").classList.add("open");document.getElementById("allgName").value="";document.getElementById("allgYear").value=""};
+window.closeAllgModal=function(){document.getElementById("allgModal").classList.remove("open")};
+window.confirmAllg=function(){
+  const pt=P.find(p=>p.id===sel);
+  const name=document.getElementById("allgName").value.trim();
+  if(!name)return;
+  pt.allergies.push({
+    allergen:name,reaction:document.getElementById("allgReaction").value,
+    severity:document.getElementById("allgSev").value,source:document.getElementById("allgSource").value,
+    year:document.getElementById("allgYear").value||"—"
+  });
+  closeAllgModal();render();
+};
+
+// Actions
+window.selPt=function(id){sel=id;render()};
+window.pacC=function(i){const pt=P.find(p=>p.id===sel);pt.meds[i].pac=true;pt.meds[i].pact=`${td()} ${now()}`;render()};
+window.ascC=function(i){const pt=P.find(p=>p.id===sel);pt.meds[i].asc=true;pt.meds[i].asct=`${td()} ${now()}`;render()};
+window.pacAll=function(){const pt=P.find(p=>p.id===sel);pt.meds.forEach(m=>{if(!m.pac){m.pac=true;m.pact=`${td()} ${now()}`}});render()};
+window.ascAll=function(){const pt=P.find(p=>p.id===sel);pt.meds.forEach(m=>{if(!m.asc){m.asc=true;m.asct=`${td()} ${now()}`}});render()};
+window.chg=function(i,f,v){const pt=P.find(p=>p.id===sel);pt.meds[i][f]=f==="hd"?parseInt(v):v;pt.meds[i].pac=false;pt.meds[i].pact=null;pt.meds[i].asc=false;pt.meds[i].asct=null;render()};
+window.setLastDose=function(i,val){const pt=P.find(p=>p.id===sel);pt.meds[i].lastDose=val;};
+window.adminS=function(i){const pt=P.find(p=>p.id===sel);pt.smeds[i].gv=true;pt.smeds[i].gvt=now();render()};
+window.toggleAllergy=function(){document.getElementById("allgBody").classList.toggle("open")};
+
+// ═══ Render ═══
+function render(){
+  const pt=P.find(p=>p.id===sel);
+
+  // Sidebar
+  document.getElementById("ptList").innerHTML=P.map(p=>{
+    const jc=p.joint==="Hip"?"var(--hip)":"var(--knee)";
+    const pn=p.meds.filter(m=>m.pac).length,an=p.meds.filter(m=>m.asc).length,t=p.meds.length;
+    return`<div class="pt-card ${p.id===sel?"active":""}" onclick="selPt(${p.id})"><div class="pt-jbar" style="background:${jc}"></div><div style="flex:1;min-width:0"><div class="pt-name">${p.ln}, ${p.fn}</div><div class="pt-detail">${p.or} · ${p.proc}</div></div><div class="pt-stats"><div class="pt-stat-num" style="color:${an===t?"var(--green)":"var(--dim)"}">PAC ${pn}/${t}</div><div style="font-size:9px;color:var(--muted);font-family:var(--mono)">ASC ${an}/${t}</div></div></div>`}).join("");
+
+  // Header
+  const jc=pt.joint==="Hip"?{a:"var(--hip)"}:{a:"var(--knee)"};
+  document.getElementById("ptHeader").innerHTML=`<div style="display:flex;align-items:center;gap:14px;margin-bottom:14px"><div style="width:4px;height:40px;border-radius:2px;background:${jc.a}"></div><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:18px;font-weight:700">${pt.ln}, ${pt.fn}</span><span style="font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.03);color:${jc.a};font-family:var(--mono);font-weight:700;border:1px solid ${jc.a}22">${pt.lat} ${pt.joint}</span></div><div style="font-size:11px;color:var(--dim);font-family:var(--mono);margin-top:2px">${pt.surg} · ${pt.proc} · ${pt.age}${pt.sex} · ${pt.wt}kg · MRN ${pt.mrn} · OR ${pt.or}</div></div></div>`;
+
+  // ── Allergy Panel ──
+  const hasAllg = pt.allergies.length > 0;
+  const hasSevere = pt.allergies.some(a=>a.severity==="severe");
+  // Check cross-reactivity against surgical order set
+  let xrAlerts = [];
+  pt.allergies.forEach(a => {
+    const xr = CROSS_REACT[a.allergen];
+    if (xr) {
+      const matchingSurg = pt.smeds.filter(s => xr.drugs.some(d => s.n.includes(d.split(" ")[0])));
+      if (matchingSurg.length) {
+        const isSevere = a.reaction === "Anaphylaxis" || a.severity === "severe";
+        xrAlerts.push({ allergen: a.allergen, reaction: a.reaction, severity: a.severity, drugs: matchingSurg.map(s=>s.n), note: isSevere ? `⛔ CONTRAINDICATED — ${a.allergen} anaphylaxis. Use Vancomycin or Clindamycin.` : `⚠ Cross-reactivity risk — ${a.allergen} (${a.reaction}). Cephalosporin may be used with provider approval.` });
+      }
+    }
+  });
+
+  let allgHtml = `<div class="allergy-panel ${hasAllg?"":"nkda"}">`;
+  allgHtml += `<div class="allergy-header ${hasAllg?"has-allergy":"nkda-header"}" onclick="toggleAllergy()">`;
+  if (hasAllg) {
+    allgHtml += `<span class="allergy-title" style="color:var(--red-soft)">⚠ ALLERGIES (${pt.allergies.length}) — ${pt.allergies.map(a=>a.allergen).join(", ")}</span>`;
+  } else {
+    allgHtml += `<span class="allergy-title" style="color:var(--green)">✓ NKDA — No Known Drug Allergies</span>`;
+  }
+  allgHtml += `<span class="allergy-toggle">▾ Details</span></div>`;
+  allgHtml += `<div class="allergy-body ${hasAllg?"open":""}" id="allgBody">`;
+
+  if (hasAllg) {
+    allgHtml += `<table class="allg-table"><thead><tr><th>Allergen</th><th>Reaction</th><th>Severity</th><th>Source</th><th>Year</th></tr></thead><tbody>`;
+    pt.allergies.forEach(a => {
+      const sevCls = a.severity==="severe"?"sev-severe":a.severity==="moderate"?"sev-moderate":"sev-mild";
+      allgHtml += `<tr><td class="allg-allergen">${a.allergen}</td><td style="font-family:var(--mono);font-size:11px">${a.reaction}</td><td><span class="allg-sev ${sevCls}">${a.severity.toUpperCase()}</span></td><td style="font-size:11px;color:#7a7a7a">${a.source}</td><td style="font-size:11px;color:#7a7a7a;font-family:var(--mono)">${a.year}</td></tr>`;
+    });
+    allgHtml += `</tbody></table>`;
+
+    // Cross-reactivity alerts
+    xrAlerts.forEach(xr => {
+      allgHtml += `<div class="allg-xr-banner">${xr.note}<br><span style="font-size:10px;color:#8a5a5a">Surgical order set includes: ${xr.drugs.join(", ")}</span></div>`;
+    });
+  }
+  allgHtml += `<div style="margin-top:8px"><button class="allg-add-btn" onclick="openAllgModal()">+ Add Allergy</button></div>`;
+  allgHtml += `</div></div>`;
+  document.getElementById("allergyView").innerHTML = allgHtml;
+
+  const t=pt.meds.length,pn=pt.meds.filter(m=>m.pac).length,an=pt.meds.filter(m=>m.asc).length;
+  const sg=pt.smeds.filter(m=>m.gv).length,st2=pt.smeds.length;
+
+  // ── Med Table ──
+  let h=`<div class="sec-header"><span class="sec-title">Home Medications — Perioperative Plan</span><span class="sec-count">${t} meds · PAC ${pn}/${t} · ASC ${an}/${t}</span></div>`;
+  h+=`<table class="med-table"><thead><tr><th style="width:22%">Medication</th><th style="width:11%">Sig</th><th class="ctr" style="width:12%">Pre-Op Plan</th><th class="ctr" style="width:15%">Post-Op Resumption</th><th class="ctr" style="width:8%">PAC ✓</th><th class="ctr" style="width:8%">ASC ✓</th></tr></thead><tbody>`;
+
+  pt.meds.forEach((m,i)=>{
+    // Medication cell with indication, source, prescriber
+    h+=`<tr><td><div class="mname">${m.n}</div><div class="mgen">${m.g} ${m.str}</div>`;
+    if(m.ind) h+=`<div class="mindication">for ${m.ind}</div>`;
+    if(m.prescriber && m.prescriber!=="—" && m.prescriber!=="Self") h+=`<div class="mprescriber">${m.prescriber}</div>`;
+    h+=`<div class="mtags">${srcTag(m.src)}<span class="mtag mtag-cls">${m.cls}</span></div></td>`;
+
+    // Sig
+    h+=`<td class="msig">${m.sig}</td>`;
+
+    // Pre-op plan + last dose for held meds
+    h+=`<td class="ctr"><select class="plan-select" onchange="chg(${i},'pp',this.value)" style="margin-bottom:3px"><option value="continue" ${m.pp==="continue"?"selected":""}>→ Continue</option><option value="hold" ${m.pp==="hold"?"selected":""}>⏸ Hold</option><option value="discontinue" ${m.pp==="discontinue"?"selected":""}>✕ D/C</option></select>`;
+    if(m.pp==="hold"){
+      h+=`<select class="plan-select" onchange="chg(${i},'hd',this.value)" style="font-size:9px;margin-bottom:3px">${[1,3,5,7,10,14].map(d=>`<option value="${d}" ${m.hd===d?"selected":""}>${d}d pre-op</option>`).join("")}</select>`;
+      // Last dose field
+      h+=`<div class="last-dose"><div class="last-dose-label">Last Dose Taken</div>`;
+      if(m.lastDose){
+        h+=`<div class="last-dose-confirmed">${m.lastDose}</div>`;
+      } else {
+        h+=`<input class="last-dose-input" type="text" placeholder="e.g. 02/25 PM" onblur="setLastDose(${i},this.value)">`;
+      }
+      h+=`</div>`;
+    }
+    h+=`</td>`;
+
+    // Post-op
+    h+=`<td class="ctr"><select class="plan-select" onchange="chg(${i},'pop',this.value)" style="font-size:9px;margin-bottom:2px"><option value="resume_immediate" ${m.pop==="resume_immediate"?"selected":""}>Resume immediately</option><option value="resume_pod1" ${m.pop==="resume_pod1"?"selected":""}>Resume POD#1</option><option value="resume_delayed" ${m.pop==="resume_delayed"?"selected":""}>When cleared</option><option value="provider_decision" ${m.pop==="provider_decision"?"selected":""}>Per provider</option><option value="new_rx" ${m.pop==="new_rx"?"selected":""}>New Rx post-op</option><option value="discontinue" ${m.pop==="discontinue"?"selected":""}>Discontinue</option></select><div class="plan-note">${m.pon||""}</div></td>`;
+
+    // PAC / ASC confirms
+    h+=`<td class="ctr">${m.pac?`<button class="confirm-btn done">✓</button><span class="confirm-time">${m.pact}</span>`:`<button class="confirm-btn" onclick="pacC(${i})"></button>`}</td>`;
+    h+=`<td class="ctr">${m.asc?`<button class="confirm-btn done">✓</button><span class="confirm-time">${m.asct}</span>`:`<button class="confirm-btn" onclick="ascC(${i})"></button>`}</td>`;
+    h+=`</tr>`;
+  });
+  h+=`</tbody></table>`;
+
+  // Bulk
+  h+=`<div class="bulk-btns">${pn<t?`<button class="bulk-btn" onclick="pacAll()" style="color:var(--green);border-color:rgba(42,107,63,0.3)">✓ PAC Confirm All</button>`:""}${an<t?`<button class="bulk-btn" onclick="ascAll()" style="color:var(--blue);border-color:rgba(59,107,143,0.3)">✓ ASC Confirm All</button>`:""}</div>`;
+
+  // Surgical Meds
+  h+=`<div class="sec-header" style="margin-top:24px"><span class="sec-title">Surgical Order Set</span><span class="sec-count">${sg}/${st2} administered</span></div>`;
+  pt.smeds.forEach((m,i)=>{
+    h+=`<div class="surg-row ${m.gv?"given":""}"><div style="width:10px;height:10px;border-radius:50%;background:${m.gv?"var(--green)":"var(--blue)"};flex-shrink:0"></div><div style="flex:1"><div class="surg-name">${m.n}</div><div class="surg-sig">${m.sig}</div><div class="surg-tags"><span class="surg-tag" style="background:var(--blue-bg);color:var(--blue);border:1px solid rgba(59,107,143,0.15)">Order Set</span>${m.gv?`<span class="surg-tag" style="background:var(--green-bg);color:var(--green);border:1px solid rgba(42,107,63,0.15)">Given ${m.gvt}</span>`:""}</div></div>${m.gv?`<button class="admin-btn done">✓ ${m.gvt}</button>`:`<button class="admin-btn" onclick="adminS(${i})">Administer</button>`}</div>`;
+  });
+
+  document.getElementById("medContent").innerHTML=h;
+}
+render();
+</script>
+</body>
+</html>
