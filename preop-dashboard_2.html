@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TJR Hub · PAC / Pre-Op Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080808;--card:#0d0d0d;--bdr:#1a1a1a;
+  --tx:#e0e0e0;--dm:#5a5a5a;--mt:#3a3a3a;
+  --gn:#2a6b3f;--gnB:rgba(42,107,63,0.10);--gnS:#3a8b5f;
+  --yw:#8a6d2b;--ywB:rgba(138,109,43,0.08);
+  --rd:#8b2d2d;--rdB:rgba(139,45,45,0.10);--rdS:#cf6b6b;
+  --kn:#3b82f6;--hp:#a855f7;
+  --m:'DM Mono',monospace;--s:'IBM Plex Sans',sans-serif;
+}
+body{background:var(--bg);color:var(--tx);font-family:var(--s);min-height:100vh}
+.top{padding:20px 24px 16px;border-bottom:1px solid #141414;display:flex;justify-content:space-between;align-items:flex-end}
+.top-sub{font-size:10px;font-weight:700;color:var(--mt);letter-spacing:.15em;text-transform:uppercase;font-family:var(--m);margin-bottom:4px}
+.top-title{font-size:20px;font-weight:700}
+.top-date{font-size:12px;color:#4a4a4a;font-family:var(--m);margin-top:2px}
+.top-r{display:flex;gap:16px;align-items:center}
+.legend{padding:10px 24px;display:flex;gap:20px;border-bottom:1px solid #0f0f0f;background:rgba(255,255,255,0.008);flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:6px;font-size:10px;color:#5a5a5a;font-family:var(--m)}
+.ld{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.lh{margin-left:auto;font-size:10px;color:#3a3a3a;font-family:var(--m);font-style:italic}
+.jd{width:8px;height:8px;border-radius:2px;display:inline-block}
+.cards{padding:16px 24px;display:flex;flex-direction:column;gap:10px}
+
+/* Patient card */
+.pc{background:var(--card);border-radius:10px;overflow:hidden;border:1px solid var(--bdr);transition:border-color .3s}
+.pc.hi{border-color:rgba(139,45,45,0.3)}.pc.rdy{border-color:rgba(42,107,63,0.4)}
+.ph{padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:background .2s}
+.ph:hover{background:rgba(255,255,255,0.02)}.ph.op{background:rgba(255,255,255,0.015);border-bottom:1px solid var(--bdr)}
+.jb{width:4px;height:48px;border-radius:2px;flex-shrink:0}
+.pt{text-align:center;min-width:52px;flex-shrink:0}
+.pt-t{font-size:17px;font-weight:700;font-family:var(--m);line-height:1.1}
+.pt-b{font-size:10px;color:var(--dm);font-family:var(--m);margin-top:2px}
+.pi{flex:1;min-width:0}
+.pn{font-size:15px;font-weight:600}
+.ptg{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pjt{font-size:10px;padding:2px 8px;border-radius:4px;font-family:var(--m);font-weight:700}
+.pat{font-size:9px;padding:2px 6px;border-radius:4px;background:var(--rdB);color:var(--rdS);font-family:var(--m);font-weight:700;border:1px solid rgba(139,45,45,0.15)}
+.pd{font-size:11px;color:var(--dm);font-family:var(--m);margin-top:3px}
+.rw{position:relative;width:48px;height:48px;flex-shrink:0}
+.rt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;font-family:var(--m);color:#8a8a8a}
+.rt.rg{color:var(--gn)}
+.pb{font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;font-family:var(--m);text-transform:uppercase;letter-spacing:.05em;border:1px solid #2a2a2a;min-width:80px;text-align:center;flex-shrink:0;background:rgba(255,255,255,0.03);color:#6a6a6a}
+.pb.rg{background:var(--gnB);color:var(--gn);border-color:rgba(42,107,63,0.3)}
+.aw{font-size:12px;color:#4a4a4a;transition:transform .2s}.aw.op{transform:rotate(180deg)}
+.bd{padding:6px 16px 16px;display:none}.bd.op{display:block}
+.ab{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--rdB);border:1px solid rgba(139,45,45,0.3);border-radius:6px;margin:6px 0;font-size:12px;font-weight:700;color:var(--rdS);font-family:var(--m)}
+
+/* Phase header */
+.phh{display:flex;align-items:center;justify-content:space-between;padding:10px 0 6px;margin-top:6px;border-bottom:1px solid #161616}
+.phl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-family:var(--m);color:#6a6a6a}
+.phl.dn{color:var(--gn)}.phl.is{color:var(--rd)}
+.phc{font-size:10px;font-family:var(--m);font-weight:600;color:#4a4a4a;padding:2px 8px;border-radius:8px}
+.phc.dn{color:var(--gn);background:var(--gnB)}.phc.is{color:var(--rd);background:var(--rdB)}
+
+/* Checklist item */
+.cl{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-radius:6px;transition:background .15s}
+.cl.ck{cursor:pointer}.cl.ck:hover{background:rgba(255,255,255,0.03)}
+.cl.na{opacity:.35}.cl.ex{background:rgba(255,255,255,0.025)}
+.ci{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px;font-family:var(--m)}
+.cc{flex:1;min-width:0}
+.cr{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.cla{font-size:13px;font-weight:500;font-family:var(--s)}
+.cb{font-size:10px;padding:2px 8px;border-radius:10px;font-family:var(--m);font-weight:600;white-space:nowrap;flex-shrink:0}
+.cs{font-size:11px;color:#5a5a5a;margin-top:2px;font-family:var(--m);line-height:1.4}
+.cs.fl{color:#8a8a8a}
+.ck-lnk{font-size:10px;color:#4a6a5a;margin-top:2px;font-family:var(--m);font-style:italic}
+.cinp{padding:0 12px 10px 36px}
+
+/* Clinic detail panel */
+.cdp{margin:4px 0 8px 36px;padding:12px 14px;background:rgba(255,255,255,0.02);border:1px solid #1e1e1e;border-radius:8px}
+.cdp-title{font-size:10px;font-weight:700;color:#6a6a6a;font-family:var(--m);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.cdp-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 12px}
+.cdp-grid.c2{grid-template-columns:1fr 1fr}
+.cdp-grid.c1{grid-template-columns:1fr}
+.cdp-item{padding:4px 0}
+.cdp-k{font-size:9px;color:#555;font-family:var(--m);text-transform:uppercase;letter-spacing:.04em}
+.cdp-v{font-size:13px;font-weight:600;color:var(--tx);font-family:var(--m);margin-top:1px}
+.cdp-v.hi{color:var(--rdS)}.cdp-v.lo{color:var(--yw)}.cdp-v.ok{color:var(--gnS)}
+.cdp-v.sm{font-size:11px;font-weight:400;color:#8a8a8a}
+.cdp-note{font-size:10px;color:#6a6a6a;font-family:var(--m);margin-top:8px;padding-top:6px;border-top:1px solid #1a1a1a;line-height:1.5}
+.cdp-flag{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:3px 8px;border-radius:4px;font-family:var(--m);font-weight:600;margin-top:6px}
+.cdp-flag.ok{background:var(--gnB);color:var(--gnS);border:1px solid rgba(42,107,63,0.2)}
+.cdp-flag.warn{background:var(--rdB);color:var(--rdS);border:1px solid rgba(139,45,45,0.2)}
+.cdp-flag.info{background:rgba(59,107,143,0.1);color:#5a9abf;border:1px solid rgba(59,107,143,0.2)}
+.vfy-btn{margin-top:10px;padding:7px 16px;border-radius:5px;font-family:var(--m);font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--gnS);background:var(--gn);color:#fff;transition:all .15s}
+.vfy-btn:hover{background:var(--gnS)}
+
+/* Buttons */
+.ob{padding:5px 10px;font-size:11px;font-family:var(--m);border-radius:4px;cursor:pointer;border:1px solid #2a2a2a;background:#1a1a1a;color:#7a7a7a;transition:all .15s}
+.ob.sg{border-color:var(--gnS);background:var(--gnB);color:var(--gnS)}
+.ob.sr{border-color:var(--rdS);background:var(--rdB);color:var(--rdS)}
+.ob.sy{border-color:#8a6d2b;background:var(--ywB);color:#8a6d2b}
+.ob.sn{border-color:var(--gnS);background:var(--gnB);color:var(--gnS)}
+.il{font-size:10px;color:#8a8a8a;margin-bottom:2px;font-family:var(--m)}
+.il2{font-size:11px;color:#8a8a8a;margin-bottom:4px;font-family:var(--m)}
+.fi{width:100%;padding:6px 8px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:4px;color:var(--tx);font-size:13px;font-family:var(--m);outline:none;box-sizing:border-box}
+.fi:focus{border-color:#3a3a3a}
+.sb{width:100%;padding:8px;border-radius:4px;font-family:var(--m);font-size:12px;cursor:default;border:1px solid #2a2a2a;background:#1a1a1a;color:#555;transition:all .15s}
+.sb.ok{background:var(--gn);color:#fff;border-color:var(--gnS);cursor:pointer}
+.sb.dng{background:var(--rd);color:#fff;border-color:var(--rdS);cursor:pointer}
+
+/* Sign-off */
+.so{margin:16px 0 8px;padding:14px 16px;border-radius:8px;border:1px solid var(--bdr);background:rgba(255,255,255,0.02)}
+.so.rts{border-color:rgba(42,107,63,0.3);background:rgba(42,107,63,0.05)}
+.so.sgn{border-color:rgba(42,107,63,0.3);background:var(--gnB)}
+.sot{font-size:11px;font-weight:700;color:#7a7a7a;font-family:var(--m);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+.soe{font-size:11px;color:var(--rdS);font-family:var(--m);margin-bottom:10px;padding:6px 10px;background:var(--rdB);border-radius:4px;border:1px solid rgba(139,45,45,0.15)}
+.sog{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
+.sof{display:grid;grid-template-columns:2fr 1fr;gap:6px}
+.sob{padding:8px 20px;border-radius:6px;font-family:var(--m);font-size:12px;font-weight:600;white-space:nowrap;cursor:default;border:1px solid #2a2a2a;background:#1a1a1a;color:#555}
+.sob.ok{background:var(--gn);color:#fff;border-color:var(--gnS);cursor:pointer}
+.soa{font-size:10px;color:#4a4a4a;font-family:var(--m);margin-top:8px;line-height:1.5}
+.sobd{font-size:12px;color:#8a8a8a;font-family:var(--m);line-height:1.8;padding-left:32px}
+.sonm{margin-top:8px;color:var(--gn);font-weight:600}
+
+/* Handoff */
+.ho{margin-top:16px;padding:14px 16px;background:var(--gnB);border:1px solid rgba(42,107,63,0.3);border-radius:8px}
+.hot{font-size:12px;font-weight:700;color:var(--gn);font-family:var(--m);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+.hob{font-size:12px;color:#8a8a8a;font-family:var(--m);line-height:1.8}.hob span{color:#5a5a5a}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#1a1a1a;border-radius:3px}
+</style>
+</head>
+<body>
+<div class="top">
+  <div>
+    <div class="top-sub">TJR HUB · PAC / PRE-OP</div>
+    <div class="top-title">Unified Readiness Dashboard</div>
+    <div class="top-date" id="tD"></div>
+  </div>
+  <div class="top-r">
+    <div style="text-align:right"><div style="font-size:24px;font-weight:700;font-family:var(--m)">4</div><div style="font-size:10px;color:var(--dm);font-family:var(--m)">CASES</div></div>
+    <div style="width:1px;height:32px;background:var(--bdr)"></div>
+    <div style="display:flex;gap:12px"><div class="li"><span class="jd" style="background:var(--kn)"></span>Knee</div><div class="li"><span class="jd" style="background:var(--hp)"></span>Hip</div></div>
+  </div>
+</div>
+<div class="legend">
+  <div class="li"><div class="ld" style="background:var(--gn);border:1px solid rgba(42,107,63,0.5)"></div>Complete / Verified</div>
+  <div class="li"><div class="ld" style="background:var(--yw);border:1px solid rgba(138,109,43,0.5)"></div>Pending</div>
+  <div class="li"><div class="ld" style="background:var(--rd);border:1px solid rgba(139,45,45,0.5)"></div>Issue / Blocked</div>
+  <div class="lh">tap item to view clinic data · structured inputs for assessments</div>
+</div>
+<div class="cards" id="cards"></div>
+
+<script>
+// ═══ CLINIC DATA — actual values behind each PAC/verify item ═══
+const CLINIC = {
+  1: { // Margaret Thompson
+    labs: {
+      title: "Lab Results — Drawn 02/22/2026",
+      grid: "c3",
+      items: [
+        {k:"WBC",v:"7.2",u:"K/μL",st:""},
+        {k:"Hgb",v:"12.8",u:"g/dL",st:""},
+        {k:"Hct",v:"38.4",u:"%",st:""},
+        {k:"Plt",v:"245",u:"K/μL",st:""},
+        {k:"Na",v:"141",u:"mEq/L",st:""},
+        {k:"K",v:"4.1",u:"mEq/L",st:""},
+        {k:"BUN",v:"18",u:"mg/dL",st:""},
+        {k:"Cr",v:"0.9",u:"mg/dL",st:""},
+        {k:"Glucose",v:"118",u:"mg/dL",st:"lo"},
+        {k:"PT",v:"12.1",u:"sec",st:""},
+        {k:"INR",v:"1.0",u:"",st:"ok"},
+        {k:"Type & Screen",v:"A+",u:"",st:"info"},
+      ],
+      note:"INR 1.0 — confirms adequate Eliquis washout at 3 days. Glucose mildly elevated, consistent with A1c 6.2%.",
+      flags:[{t:"INR Normalized",c:"ok"},{t:"Eliquis washout adequate",c:"ok"}]
+    },
+    a1c: {
+      title:"A1c — Drawn 02/22/2026",grid:"c2",
+      items:[{k:"A1c",v:"6.2%",st:"ok"},{k:"Threshold",v:"< 8.0%",st:""},{k:"Equivalent avg glucose",v:"~131 mg/dL",st:""},{k:"Last A1c (06/2025)",v:"6.4%",st:""}],
+      note:"A1c trending down. Well-controlled type 2 diabetes on Metformin.",flags:[{t:"Within surgical threshold",c:"ok"}]
+    },
+    bmi: {
+      title:"Body Metrics — Recorded 02/25/2026",grid:"c3",
+      items:[{k:"Height",v:"5'5\"",st:""},{k:"Weight",v:"82 kg",st:""},{k:"BMI",v:"31.4",st:"lo"},{k:"Threshold",v:"< 40",st:""},{k:"BMI Class",v:"Obese I",st:"lo"},{k:"Ideal weight",v:"57–73 kg",st:""}],
+      note:"BMI 31.4 is within surgical threshold (<40) but in Obese Class I. Standard Ancef dosing 2g appropriate (weight < 120kg).",flags:[{t:"Within surgical threshold",c:"ok"},{t:"Obese Class I — standard dosing",c:"info"}]
+    },
+    cardiac: {
+      title:"Cardiac Clearance — Dr. Rao (Cardiology)",grid:"c1",
+      items:[{k:"Clearance date",v:"02/20/2026",st:""},{k:"EKG",v:"Normal sinus rhythm, rate 72, no ST changes",st:"ok"},{k:"EKG date",v:"02/20/2026",st:""},{k:"Echo",v:"EF 60%, no wall motion abnormalities, mild MR",st:""},{k:"Echo date",v:"01/15/2026",st:""},{k:"Stress test",v:"Not indicated",st:""},{k:"Cardiac Hx",v:"AFib (paroxysmal), HTN",st:""},{k:"Recommendation",v:"Cleared for surgery. Resume Eliquis post-op when surgeon approves. Hold Lisinopril day of surgery.",st:"ok"}],
+      note:"Cleared by Dr. Rao on 02/20. Paroxysmal AFib — currently in NSR. Eliquis management plan coordinated with surgeon.",
+      flags:[{t:"Cleared for surgery",c:"ok"},{t:"AFib — resume anticoagulation post-op",c:"info"}]
+    },
+    medholds: {
+      title:"Medication Hold Confirmations",grid:"c1",
+      items:[{k:"Eliquis 5mg BID",v:"HOLD 3 days pre-op — Last dose: 02/25 evening",st:"ok"},{k:"Lisinopril 10mg daily",v:"HOLD day of surgery — Last dose: 02/27 morning",st:"ok"},{k:"Metoprolol 25mg BID",v:"DO NOT HOLD — Take morning of surgery with sip of water",st:"info"},{k:"Metformin 1000mg BID",v:"HOLD day of surgery — Last dose: 02/27 evening",st:"ok"}],
+      note:"Patient confirmed hold instructions via SMS on 02/26. Eliquis washout verified by INR 1.0.",
+      flags:[{t:"All holds confirmed",c:"ok"},{t:"SMS confirmation 02/26",c:"info"}]
+    },
+    hp: {
+      title:"H&P Summary — Dr. Henderson, 02/25/2026",grid:"c1",
+      items:[{k:"Exam date",v:"02/25/2026 (4 days ago)",st:"ok"},{k:"Chief complaint",v:"Right knee pain, bone-on-bone OA, failed conservative management × 2 years",st:""},{k:"Key findings",v:"Right knee: Varus deformity, ROM 5–105°, crepitus, no effusion. Stable gait with antalgic component.",st:""},{k:"Comorbidities",v:"T2DM (controlled), HTN, Paroxysmal AFib, Obesity Class I",st:""},{k:"ASA Class",v:"III",st:"lo"},{k:"Anesthesia considerations",v:"AFib history — monitor rhythm. BMI 31.4 — standard airway expected.",st:""}],
+      note:"H&P valid through 03/27/2026 (30-day window). ASA III due to multiple controlled comorbidities.",
+      flags:[{t:"H&P valid — expires 03/27",c:"ok"},{t:"ASA III",c:"info"}]
+    },
+    consent: {
+      title:"Surgical Consent",grid:"c2",
+      items:[{k:"Procedure",v:"Right Total Knee Arthroplasty",st:""},{k:"Surgeon",v:"Dr. Henderson",st:""},{k:"Signed by patient",v:"02/25/2026",st:"ok"},{k:"Witness",v:"Jessica M., RN",st:""},{k:"Laterality confirmed",v:"RIGHT knee",st:""},{k:"Risks reviewed",v:"Infection, DVT/PE, nerve damage, stiffness, revision",st:""}],
+      note:"Consent signed at clinic visit on 02/25. Patient verbalized understanding. Laterality matches schedule."
+    },
+    insurance: {
+      title:"Insurance Authorization",grid:"c2",
+      items:[{k:"Auth number",v:"AUTH-90281",st:"ok"},{k:"Payer",v:"Blue Cross Blue Shield",st:""},{k:"Plan",v:"PPO — Medicare Supplement",st:""},{k:"Authorization for",v:"Right TKA (CPT 27447)",st:""},{k:"Valid through",v:"03/15/2026",st:""},{k:"Implant coverage",v:"Approved — standard implant system",st:"ok"}],
+      note:"Authorization valid. Medicare Supplement — no prior auth issues expected."
+    },
+    allergies: {
+      title:"Allergy Detail",grid:"c1",
+      items:[{k:"Penicillin",v:"Rash / Urticaria — Moderate — Chart-Documented (2015)",st:"lo"},{k:"Sulfa",v:"GI Upset — Mild — Patient-Reported (2010)",st:""},{k:"Cross-reactivity",v:"⚠ Penicillin allergy + Ancef order: Cephalosporin cross-reactivity risk ~2%. Rash reaction = may use with provider approval.",st:"lo"}],
+      note:"Penicillin allergy is rash, not anaphylaxis. Cephalosporin (Ancef) may be administered per provider approval. Alternative: Vancomycin or Clindamycin.",
+      flags:[{t:"Ancef usable with provider approval",c:"info"},{t:"Not anaphylaxis",c:"ok"}]
+    },
+    meds:{title:"Home Medications — 8 on file",grid:"c1",
+      items:[{k:"Eliquis 5mg BID",v:"for AFib — HOLD 3d pre-op — Rx · Dr. Rao (Cardiology)",st:""},{k:"Lisinopril 10mg daily",v:"for HTN — HOLD day-of — Rx · Dr. Adams (PCP)",st:""},{k:"Metoprolol 25mg BID",v:"for Rate control — DO NOT HOLD — Rx · Dr. Rao (Cardiology)",st:"info"},{k:"Metformin 1000mg BID",v:"for T2DM — HOLD day-of — Rx · Dr. Adams (PCP)",st:""},{k:"Atorvastatin 20mg QHS",v:"for Cholesterol — Continue — Rx · Dr. Adams (PCP)",st:""},{k:"Aspirin 81mg daily",v:"for Cardioprotection — HOLD 7d — OTC",st:""},{k:"Calcium + D3 600mg",v:"for Bone health — Continue — OTC",st:""},{k:"Gabapentin 300mg TID",v:"for Neuropathic pain — Continue — Rx · Dr. Adams (PCP)",st:""}],
+      note:"8 home medications reconciled at PAC. 4 held, 4 continued. PAC confirmed all 8."
+    },
+    identity:{title:"Patient Identity",grid:"c2",
+      items:[{k:"Full name",v:"Margaret Ann Thompson",st:""},{k:"DOB",v:"03/15/1957 (age 68)",st:""},{k:"MRN",v:"TJR-20241",st:""},{k:"Sex",v:"Female",st:""},{k:"Address",v:"142 Oakwood Dr, Gainesville, GA 30501",st:""},{k:"Phone",v:"(770) 555-0148",st:""}]
+    },
+    adult:{title:"Responsible Adult",grid:"c2",
+      items:[{k:"Name",v:"Robert Thompson (son)",st:""},{k:"Phone",v:"(770) 555-0192",st:""},{k:"Relationship",v:"Son",st:""},{k:"Will be present",v:"Confirmed — arriving with patient",st:"ok"}]
+    },
+    sitemark:{title:"Surgical Site Verification",grid:"c2",
+      items:[{k:"Procedure",v:"Right Total Knee Arthroplasty",st:""},{k:"Laterality",v:"RIGHT",st:"ok"},{k:"Surgeon",v:"Dr. Henderson",st:""},{k:"Consent matches",v:"Yes — Right TKA",st:"ok"},{k:"Schedule matches",v:"Yes — Right TKA @ 07:30",st:"ok"},{k:"Imaging confirms",v:"Right knee OA — bone-on-bone",st:""}]
+    }
+  },
+  2: { // James Rodriguez
+    labs:{title:"Lab Results — Drawn 02/23/2026",grid:"c3",
+      items:[{k:"WBC",v:"6.8",u:"K/μL",st:""},{k:"Hgb",v:"14.2",u:"g/dL",st:""},{k:"Hct",v:"42.6",u:"%",st:""},{k:"Plt",v:"198",u:"K/μL",st:""},{k:"Na",v:"139",u:"mEq/L",st:""},{k:"K",v:"4.3",u:"mEq/L",st:""},{k:"BUN",v:"22",u:"mg/dL",st:""},{k:"Cr",v:"1.1",u:"mg/dL",st:""},{k:"Glucose",v:"98",u:"mg/dL",st:"ok"},{k:"PT",v:"11.8",u:"sec",st:""},{k:"INR",v:"1.0",u:"",st:"ok"},{k:"Type & Screen",v:"O+",u:"",st:"info"}],
+      note:"All values within normal limits. No coagulation concerns.",flags:[{t:"All within normal limits",c:"ok"}]},
+    a1c:{title:"A1c — Drawn 02/23/2026",grid:"c2",items:[{k:"A1c",v:"5.8%",st:"ok"},{k:"Threshold",v:"< 8.0%",st:""},{k:"Classification",v:"Non-diabetic range",st:"ok"},{k:"Equivalent avg glucose",v:"~120 mg/dL",st:""}],flags:[{t:"Non-diabetic",c:"ok"}]},
+    bmi:{title:"Body Metrics — Recorded 02/26/2026",grid:"c3",items:[{k:"Height",v:"5'11\"",st:""},{k:"Weight",v:"95 kg",st:""},{k:"BMI",v:"27.1",st:""},{k:"Threshold",v:"< 40",st:""},{k:"BMI Class",v:"Overweight",st:""},{k:"Ancef dose",v:"2g (weight < 120kg)",st:""}],flags:[{t:"Within threshold",c:"ok"}]},
+    medholds:{title:"Medication Hold Confirmations",grid:"c1",items:[{k:"Aspirin 325mg daily",v:"HOLD 7 days pre-op — Last dose: 02/19 morning",st:"ok"},{k:"Lisinopril 20mg daily",v:"DO NOT HOLD — Take morning of surgery",st:"info"},{k:"Amlodipine 5mg daily",v:"DO NOT HOLD — Take morning of surgery",st:"info"}],note:"Aspirin held for 10 days (exceeds 7-day requirement). Patient confirmed via phone call 02/24.",flags:[{t:"All holds confirmed",c:"ok"},{t:"Aspirin washout exceeded",c:"ok"}]},
+    hp:{title:"H&P Summary — Dr. Patel, 02/26/2026",grid:"c1",items:[{k:"Exam date",v:"02/26/2026 (3 days ago)",st:"ok"},{k:"Chief complaint",v:"Left hip pain, advanced OA, bone-on-bone. Failed PT, injections, NSAIDs.",st:""},{k:"Key findings",v:"Left hip: Limited IR 5°, flexion 90°, groin pain with ROM. Antalgic gait.",st:""},{k:"Comorbidities",v:"HTN (controlled), Mild CKD (Cr 1.1), BPH",st:""},{k:"ASA Class",v:"II",st:"ok"}],flags:[{t:"H&P valid — expires 03/28",c:"ok"},{t:"ASA II",c:"ok"}]},
+    consent:{title:"Surgical Consent",grid:"c2",items:[{k:"Procedure",v:"Left Total Hip Arthroplasty",st:""},{k:"Surgeon",v:"Dr. Patel",st:""},{k:"Signed",v:"02/26/2026",st:"ok"},{k:"Laterality",v:"LEFT hip",st:"ok"}]},
+    insurance:{title:"Insurance Authorization",grid:"c2",items:[{k:"Auth number",v:"AUTH-90315",st:"ok"},{k:"Payer",v:"Medicare Part A",st:""},{k:"Authorization for",v:"Left THA (CPT 27130)",st:""},{k:"Valid through",v:"03/20/2026",st:""}]},
+    allergies:{title:"Allergy Detail",grid:"c1",items:[{k:"Status",v:"NKDA — No Known Drug Allergies",st:"ok"}],flags:[{t:"NKDA",c:"ok"}]},
+    meds:{title:"Home Medications — 5 on file",grid:"c1",items:[{k:"Aspirin 325mg daily",v:"for Cardioprotection — HOLD 7d — OTC",st:""},{k:"Lisinopril 20mg daily",v:"for HTN — Continue — Rx · Dr. Kim (PCP)",st:""},{k:"Amlodipine 5mg daily",v:"for HTN — Continue — Rx · Dr. Kim (PCP)",st:""},{k:"Tamsulosin 0.4mg QHS",v:"for BPH — Continue — Rx · Dr. Kim (PCP)",st:""},{k:"Vitamin D3 2000IU",v:"for Supplementation — Continue — OTC",st:""}]},
+    identity:{title:"Patient Identity",grid:"c2",items:[{k:"Full name",v:"James Miguel Rodriguez",st:""},{k:"DOB",v:"11/08/1953 (age 72)",st:""},{k:"MRN",v:"TJR-20242",st:""},{k:"Sex",v:"Male",st:""}]},
+    adult:{title:"Responsible Adult",grid:"c2",items:[{k:"Name",v:"Maria Rodriguez (wife)",st:""},{k:"Phone",v:"(770) 555-0231",st:""},{k:"Will be present",v:"Confirmed",st:"ok"}]},
+    sitemark:{title:"Surgical Site Verification",grid:"c2",items:[{k:"Procedure",v:"Left Total Hip Arthroplasty",st:""},{k:"Laterality",v:"LEFT",st:"ok"},{k:"Consent matches",v:"Yes",st:"ok"},{k:"Schedule matches",v:"Yes",st:"ok"}]}
+  },
+  3: { // Dorothy Chen — problematic patient with issues
+    labs:{title:"Lab Results — Drawn 02/21/2026",grid:"c3",
+      items:[{k:"WBC",v:"8.1",u:"K/μL",st:""},{k:"Hgb",v:"11.2",u:"g/dL",st:"lo"},{k:"Hct",v:"33.6",u:"%",st:"lo"},{k:"Plt",v:"312",u:"K/μL",st:""},{k:"Na",v:"138",u:"mEq/L",st:""},{k:"K",v:"4.5",u:"mEq/L",st:""},{k:"BUN",v:"16",u:"mg/dL",st:""},{k:"Cr",v:"0.8",u:"mg/dL",st:""},{k:"Glucose",v:"186",u:"mg/dL",st:"hi"},{k:"HgA1c",v:"7.9",u:"%",st:"hi"},{k:"Type & Screen",v:"B+",u:"",st:"info"},{k:"PT/INR",v:"N/A",u:"",st:""}],
+      note:"Hgb 11.2 borderline — may need type & cross if significant EBL expected. Glucose 186 reflects poor A1c control at 7.9%. Discuss with surgeon regarding surgical clearance.",
+      flags:[{t:"A1c 7.9% — ABOVE 8.0% threshold?",c:"warn"},{t:"Hgb 11.2 — borderline low",c:"warn"},{t:"Glucose 186 — elevated",c:"warn"}]},
+    a1c:{title:"A1c — Drawn 02/21/2026",grid:"c2",items:[{k:"A1c",v:"7.9%",st:"hi"},{k:"Threshold",v:"< 8.0%",st:""},{k:"Status",v:"⚠ Borderline — 0.1% below cutoff",st:"lo"},{k:"Last A1c (09/2025)",v:"8.2%",st:"hi"},{k:"Equivalent avg glucose",v:"~180 mg/dL",st:"hi"},{k:"Endocrine",v:"Dr. Park — follow-up scheduled post-op",st:""}],
+      note:"A1c 7.9% is technically within threshold (<8.0%) but borderline. Previous A1c was 8.2% — trending down. Surgeon approved to proceed. Jardiance and Metformin held pre-op may cause temporary glucose elevation.",
+      flags:[{t:"Borderline — surgeon approved",c:"info"},{t:"Trending down from 8.2%",c:"ok"}]},
+    bmi:{title:"Body Metrics — Recorded 02/24/2026",grid:"c3",items:[{k:"Height",v:"5'4\"",st:""},{k:"Weight",v:"88 kg",st:""},{k:"BMI",v:"33.2",st:"lo"},{k:"Threshold",v:"< 40",st:""},{k:"BMI Class",v:"Obese I",st:"lo"},{k:"Ancef dose",v:"2g (weight < 120kg)",st:""}],flags:[{t:"Within threshold",c:"ok"}]},
+    cardiac:{title:"Cardiac Clearance — Dr. Liu (Cardiology)",grid:"c1",
+      items:[{k:"Clearance date",v:"02/18/2026",st:""},{k:"EKG",v:"Normal sinus rhythm, rate 78, LVH pattern, no ischemic changes",st:""},{k:"EKG date",v:"02/18/2026",st:""},{k:"Echo",v:"EF 55%, mild diastolic dysfunction, no significant valvular disease",st:""},{k:"Echo date",v:"01/10/2026",st:""},{k:"Cardiac Hx",v:"HTN (longstanding), T2DM — cardiac risk factors present",st:""},{k:"Recommendation",v:"Cleared for surgery. Continue Metoprolol morning of surgery. Monitor glucose perioperatively.",st:"ok"}],
+      flags:[{t:"Cleared for surgery",c:"ok"},{t:"Monitor glucose",c:"info"}]},
+    medholds:{title:"Medication Hold Confirmations — ⚠ INCOMPLETE",grid:"c1",
+      items:[{k:"Metformin 1000mg BID",v:"HOLD 2 days pre-op — ⛔ NOT CONFIRMED",st:"hi"},{k:"Jardiance 25mg daily",v:"HOLD 3 days pre-op — ⛔ NOT CONFIRMED",st:"hi"},{k:"Fish Oil 1200mg daily",v:"HOLD 7 days pre-op — ⛔ NOT CONFIRMED",st:"hi"},{k:"Metoprolol 50mg BID",v:"DO NOT HOLD — Take morning of surgery",st:"info"},{k:"Lisinopril 20mg daily",v:"HOLD day-of — NOT CONFIRMED",st:"hi"}],
+      note:"Patient has NOT confirmed medication holds. Multiple attempts via SMS and phone — no response since 02/22. This is a potential day-of cancellation risk if diabetic meds were not held.",
+      flags:[{t:"⛔ Holds not confirmed",c:"warn"},{t:"Cancellation risk",c:"warn"}]},
+    hp:{title:"H&P Summary — Dr. Henderson, 02/24/2026",grid:"c1",items:[{k:"Exam date",v:"02/24/2026 (5 days ago)",st:"ok"},{k:"Chief complaint",v:"Left knee pain, advanced tricompartmental OA",st:""},{k:"Key findings",v:"Left knee: Valgus deformity, ROM 0–95°, large effusion, crepitus. Ambulates with cane.",st:""},{k:"Comorbidities",v:"T2DM (poorly controlled), HTN, Obesity Class I, Latex allergy (anaphylaxis)",st:""},{k:"ASA Class",v:"III",st:"lo"},{k:"Latex precautions",v:"⚠ LATEX-FREE ENVIRONMENT REQUIRED — anaphylaxis history",st:"hi"}],
+      note:"CRITICAL: Latex-free OR setup required. Notify OR staff and anesthesia. First case of day preferred for latex allergy patients but scheduled third.",
+      flags:[{t:"LATEX-FREE OR REQUIRED",c:"warn"},{t:"ASA III",c:"info"}]},
+    consent:{title:"Surgical Consent",grid:"c2",items:[{k:"Procedure",v:"Left Total Knee Arthroplasty",st:""},{k:"Surgeon",v:"Dr. Henderson",st:""},{k:"Signed",v:"02/24/2026",st:"ok"},{k:"Laterality",v:"LEFT knee",st:"ok"}]},
+    insurance:{title:"Insurance Authorization",grid:"c2",items:[{k:"Auth number",v:"AUTH-90287",st:"ok"},{k:"Payer",v:"Aetna",st:""},{k:"Authorization for",v:"Left TKA (CPT 27447)",st:""},{k:"Valid through",v:"03/24/2026",st:""}]},
+    allergies:{title:"Allergy Detail — ⚠ HIGH ALERT",grid:"c1",
+      items:[{k:"Latex",v:"ANAPHYLAXIS — Severe — Observed in Facility (2018)",st:"hi"}],
+      note:"ANAPHYLAXIS to latex documented in 2018 at outside facility. Requires complete latex-free environment: gloves, catheters, tourniquets, IV tubing must all be latex-free. Epi pen should be available.",
+      flags:[{t:"⛔ LATEX ANAPHYLAXIS",c:"warn"},{t:"Latex-free OR mandatory",c:"warn"}]},
+    meds:{title:"Home Medications — 11 on file",grid:"c1",items:[{k:"Metformin 1000mg BID",v:"for T2DM — HOLD 2d — Rx · Dr. Park (Endocrine)",st:""},{k:"Jardiance 25mg daily",v:"for T2DM — HOLD 3d — Rx · Dr. Park (Endocrine)",st:""},{k:"Glipizide 5mg BID",v:"for T2DM — HOLD day-of — Rx · Dr. Park (Endocrine)",st:""},{k:"Metoprolol 50mg BID",v:"for HTN — DO NOT HOLD — Rx · Dr. Liu (Cardiology)",st:"info"},{k:"Lisinopril 20mg daily",v:"for HTN — HOLD day-of — Rx · Dr. Chen (PCP)",st:""},{k:"HCTZ 25mg daily",v:"for HTN — Continue — Rx · Dr. Chen (PCP)",st:""},{k:"Atorvastatin 40mg QHS",v:"for Cholesterol — Continue — Rx · Dr. Chen (PCP)",st:""},{k:"Fish Oil 1200mg daily",v:"for Wellness — HOLD 7d — HERB",st:""},{k:"Calcium + D3 600mg",v:"for Bone health — Continue — OTC",st:""},{k:"Gabapentin 300mg TID",v:"for Neuropathy — Continue — Rx · Dr. Chen (PCP)",st:""},{k:"Omeprazole 20mg daily",v:"for GERD — Continue — Rx · Dr. Chen (PCP)",st:""}]},
+    identity:{title:"Patient Identity",grid:"c2",items:[{k:"Full name",v:"Dorothy Wei Chen",st:""},{k:"DOB",v:"07/22/1960 (age 65)",st:""},{k:"MRN",v:"TJR-20243",st:""},{k:"Sex",v:"Female",st:""}]},
+    adult:{title:"Responsible Adult",grid:"c2",items:[{k:"Name",v:"Lisa Chen (daughter)",st:""},{k:"Phone",v:"(770) 555-0367",st:""},{k:"Will be present",v:"Confirmed",st:"ok"}]},
+    sitemark:{title:"Surgical Site Verification",grid:"c2",items:[{k:"Procedure",v:"Left Total Knee Arthroplasty",st:""},{k:"Laterality",v:"LEFT",st:"ok"},{k:"Consent matches",v:"Yes",st:"ok"},{k:"Schedule matches",v:"Yes",st:"ok"}]}
+  },
+  4: { // William Foster — clean patient
+    labs:{title:"Lab Results — Drawn 02/24/2026",grid:"c3",
+      items:[{k:"WBC",v:"5.9",u:"K/μL",st:""},{k:"Hgb",v:"15.1",u:"g/dL",st:""},{k:"Hct",v:"45.3",u:"%",st:""},{k:"Plt",v:"220",u:"K/μL",st:""},{k:"Na",v:"140",u:"mEq/L",st:""},{k:"K",v:"4.0",u:"mEq/L",st:""},{k:"BUN",v:"14",u:"mg/dL",st:""},{k:"Cr",v:"0.9",u:"mg/dL",st:""},{k:"Glucose",v:"92",u:"mg/dL",st:"ok"},{k:"Type & Screen",v:"O-",u:"",st:"info"}],
+      flags:[{t:"All within normal limits",c:"ok"}]},
+    a1c:{title:"A1c — Drawn 02/24/2026",grid:"c2",items:[{k:"A1c",v:"5.4%",st:"ok"},{k:"Classification",v:"Normal — non-diabetic",st:"ok"}],flags:[{t:"Non-diabetic",c:"ok"}]},
+    bmi:{title:"Body Metrics — Recorded 02/27/2026",grid:"c3",items:[{k:"Height",v:"5'10\"",st:""},{k:"Weight",v:"78 kg",st:""},{k:"BMI",v:"25.8",st:""},{k:"BMI Class",v:"Overweight",st:""},{k:"Ancef dose",v:"2g (weight < 120kg)",st:""}],flags:[{t:"Within threshold",c:"ok"}]},
+    medholds:{title:"Medication Hold Confirmations",grid:"c1",items:[{k:"Status",v:"No medications require holding",st:"ok"},{k:"Ibuprofen PRN",v:"Patient reports occasional use — advised to stop 7 days pre-op",st:"info"}],flags:[{t:"No holds required",c:"ok"}]},
+    hp:{title:"H&P Summary — Dr. Patel, 02/27/2026",grid:"c1",items:[{k:"Exam date",v:"02/27/2026 (2 days ago)",st:"ok"},{k:"Chief complaint",v:"Right hip pain, advanced OA",st:""},{k:"Key findings",v:"Right hip: Flexion 80°, IR 0°, groin pain. Positive impingement.",st:""},{k:"Comorbidities",v:"Mild GERD, Codeine sensitivity (nausea)",st:""},{k:"ASA Class",v:"I",st:"ok"}],flags:[{t:"H&P valid — expires 03/29",c:"ok"},{t:"ASA I — low risk",c:"ok"}]},
+    consent:{title:"Surgical Consent",grid:"c2",items:[{k:"Procedure",v:"Right Total Hip Arthroplasty",st:""},{k:"Surgeon",v:"Dr. Patel",st:""},{k:"Signed",v:"02/27/2026",st:"ok"},{k:"Laterality",v:"RIGHT hip",st:"ok"}]},
+    insurance:{title:"Insurance Authorization",grid:"c2",items:[{k:"Auth number",v:"AUTH-90342",st:"ok"},{k:"Payer",v:"United Healthcare",st:""},{k:"Authorization for",v:"Right THA (CPT 27130)",st:""},{k:"Valid through",v:"03/27/2026",st:""}]},
+    allergies:{title:"Allergy Detail",grid:"c1",items:[{k:"Codeine",v:"Nausea/vomiting — Moderate — Patient-Reported",st:"lo"}],note:"Codeine sensitivity — avoid codeine-containing analgesics post-op. Use non-codeine alternatives (oxycodone, hydromorphone).",flags:[{t:"Avoid codeine analgesics",c:"info"}]},
+    meds:{title:"Home Medications — 3 on file",grid:"c1",items:[{k:"Omeprazole 20mg daily",v:"for GERD — Continue — Rx · Dr. Brooks (PCP)",st:""},{k:"Vitamin D3 1000IU",v:"for Supplementation — Continue — OTC",st:""},{k:"Ibuprofen 400mg PRN",v:"for Pain — Discontinued pre-op — OTC",st:""}]},
+    identity:{title:"Patient Identity",grid:"c2",items:[{k:"Full name",v:"William James Foster",st:""},{k:"DOB",v:"09/03/1967 (age 58)",st:""},{k:"MRN",v:"TJR-20244",st:""},{k:"Sex",v:"Male",st:""}]},
+    adult:{title:"Responsible Adult",grid:"c2",items:[{k:"Name",v:"Sarah Foster (wife)",st:""},{k:"Phone",v:"(770) 555-0412",st:""},{k:"Will be present",v:"Confirmed",st:"ok"}]},
+    sitemark:{title:"Surgical Site Verification",grid:"c2",items:[{k:"Procedure",v:"Right Total Hip Arthroplasty",st:""},{k:"Laterality",v:"RIGHT",st:"ok"},{k:"Consent matches",v:"Yes",st:"ok"},{k:"Schedule matches",v:"Yes",st:"ok"}]}
+  }
+};
+
+// Map checklist item IDs to clinic data keys
+const CLINIC_KEY_MAP = {
+  labs:"labs",a1c:"a1c",bmi:"bmi",cardiac:"cardiac",medholds:"medholds",hp:"hp",consent:"consent",insurance:"insurance",
+  identity:"identity",allergies:"allergies",meds:"meds",adult:"adult",sitemark:"sitemark"
+};
+
+// ═══ Patient Data ═══
+const PTS=[
+  {id:1,fn:"Margaret",ln:"Thompson",age:68,sex:"F",mrn:"TJR-20241",dob:"03/15/1957",joint:"Knee",lat:"Right",proc:"Right TKA",surgeon:"Dr. Henderson",or:"07:30",bay:"Pre-Op 1",wt:82,allergies:["Penicillin (rash)","Sulfa (GI)"],mc:8,adult:"Son — Robert Thompson",orders:"Ancef 2g IV, Celebrex 200mg PO, Tylenol 1000mg PO",pac:{labs:1,a1c:1,a1cV:"6.2",bmi:1,bmiV:"31.4",cardiac:1,cardiacN:1,mh:1,hd:"Eliquis held 3d · Lisinopril held 1d",hp:1,hpD:"02/25/2026",consent:1,ins:1,auth:"AUTH-90281"}},
+  {id:2,fn:"James",ln:"Rodriguez",age:72,sex:"M",mrn:"TJR-20242",dob:"11/08/1953",joint:"Hip",lat:"Left",proc:"Left THA",surgeon:"Dr. Patel",or:"09:00",bay:"Pre-Op 3",wt:95,allergies:[],mc:5,adult:"Wife — Maria Rodriguez",orders:"Ancef 2g IV",pac:{labs:1,a1c:1,a1cV:"5.8",bmi:1,bmiV:"27.1",cardiac:0,cardiacN:0,mh:1,hd:"Aspirin held 7d",hp:1,hpD:"02/26/2026",consent:1,ins:1,auth:"AUTH-90315"}},
+  {id:3,fn:"Dorothy",ln:"Chen",age:65,sex:"F",mrn:"TJR-20243",dob:"07/22/1960",joint:"Knee",lat:"Left",proc:"Left TKA",surgeon:"Dr. Henderson",or:"11:00",bay:"—",wt:88,allergies:["Latex (anaphylaxis)"],mc:11,adult:"Daughter — Lisa Chen",orders:"Ancef 2g IV, Celebrex 200mg PO, Tylenol 1000mg PO",pac:{labs:1,a1c:0,a1cV:"7.9",bmi:1,bmiV:"33.2",cardiac:1,cardiacN:1,mh:0,hd:"Jardiance — NOT confirmed · Fish Oil — NOT confirmed",hp:1,hpD:"02/24/2026",consent:1,ins:1,auth:"AUTH-90287"}},
+  {id:4,fn:"William",ln:"Foster",age:58,sex:"M",mrn:"TJR-20244",dob:"09/03/1967",joint:"Hip",lat:"Right",proc:"Right THA",surgeon:"Dr. Patel",or:"13:00",bay:"—",wt:78,allergies:["Codeine (nausea)"],mc:3,adult:"Wife — Sarah Foster",orders:"Ancef 2g IV",pac:{labs:1,a1c:1,a1cV:"5.4",bmi:1,bmiV:"25.8",cardiac:0,cardiacN:0,mh:1,hd:"No holds required",hp:1,hpD:"02/27/2026",consent:1,ins:1,auth:"AUTH-90342"}}
+];
+
+const PHL={PAC:"Pre-Admission Clinic",CHECKIN:"Check-In",PREOP:"Pre-Op Assessment",ANESTHESIA:"Anesthesia"};
+function hpExp(d){if(!d)return!0;const p=d.split("/");return(new Date()-new Date(p[2],p[0]-1,p[1]))/(864e5)>30}
+function tn(){return new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})}
+function td(){return new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit"})}
+
+function bCL(pt){
+  const hx=hpExp(pt.pac.hpD);
+  return[
+    {id:"labs",ph:"PAC",tp:"verify",lb:"Labs Complete",sb:"CBC, BMP, Type & Screen",src:"c",vl:pt.pac.labs},
+    {id:"a1c",ph:"PAC",tp:"verify",lb:"A1c in Range",sb:pt.pac.a1cV?`A1c: ${pt.pac.a1cV}%`:null,src:"c",vl:pt.pac.a1c},
+    {id:"bmi",ph:"PAC",tp:"verify",lb:"BMI in Range",sb:pt.pac.bmiV?`BMI: ${pt.pac.bmiV}`:null,src:"c",vl:pt.pac.bmi},
+    {id:"cardiac",ph:"PAC",tp:"verify",lb:"Cardiac Clearance",sb:pt.pac.cardiacN?"Required — on file":"Not required",src:"c",vl:pt.pac.cardiac,na:!pt.pac.cardiacN},
+    {id:"medholds",ph:"PAC",tp:"verify",lb:"Medication Holds Confirmed",sb:pt.pac.hd,src:"c",vl:pt.pac.mh},
+    {id:"hp",ph:"PAC",tp:"verify",lb:"H&P on File",sb:pt.pac.hpD?`Dated ${pt.pac.hpD}${hx?" — ⛔ EXPIRED >30d":""}`:"Missing",src:"c",vl:pt.pac.hp&&!hx,iss:hx&&pt.pac.hp?"H&P expired":""},
+    {id:"consent",ph:"PAC",tp:"verify",lb:"Surgical Consent Signed",sb:null,src:"c",vl:pt.pac.consent},
+    {id:"insurance",ph:"PAC",tp:"verify",lb:"Insurance Authorization",sb:pt.pac.auth,src:"c",vl:pt.pac.ins},
+    {id:"arrived",ph:"CHECKIN",tp:"event",lb:"Patient Arrived",sb:null,src:"n"},
+    {id:"identity",ph:"CHECKIN",tp:"verify",lb:"Identity Verified & Wristband",sb:`DOB ${pt.dob} · MRN ${pt.mrn}`,src:"c"},
+    {id:"npo",ph:"CHECKIN",tp:"assess",lb:"NPO Status Confirmed",sb:"Last solids and clear liquids",src:"n",inp:"npo"},
+    {id:"adult",ph:"CHECKIN",tp:"verify",lb:"Responsible Adult Present",sb:pt.adult,src:"c"},
+    {id:"belongings",ph:"CHECKIN",tp:"event",lb:"Belongings Secured",sb:null,src:"n"},
+    {id:"pregnancy",ph:"CHECKIN",tp:"assess",lb:"Pregnancy Screen",sb:null,src:"n",na:pt.sex==="M"||pt.age>55,inp:"preg"},
+    {id:"healthscreen",ph:"PREOP",tp:"assess",lb:"Day-of Health Screening",sb:"Changes, symptoms, exposures",src:"n",inp:"hs"},
+    {id:"vitals",ph:"PREOP",tp:"assess",lb:"Vitals",sb:null,src:"n",inp:"vitals"},
+    {id:"allergies",ph:"PREOP",tp:"verify",lb:"Allergies Verified with Patient",sb:pt.allergies.length?pt.allergies.join(", "):"NKDA",src:"c"},
+    {id:"meds",ph:"PREOP",tp:"assess",lb:"Medication Reconciliation — Day-of",sb:`${pt.mc} meds · Held: ${pt.pac.hd||"none"}`,src:"c",inp:"mr"},
+    {id:"iv",ph:"PREOP",tp:"assess",lb:"IV Access",sb:null,src:"n",inp:"iv"},
+    {id:"sitemark",ph:"PREOP",tp:"verify",lb:"Surgical Site Marked & Verified",sb:`${pt.lat} ${pt.joint}`,src:"c"},
+    {id:"nursingassess",ph:"PREOP",tp:"assess",lb:"Nursing Assessment",sb:"Skin, mobility, mental status, fall risk",src:"n",inp:"na"},
+    {id:"checklist",ph:"PREOP",tp:"event",lb:"Prep Checklist Complete",sb:"Gown, dentures, jewelry, glasses, stockings",src:"n"},
+    {id:"preopmeds",ph:"PREOP",tp:"event",lb:"Pre-Op Meds Administered",sb:pt.orders,src:"n"},
+    {id:"anesinterview",ph:"ANESTHESIA",tp:"gate",lb:"Anesthesia Interview Complete",sb:null,src:"n"},
+    {id:"anesplan",ph:"ANESTHESIA",tp:"gate",lb:"Anesthesia Plan Documented",sb:null,src:"n"},
+    {id:"timeout",ph:"ANESTHESIA",tp:"gate",lb:"Pre-Op Time-Out Ready",sb:"Patient, procedure, site, consent, labs",src:"n"},
+  ];
+}
+
+const ST={};PTS.forEach(p=>ST[p.id]={comp:{},exp:null,det:null,so:null});
+let openPt=1;
+function gS(i,c){if(i.na)return"na";if(c[i.id])return"complete";if(i.ph==="PAC"&&i.vl===1)return"complete";if(i.ph==="PAC"&&i.vl===0)return"issue";return"pending"}
+const SCC={complete:{c:"var(--gn)",bg:"var(--gnB)"},pending:{c:"var(--yw)",bg:"var(--ywB)"},issue:{c:"var(--rd)",bg:"var(--rdB)"},na:{c:"var(--mt)",bg:"rgba(58,58,58,0.2)"}};
+const IC={complete:"✓",pending:"○",issue:"✕",na:"—"};
+
+function cI(pid,iid,det){ST[pid].comp[iid]={time:tn(),detail:det||null};ST[pid].exp=null;ST[pid].det=null;render()}
+function tE(pid,iid){ST[pid].exp=ST[pid].exp===iid?null:iid;ST[pid].det=null;render()}
+function tD(pid,iid){ST[pid].det=ST[pid].det===iid?null:iid;ST[pid].exp=null;render()}
+function tP(id){openPt=openPt===id?null:id;render()}
+function doSign(pid){const n=document.getElementById(`sn-${pid}`);const c=document.getElementById(`sc-${pid}`);if(!n||!n.value.trim())return;ST[pid].so={name:n.value.trim(),creds:c.value,time:`${td()} ${tn()}`};render()}
+
+// ═══ Render clinic detail panel ═══
+function renderCDP(pid,itemId){
+  const ck=CLINIC_KEY_MAP[itemId];if(!ck)return"";
+  const data=CLINIC[pid]?.[ck];if(!data)return"";
+  const gc=data.grid==="c2"?"c2":data.grid==="c1"?"c1":"";
+  let h=`<div class="cdp"><div class="cdp-title"><span>📋 ${data.title}</span><span style="font-size:9px;color:#4a4a4a;cursor:pointer" onclick="tD(${pid},'${itemId}')">✕ close</span></div>`;
+  h+=`<div class="cdp-grid ${gc}">`;
+  data.items.forEach(it=>{
+    const stCls=it.st==="hi"?" hi":it.st==="lo"?" lo":it.st==="ok"?" ok":it.st==="info"?" sm":"";
+    h+=`<div class="cdp-item"><div class="cdp-k">${it.k}</div><div class="cdp-v${stCls}">${it.v}${it.u?" "+it.u:""}</div></div>`;
+  });
+  h+=`</div>`;
+  if(data.flags){h+=`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">`;data.flags.forEach(f=>{h+=`<div class="cdp-flag ${f.c}">${f.t}</div>`});h+=`</div>`}
+  if(data.note)h+=`<div class="cdp-note">${data.note}</div>`;
+  // Verify button for day-of items that aren't yet verified
+  const st=ST[pid];const cl=bCL(PTS.find(p=>p.id===pid));const item=cl.find(i=>i.id===itemId);
+  if(item&&gS(item,st.comp)==="pending"&&item.src==="c"&&!item.inp){
+    h+=`<button class="vfy-btn" onclick="cI(${pid},'${itemId}')">✓ Verify & Confirm</button>`;
+  }
+  h+=`</div>`;return h;
+}
+
+// ═══ Input state + generators ═══
+const HS={},MR={},NAA={};
+
+function mkVitals(pid){const fs=[{k:"sbp",l:"SBP",p:"120"},{k:"dbp",l:"DBP",p:"80"},{k:"hr",l:"HR",p:"72"},{k:"temp",l:"Temp°F",p:"98.6"},{k:"spo2",l:"SpO2%",p:"98"},{k:"rr",l:"RR",p:"16"}];return`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px">${fs.map(f=>`<div><div class="il">${f.l}</div><input class="fi" type="number" placeholder="${f.p}" id="v${pid}${f.k}"></div>`).join("")}<div style="grid-column:1/-1;margin-top:4px"><button class="sb" onclick="svV(${pid})">Record Vitals</button></div></div>`}
+function svV(pid){const g=k=>(document.getElementById(`v${pid}${k}`)||{}).value||"";if(!g("sbp")||!g("dbp")||!g("hr")||!g("spo2"))return;cI(pid,"vitals",`${g("sbp")}/${g("dbp")} HR:${g("hr")} T:${g("temp")||"—"} SpO2:${g("spo2")} RR:${g("rr")||"—"}`)}
+function mkIV(pid){return`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px"><div><div class="il">Gauge</div><select class="fi" id="ig${pid}"><option value="">—</option><option>18g</option><option>20g</option><option>22g</option></select></div><div><div class="il">Site</div><select class="fi" id="is${pid}"><option value="">—</option><option>R Hand</option><option>L Hand</option><option>R AC</option><option>L AC</option><option>R Forearm</option><option>L Forearm</option></select></div><div><div class="il">Attempts</div><select class="fi" id="ia${pid}"><option>1</option><option>2</option><option>3</option></select></div><div style="grid-column:1/-1;margin-top:4px"><button class="sb" onclick="svI(${pid})">Record IV Access</button></div></div>`}
+function svI(pid){const g=document.getElementById(`ig${pid}`).value,s=document.getElementById(`is${pid}`).value,a=document.getElementById(`ia${pid}`).value;if(!g||!s)return;cI(pid,"iv",`${g} ${s}, ${a} attempt${a>1?"s":""}`)}
+function mkNPO(pid){return`<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px"><div><div class="il">Last Solids</div><input class="fi" type="time" id="nf${pid}"></div><div><div class="il">Last Clear Liquids</div><input class="fi" type="time" id="nc${pid}"></div><div style="grid-column:1/-1;margin-top:4px"><button class="sb" onclick="svN(${pid})">Confirm NPO</button></div></div>`}
+function svN(pid){const f=document.getElementById(`nf${pid}`).value,c=document.getElementById(`nc${pid}`).value;if(!f&&!c)return;cI(pid,"npo",`Solids: ${f||"denied"} | Clears: ${c||"denied"}`)}
+function mkPreg(pid){return`<div style="display:flex;gap:4px;margin-top:8px">${["Negative","Not indicated","Positive — STOP"].map(o=>`<button class="ob" style="flex:1${o.includes("STOP")?";border-color:var(--rdS);color:var(--rdS)":""}" onclick="cI(${pid},'pregnancy','${o}')">${o}</button>`).join("")}</div>`}
+
+function mkHS(pid){if(!HS[pid])HS[pid]={};const h=HS[pid];const qs=[{id:"symptoms",l:"New symptoms since last visit?",os:["None","Cough/cold","Fever","Chest pain","SOB","Other"]},{id:"exposure",l:"COVID / illness exposure?",os:["No","Yes — tested neg","Yes — not tested"]},{id:"changes",l:"Medication or health changes?",os:["No changes","New medication","ER/hospital visit","Other"]}];let r=`<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">`;qs.forEach(q=>{r+=`<div><div class="il2">${q.l}</div><div style="display:flex;flex-wrap:wrap;gap:4px">`;q.os.forEach(o=>{const s=h[q.id]===o;const f=o===q.os[0];r+=`<button class="ob${s?(f?" sg":" sr"):""}" onclick="hsS(${pid},'${q.id}','${o.replace(/'/g,"\\'")}')">${o}</button>`});r+=`</div></div>`});const ad=qs.every(q=>h[q.id]);const an=h.symptoms==="None"&&h.exposure==="No"&&h.changes==="No changes";r+=`<button class="sb${ad?(an?" ok":" dng"):""}" onclick="svHS(${pid})">${ad&&!an?"⚠ Flag & Record":"Record Screening"}</button></div>`;return r}
+function hsS(pid,k,v){if(!HS[pid])HS[pid]={};HS[pid][k]=v;render()}
+function svHS(pid){const h=HS[pid];if(!h?.symptoms||!h?.exposure||!h?.changes)return;const an=h.symptoms==="None"&&h.exposure==="No"&&h.changes==="No changes";cI(pid,"healthscreen",an?"No new symptoms, exposures, or changes":Object.entries(h).map(([k,v])=>`${k}: ${v}`).join(" · "))}
+
+function mkMR(pid,pt){if(!MR[pid])MR[pid]={};const m=MR[pid];let r=`<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px"><div><div class="il2">AM medications taken as instructed?</div><div style="display:flex;gap:4px">`;["Yes — all AM meds","Partial — some missed","No — none taken"].forEach(o=>{const s=m.am===o;r+=`<button class="ob${s?(o[0]==="Y"?" sg":" sr"):""}" style="flex:1" onclick="mrS(${pid},'am','${o.replace(/'/g,"\\'")}')">${o}</button>`});r+=`</div></div><div><div class="il2">Held medications confirmed? (${pt.pac.hd||"none"})</div><div style="display:flex;gap:4px">`;["Confirmed — all held","Issue — took held med","N/A — no holds"].forEach(o=>{const s=m.hold===o;const ok=o[0]==="C"||o[0]==="N";r+=`<button class="ob${s?(ok?" sg":" sr"):""}" style="flex:1" onclick="mrS(${pid},'hold','${o.replace(/'/g,"\\'")}')">${o}</button>`});r+=`</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div><div class="il">Last dose of held med</div><input class="fi" placeholder="e.g. Eliquis — Tue 8pm" id="mrl${pid}" value="${m.ld||""}"></div><div><div class="il">Notes</div><input class="fi" placeholder="e.g. Took metoprolol with sip" id="mrn${pid}" value="${m.n||""}"></div></div>`;const ok=m.am&&m.hold;r+=`<button class="sb${ok?" ok":""}" onclick="svMR(${pid})">Confirm Medication Reconciliation</button></div>`;return r}
+function mrS(pid,k,v){if(!MR[pid])MR[pid]={};MR[pid][k]=v;render()}
+function svMR(pid){const m=MR[pid];if(!m?.am||!m?.hold)return;const ld=(document.getElementById(`mrl${pid}`)||{}).value||"";const n=(document.getElementById(`mrn${pid}`)||{}).value||"";MR[pid].ld=ld;MR[pid].n=n;const p=[m.am,m.hold];if(ld)p.push(`Last dose: ${ld}`);if(n)p.push(n);cI(pid,"meds",p.join(" · "))}
+
+function mkNA(pid){if(!NAA[pid])NAA[pid]={};const n=NAA[pid];let r=`<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px"><div><div class="il2">Skin integrity at surgical site</div><div style="display:flex;gap:4px">`;["Intact — no issues","Rash/irritation","Open wound/lesion"].forEach(o=>{const s=n.skin===o;r+=`<button class="ob${s?(o[0]==="I"?" sg":" sr"):""}" style="flex:1" onclick="naS(${pid},'skin','${o.replace(/'/g,"\\'")}')">${o}</button>`});r+=`</div></div><div><div class="il2">Mobility / baseline</div><div style="display:flex;gap:4px">`;["Independent","Cane/walker","Wheelchair","Non-ambulatory"].forEach(o=>{const s=n.mob===o;r+=`<button class="ob${s?" sn":""}" style="flex:1" onclick="naS(${pid},'mob','${o}')">${o}</button>`});r+=`</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div><div class="il2">Mental status</div><div style="display:flex;gap:4px">`;["Alert & oriented","Confused/anxious"].forEach(o=>{const s=n.mental===o;r+=`<button class="ob${s?(o[0]==="A"?" sg":" sr"):""}" style="flex:1" onclick="naS(${pid},'mental','${o.replace(/'/g,"\\'")}')">${o}</button>`});r+=`</div></div><div><div class="il2">Fall risk</div><div style="display:flex;gap:4px">`;["Low","Moderate","High"].forEach(o=>{const s=n.fall===o;r+=`<button class="ob${s?(o==="Low"?" sg":o==="High"?" sr":" sy"):""}" style="flex:1" onclick="naS(${pid},'fall','${o}')">${o}</button>`});r+=`</div></div></div>`;const ok=n.skin&&n.mob&&n.mental&&n.fall;r+=`<button class="sb${ok?" ok":""}" onclick="svNA(${pid})">Record Nursing Assessment</button></div>`;return r}
+function naS(pid,k,v){if(!NAA[pid])NAA[pid]={};NAA[pid][k]=v;render()}
+function svNA(pid){const n=NAA[pid];if(!n?.skin||!n?.mob||!n?.mental||!n?.fall)return;cI(pid,"nursingassess",`Skin: ${n.skin} · Mobility: ${n.mob} · Mental: ${n.mental} · Fall risk: ${n.fall}`)}
+
+const INP={vitals:mkVitals,iv:mkIV,npo:mkNPO,preg:mkPreg,hs:mkHS,mr:mkMR,na:mkNA};
+
+// ═══ RENDER ═══
+function render(){
+  document.getElementById("tD").textContent=new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"})+" · Total Joint Specialists Centers";
+  let html="";
+  PTS.forEach(pt=>{
+    const s=ST[pt.id],cl=bCL(pt),co=s.comp,isO=openPt===pt.id;
+    const jc=pt.joint==="Hip"?{a:"var(--hp)",bg:"rgba(168,85,247,0.08)",b:"rgba(168,85,247,0.2)"}:{a:"var(--kn)",bg:"rgba(59,130,246,0.08)",b:"rgba(59,130,246,0.2)"};
+    const act=cl.filter(i=>!i.na),dn=act.filter(i=>{const x=gS(i,co);return x==="complete"||x==="na"}),iss=act.filter(i=>gS(i,co)==="issue");
+    const pct=Math.round(dn.length/act.length*100),hI=iss.length>0;
+    let cur="PAC";for(const p of["PAC","CHECKIN","PREOP","ANESTHESIA"]){const pi=cl.filter(i=>i.ph===p&&!i.na);if(!pi.every(i=>{const x=gS(i,co);return x==="complete"||x==="na"})){cur=p;break}if(p==="ANESTHESIA")cur="READY"}
+    const rdy=cur==="READY",sc=rdy?"var(--gn)":hI?"var(--rd)":"var(--yw)";
+
+    html+=`<div class="pc${rdy?" rdy":hI?" hi":""}"><div class="ph${isO?" op":""}" onclick="tP(${pt.id})">`;
+    html+=`<div class="jb" style="background:${jc.a}"></div><div class="pt"><div class="pt-t">${pt.or}</div><div class="pt-b">${pt.bay!=="—"?pt.bay:"No Bay"}</div></div>`;
+    html+=`<div class="pi"><div class="ptg"><span class="pn">${pt.ln}, ${pt.fn}</span><span class="pjt" style="background:${jc.bg};color:${jc.a};border:1px solid ${jc.b}">${pt.lat} ${pt.joint}</span>${pt.allergies.length?`<span class="pat">ALLERGY</span>`:""}</div><div class="pd">${pt.surgeon} · ${pt.proc} · ${pt.age}${pt.sex} · ${pt.wt}kg · MRN ${pt.mrn}</div></div>`;
+    html+=`<div class="rw"><svg width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" fill="none" stroke="#1a1a1a" stroke-width="3"/><circle cx="24" cy="24" r="20" fill="none" stroke="${sc}" stroke-width="3" stroke-linecap="round" stroke-dasharray="${(pct/100)*125.6} 125.6" transform="rotate(-90 24 24)" style="transition:stroke-dasharray .5s"/></svg><div class="rt${rdy?" rg":""}">${rdy?"✓":`${pct}%`}</div></div>`;
+    html+=`<div class="pb${rdy?" rg":""}">${rdy?"● Ready":PHL[cur]||cur}</div><div class="aw${isO?" op":""}">▼</div></div>`;
+
+    html+=`<div class="bd${isO?" op":""}">`;
+    if(pt.allergies.length)html+=`<div class="ab"><span>⚠</span>&nbsp;ALLERGIES: ${pt.allergies.join(" · ")}</div>`;
+
+    ["PAC","CHECKIN","PREOP"].forEach(ph=>{
+      const items=cl.filter(i=>i.ph===ph);const d=items.filter(i=>{const x=gS(i,co);return x==="complete"||x==="na"}).length;
+      const hi=items.some(i=>gS(i,co)==="issue"),ad=d===items.length;
+      html+=`<div class="phh"><span class="phl${ad?" dn":hi?" is":""}">${PHL[ph]}</span><span class="phc${ad?" dn":hi?" is":""}">${d}/${items.length}</span></div>`;
+      items.forEach(i=>{
+        const st=gS(i,co),scc=SCC[st],cp=co[i.id],isCl=i.src==="c",hasClinic=!!CLINIC_KEY_MAP[i.id]&&!!CLINIC[pt.id]?.[CLINIC_KEY_MAP[i.id]];
+        const ne=st==="pending"&&i.inp&&INP[i.inp],ct=st==="pending"&&!ne&&!hasClinic;
+        const isDet=s.det===i.id,isExp=s.exp===i.id;
+        const lt=st==="complete"?(isCl&&!cp?"From Clinic":(cp?.time||"Done")):st==="pending"?(i.tp==="verify"?"Tap to View":"Needs Input"):st==="issue"?(i.iss||"Action Needed"):"N/A";
+
+        // Click logic: clinic items open detail panel; assess items open input; events tap-complete
+        let oc="";
+        if(st==="na")oc="";
+        else if(ne)oc=`onclick="tE(${pt.id},'${i.id}')"`;
+        else if(hasClinic&&isCl)oc=`onclick="tD(${pt.id},'${i.id}')"`;
+        else if(ct)oc=`onclick="cI(${pt.id},'${i.id}')"`;
+        else if(st==="complete"&&hasClinic)oc=`onclick="tD(${pt.id},'${i.id}')"`;
+
+        const clickable=oc?"ck":"";
+        const viewHint=hasClinic&&(st==="complete"||st==="issue")&&!cp?" — tap to view data":"";
+
+        html+=`<div class="cl ${clickable}${st==="na"?" na":""}${isDet||isExp?" ex":""}" ${oc} style="border-left:3px solid ${scc.c}"><div class="ci" style="background:${scc.bg};color:${scc.c};border:1px solid ${scc.c}40">${IC[st]}</div><div class="cc"><div class="cr"><span class="cla" style="color:${st==="complete"?"#8a8a8a":"#d0d0d0"}">${i.lb}</span><span class="cb" style="background:${scc.bg};color:${scc.c};border:1px solid ${scc.c}25">${lt}</span></div>`;
+        if(i.sb||cp?.detail)html+=`<div class="cs${cp?.detail?" fl":""}">${cp?.detail||i.sb}</div>`;
+        if(isCl&&st==="complete"&&!cp&&hasClinic)html+=`<div class="ck-lnk">↳ synced from clinic${viewHint}</div>`;
+        html+=`</div></div>`;
+
+        // Detail panel
+        if(isDet&&hasClinic)html+=renderCDP(pt.id,i.id);
+        // Input panel
+        if(isExp&&i.inp){const fn=INP[i.inp];if(fn)html+=`<div class="cinp">${fn(pt.id,pt)}</div>`}
+      });
+    });
+
+    // Sign-off
+    const preA=cl.filter(i=>["PAC","CHECKIN","PREOP"].includes(i.ph)&&!i.na);
+    const apd=preA.every(i=>{const x=gS(i,co);return x==="complete"||x==="na"});
+    const iN=preA.filter(i=>gS(i,co)==="issue").length,pN=preA.filter(i=>gS(i,co)==="pending").length;
+    if(s.so){
+      html+=`<div class="so sgn"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="width:24px;height:24px;border-radius:50%;background:var(--gnB);color:var(--gn);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;border:1px solid rgba(42,107,63,0.3)">✓</div><span style="font-size:12px;font-weight:700;color:var(--gn);font-family:var(--m);letter-spacing:.06em;text-transform:uppercase">Pre-Op Nurse Review Complete</span></div><div class="sobd"><div>I have reviewed this patient's chart, verified all pre-operative items, performed assessments, reconciled medications, and confirm readiness for anesthesia evaluation.</div><div class="sonm">${s.so.name}, ${s.so.creds} — ${s.so.time}</div></div></div>`;
+    }else{
+      html+=`<div class="so${apd?" rts":""}"><div class="sot">Pre-Op Nurse Sign-Off</div>`;
+      if(!apd){let m="";if(iN)m+=`${iN} issue${iN>1?"s":""} need resolution. `;if(pN)m+=`${pN} item${pN>1?"s":""} still pending.`;html+=`<div class="soe">${m}</div>`}
+      html+=`<div class="sog"><div class="sof"><div><div class="il">Nurse Name</div><input class="fi" style="font-size:12px" placeholder="e.g. Jessica Martinez" id="sn-${pt.id}"></div><div><div class="il">Credentials</div><select class="fi" style="font-size:12px" id="sc-${pt.id}"><option>RN</option><option>BSN, RN</option><option>LPN</option><option>CRNA</option></select></div></div><button class="sob${apd?" ok":""}" onclick="${apd?`doSign(${pt.id})`:""}">Sign &amp; Attest</button></div><div class="soa">By signing, I attest that I have reviewed this patient's chart, verified all pre-operative items, performed assessments, reconciled medications, and confirm readiness for anesthesia evaluation.</div></div>`;
+    }
+
+    // Anesthesia
+    const ai=cl.filter(i=>i.ph==="ANESTHESIA");const ad2=ai.filter(i=>{const x=gS(i,co);return x==="complete"||x==="na"}).length;const aa=ad2===ai.length;
+    html+=`<div class="phh"><span class="phl${aa?" dn":""}">${PHL.ANESTHESIA}</span><span class="phc${aa?" dn":""}">${ad2}/${ai.length}</span></div>`;
+    ai.forEach(i=>{const st=gS(i,co),scc=SCC[st],cp=co[i.id],ct=st==="pending";const lt=st==="complete"?(cp?.time||"Done"):"Required";
+      html+=`<div class="cl${ct?" ck":""}" ${ct?`onclick="cI(${pt.id},'${i.id}')"`:""} style="border-left:3px solid ${scc.c}"><div class="ci" style="background:${scc.bg};color:${scc.c};border:1px solid ${scc.c}40">${IC[st]}</div><div class="cc"><div class="cr"><span class="cla" style="color:${st==="complete"?"#8a8a8a":"#d0d0d0"}">${i.lb}</span><span class="cb" style="background:${scc.bg};color:${scc.c};border:1px solid ${scc.c}25">${lt}</span></div>${i.sb?`<div class="cs">${i.sb}</div>`:""}</div></div>`});
+
+    if(rdy)html+=`<div class="ho"><div class="hot">● Ready for OR — Handoff Summary</div><div class="hob"><div><span>Patient:</span> ${pt.ln}, ${pt.fn} · ${pt.age}${pt.sex} · ${pt.wt}kg · MRN ${pt.mrn}</div><div><span>Procedure:</span> ${pt.proc} — ${pt.surgeon}</div><div><span>Allergies:</span> ${pt.allergies.length?pt.allergies.join(", "):"NKDA"}</div>${co.vitals?`<div><span>Vitals:</span> ${co.vitals.detail}</div>`:""}${co.iv?`<div><span>IV:</span> ${co.iv.detail}</div>`:""}${co.npo?`<div><span>NPO:</span> ${co.npo.detail}</div>`:""}${co.nursingassess?`<div><span>Assessment:</span> ${co.nursingassess.detail}</div>`:""}<div><span>Pre-Op Meds:</span> ${pt.orders}</div></div></div>`;
+    html+=`</div></div>`;
+  });
+  document.getElementById("cards").innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>
