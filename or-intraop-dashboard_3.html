@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TJR Hub · OR</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080808;--tx:#e0e0e0;--dm:#5a5a5a;
+  --gn:#2a6b3f;--gnB:rgba(42,107,63,.10);--gnS:#3a8b5f;
+  --yw:#8a6d2b;--ywB:rgba(138,109,43,.08);--ywS:#b8952f;
+  --rd:#8b2d2d;--rdB:rgba(139,45,45,.10);--rdS:#cf6b6b;
+  --kn:#3b82f6;--hp:#a855f7;
+  --m:'DM Mono',monospace;--s:'IBM Plex Sans',sans-serif;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+html{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+body{background:var(--bg);color:var(--tx);font-family:var(--s);height:100dvh;overflow:hidden;position:fixed;width:100%;display:flex;flex-direction:column}
+
+.top{padding:6px 16px;border-bottom:1px solid #141414;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10}
+.top-brand{font-size:9px;font-weight:700;color:#2a2a2a;font-family:var(--m);letter-spacing:.1em}
+.top-clock{font-size:16px;font-weight:700;font-family:var(--m)}
+.case-el{font-size:11px;font-family:var(--m);font-weight:600}
+
+.ctabs{display:flex;gap:3px;padding:5px 16px;border-bottom:1px solid #111;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ctab{padding:7px 12px;border-radius:6px;font-size:11px;font-family:var(--m);font-weight:600;cursor:pointer;border:1px solid #1a1a1a;background:#0d0d0d;color:#555;white-space:nowrap;min-height:38px;display:flex;align-items:center;gap:4px}
+.ctab.act{border-color:var(--gnS);background:var(--gnB);color:var(--gnS)}
+.ctab .jd{width:6px;height:6px;border-radius:2px;flex-shrink:0}
+
+.pbar{padding:6px 16px;background:#0a0a0a;border-bottom:1px solid #141414;flex-shrink:0;display:flex;align-items:center;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.pbar-name{font-size:14px;font-weight:700;white-space:nowrap}
+.pbar-tag{font-size:9px;padding:2px 6px;border-radius:3px;font-family:var(--m);font-weight:700;white-space:nowrap}
+.pbar-al{font-size:9px;padding:2px 5px;border-radius:3px;background:var(--rdB);color:var(--rdS);font-family:var(--m);font-weight:700;border:1px solid rgba(139,45,45,.2);white-space:nowrap}
+.pbar-stats{display:flex;gap:10px;margin-left:auto;flex-shrink:0}
+.ps{text-align:center}.psv{font-size:12px;font-weight:700;font-family:var(--m);line-height:1.1}.psl{font-size:7px;color:var(--dm);font-family:var(--m);text-transform:uppercase}
+
+.content{flex:1;overflow:hidden;position:relative}
+.pane{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 16px 100px;display:none}
+.pane.act{display:block}
+
+.bnav{display:flex;border-top:1px solid #1a1a1a;background:#0a0a0a;flex-shrink:0;padding-bottom:var(--safe-b);z-index:10}
+.bn{flex:1;padding:8px 0 6px;text-align:center;cursor:pointer;position:relative}
+.bn.act{background:rgba(255,255,255,.03)}
+.bn.act::after{content:"";position:absolute;top:0;left:25%;right:25%;height:2px;background:var(--gnS)}
+.bn-i{font-size:16px;line-height:1}.bn-l{font-size:8px;font-family:var(--m);color:#444;margin-top:1px}
+.bn.act .bn-l{color:var(--gnS)}
+
+/* ═══ TIMELINE ═══ */
+.ev{display:flex;align-items:stretch;margin-bottom:1px}
+.ev-rail{width:32px;flex-shrink:0;display:flex;flex-direction:column;align-items:center}
+.ev-dot{width:10px;height:10px;border-radius:50%;border:2px solid #2a2a2a;background:var(--bg);z-index:1;flex-shrink:0;margin-top:14px}
+.ev-dot.done{border-color:var(--gnS);background:var(--gn)}
+.ev-wire{width:2px;flex:1;background:#1a1a1a;margin:1px 0}.ev-wire.done{background:rgba(42,107,63,.2)}
+.ev-card{flex:1;padding:10px 12px;border-radius:8px;border:1px solid transparent;min-height:48px;display:flex;flex-direction:column;justify-content:center}
+.ev-card.pend{border-color:#1e1e1e;cursor:pointer;background:rgba(255,255,255,.01)}
+.ev-card.pend:active{background:rgba(255,255,255,.05);transform:scale(.98)}
+.ev-card.done{border-color:rgba(42,107,63,.12);background:rgba(42,107,63,.02);cursor:pointer}
+.ev-card.done:active{background:rgba(42,107,63,.06)}
+.ev-row{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.ev-title{font-size:13px;font-weight:600;flex:1}.ev-title.dn{color:#6a6a6a}
+.ev-stamp{font-size:11px;font-family:var(--m);font-weight:600;color:var(--gnS);flex-shrink:0}
+.ev-sub{font-size:10px;color:#444;font-family:var(--m);margin-top:1px;line-height:1.3}
+.ev-sub.fl{color:#777}
+.ev-edit{display:flex;gap:4px;margin-top:8px;padding-top:6px;border-top:1px solid #1e1e1e}
+.ebtn{padding:10px 8px;border-radius:6px;font-family:var(--m);font-size:11px;font-weight:600;cursor:pointer;border:1px solid #2a2a2a;background:#1a1a1a;color:#888;text-align:center;min-height:44px;display:flex;align-items:center;justify-content:center}
+.ebtn:active{background:#222}.ebtn.dng{border-color:rgba(139,45,45,.25);color:var(--rdS)}.ebtn.dng:active{background:var(--rdB)}
+.te-inp{flex:1;padding:8px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:6px;color:var(--tx);font-size:14px;font-family:var(--m);outline:none;min-height:44px}
+.tl-ph{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-family:var(--m);color:#3a3a3a;padding:8px 0 3px}
+.alrt{padding:8px 12px;border-radius:6px;margin-bottom:6px;display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--m);font-weight:600}
+.alrt.w{background:var(--ywB);border:1px solid rgba(138,109,43,.25);color:var(--ywS)}
+.alrt.c{background:var(--rdB);border:1px solid rgba(139,45,45,.25);color:var(--rdS);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.alrt .av{margin-left:auto;font-size:14px;font-weight:700}
+.spec-row{display:flex;gap:4px;margin-top:6px}
+.spec-inp{flex:1;padding:8px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:6px;color:var(--tx);font-size:12px;font-family:var(--m);outline:none;min-height:44px}
+.spec-btn{padding:8px 12px;border-radius:6px;font-family:var(--m);font-size:11px;font-weight:600;cursor:pointer;border:1px solid;min-height:44px;display:flex;align-items:center;justify-content:center}
+
+/* ═══ COUNTS ═══ */
+.cnt{padding:14px;background:rgba(255,255,255,.015);border:1px solid #1e1e1e;border-radius:10px;margin-bottom:10px}
+.cnt-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cnt-name{font-size:15px;font-weight:700}
+.cnt-badge{font-size:9px;padding:2px 8px;border-radius:10px;font-family:var(--m);font-weight:700}
+/* The count number IS the input */
+.cnt-num-wrap{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cnt-num-inp{width:80px;padding:8px;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:var(--tx);font-size:32px;font-weight:700;font-family:var(--m);text-align:center;outline:none}
+.cnt-num-inp:focus{border-color:#3a3a3a}
+.cnt-num-inp.ok{color:var(--gnS);border-color:rgba(42,107,63,.3)}
+.cnt-num-inp.bad{color:var(--rdS);border-color:rgba(139,45,45,.3)}
+.cnt-plus{flex:1;padding:14px;border-radius:8px;border:1px solid #2a2a2a;background:#1a1a1a;color:#ccc;font-size:14px;font-weight:700;font-family:var(--m);cursor:pointer;text-align:center;min-height:52px;display:flex;align-items:center;justify-content:center}
+.cnt-plus:active{background:#222;transform:scale(.97)}
+/* Verify row - stacked for phone */
+.cnt-vfy{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.cnt-vb{padding:14px;border-radius:8px;font-family:var(--m);font-size:13px;font-weight:700;cursor:pointer;border:1px solid #2a2a2a;background:#1a1a1a;color:#555;text-align:left;padding-left:16px;min-height:48px;display:flex;align-items:center}
+.cnt-vb:active{transform:scale(.98)}
+.cnt-vb.g{border-color:var(--gnS);background:var(--gnB);color:var(--gnS)}
+.cnt-vb.r{border-color:var(--rdS);background:var(--rdB);color:var(--rdS)}
+.cnt-undo{font-size:10px;font-family:var(--m);color:#555;margin-top:4px;cursor:pointer;padding:6px 0;text-decoration:underline;text-underline-offset:2px}
+.cnt-undo:active{color:#888}
+/* Incorrect free text */
+.cnt-issue{margin-top:6px}
+.cnt-issue-ta{width:100%;padding:10px;background:#111;border:1px solid rgba(139,45,45,.2);border-radius:6px;color:var(--tx);font-size:12px;font-family:var(--m);outline:none;min-height:60px;resize:vertical}
+.cnt-issue-lbl{font-size:9px;color:var(--rdS);font-family:var(--m);margin-bottom:3px}
+
+.ebl-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.ebl-box{padding:14px;background:rgba(255,255,255,.015);border:1px solid #1e1e1e;border-radius:10px;text-align:center}
+.ebl-lbl{font-size:9px;color:#555;font-family:var(--m);text-transform:uppercase;margin-bottom:4px}
+.ebl-inp{width:100%;text-align:center;background:transparent;border:none;color:var(--tx);font-size:28px;font-weight:700;font-family:var(--m);outline:none}
+.ebl-inp.red{color:var(--rdS)}.ebl-inp.blue{color:#5a9abf}
+
+.bigb{width:100%;padding:14px;border-radius:8px;font-family:var(--m);font-size:14px;font-weight:700;border:1px solid #2a2a2a;background:#1a1a1a;color:#444;text-align:center;min-height:52px}
+.bigb.ok{background:var(--gn);color:#fff;border-color:var(--gnS);cursor:pointer}
+.bigb.ok:active{transform:scale(.97);background:var(--gnS)}
+.done-b{padding:10px;background:var(--gnB);border:1px solid rgba(42,107,63,.2);border-radius:8px;text-align:center;font-family:var(--m);font-size:12px;color:var(--gnS);font-weight:600;margin-top:8px}
+
+/* ═══ IMPLANTS ═══ */
+.imp-card{display:flex;gap:12px;padding:12px;background:rgba(255,255,255,.015);border:1px solid #1e1e1e;border-radius:10px;align-items:flex-start;margin-bottom:8px}
+.imp-cam{width:72px;height:72px;border-radius:8px;border:1px dashed #2a2a2a;background:#111;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;color:#444;overflow:hidden}
+.imp-cam:active{background:#1a1a1a;transform:scale(.95)}
+.imp-cam.has{border:1px solid var(--gnS);padding:0}
+.imp-cam.has img{width:100%;height:100%;object-fit:cover}
+.imp-cam .cl{font-size:7px;font-family:var(--m);color:#555;margin-top:1px}
+.imp-body{flex:1;min-width:0}
+.imp-nm{font-size:11px;font-weight:700;color:#666;font-family:var(--m);margin-bottom:3px}
+.imp-reading{font-size:10px;color:var(--ywS);font-family:var(--m);font-style:italic}
+.imp-data{font-size:10px;color:#888;font-family:var(--m);line-height:1.6}.imp-data .v{color:var(--tx);font-weight:500}
+.imp-err{font-size:10px;color:var(--rdS);font-family:var(--m)}
+.imp-fi{width:100%;padding:8px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:6px;color:var(--tx);font-size:11px;font-family:var(--m);outline:none;margin-top:3px}
+.imp-fi:focus{border-color:#3a3a3a}
+.imp-add{width:100%;padding:12px;border-radius:8px;border:1px dashed #2a2a2a;background:transparent;color:#444;font-size:11px;font-family:var(--m);cursor:pointer;text-align:center;min-height:44px;margin-top:6px}
+.imp-add:active{background:rgba(255,255,255,.02)}
+.cam-input{display:none}
+
+/* ═══ INFO ═══ */
+.nta{width:100%;padding:12px;background:#111;border:1px solid #1e1e1e;border-radius:8px;color:var(--tx);font-size:13px;font-family:var(--m);outline:none;resize:vertical;min-height:80px}
+.nta:focus{border-color:#2a2a2a}
+.isec{margin-bottom:14px}
+.ihdr{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-family:var(--m);color:#3a3a3a;padding:5px 0;border-bottom:1px solid #161616;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center}
+.irow{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:11px;font-family:var(--m)}
+.ik{color:#555}.iv{color:#888;text-align:right;max-width:60%}
+/* Editable staff row */
+.staff-row{display:flex;align-items:center;gap:6px;padding:4px 0}
+.staff-role{font-size:10px;color:#555;font-family:var(--m);width:60px;flex-shrink:0}
+.staff-name{flex:1;padding:6px 8px;background:#111;border:1px solid #1a1a1a;border-radius:4px;color:var(--tx);font-size:11px;font-family:var(--m);outline:none}
+.staff-name:focus{border-color:#2a2a2a}
+/* PACU handoff */
+.ho{padding:14px;background:var(--gnB);border:1px solid rgba(42,107,63,.3);border-radius:10px;margin-top:10px}
+.ho-t{font-size:10px;font-weight:700;color:var(--gn);font-family:var(--m);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.ho-row{display:flex;justify-content:space-between;padding:3px 0;font-size:10px;font-family:var(--m)}
+.ho-k{color:rgba(42,107,63,.7)}.ho-v{color:#8a8a8a;text-align:right;max-width:60%}
+.ho-note{font-size:10px;color:#6a6a6a;font-family:var(--m);font-style:italic;margin-top:6px;padding-top:6px;border-top:1px solid rgba(42,107,63,.15)}
+
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#1a1a1a;border-radius:2px}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <span class="top-brand">TJR HUB · OR</span>
+  <div style="display:flex;align-items:baseline;gap:10px"><span class="case-el" id="caseEl"></span><span class="top-clock" id="clk"></span></div>
+</div>
+<div class="ctabs" id="ctabs"></div>
+<div class="pbar" id="pbar"></div>
+<div class="content">
+  <div class="pane act" id="p-tl"></div>
+  <div class="pane" id="p-cnt"></div>
+  <div class="pane" id="p-imp"></div>
+  <div class="pane" id="p-info"></div>
+</div>
+<div class="bnav">
+  <div class="bn act" data-t="tl" onclick="sw('tl')"><div class="bn-i">⏱</div><div class="bn-l">TIMELINE</div></div>
+  <div class="bn" data-t="cnt" onclick="sw('cnt')"><div class="bn-i">🔢</div><div class="bn-l">COUNTS</div></div>
+  <div class="bn" data-t="imp" onclick="sw('imp')"><div class="bn-i">📷</div><div class="bn-l">IMPLANTS</div></div>
+  <div class="bn" data-t="info" onclick="sw('info')"><div class="bn-i">📋</div><div class="bn-l">INFO</div></div>
+</div>
+
+<script>
+const C=[
+  {id:1,fn:"Margaret",ln:"Thompson",age:68,sex:"F",mrn:"TJR-20241",dob:"03/15/1957",jt:"Knee",lat:"Right",proc:"Right TKA",sg:"Dr. Henderson",ast:"Dr. Kim (PA)",or:"07:30",rm:"OR-1",wt:82,al:["Penicillin","Sulfa"],asa:"III",anes:"Spinal",anesP:"Dr. Walsh",scrub:"T. Nguyen",circ:"J. Martinez",abx:"Ancef 2g",imp:"S+N LEGION",pos:"Supine",tq:true,tqS:"R thigh",tqP:"250",prep:"ChloraPrep",vte:"TED+SCD",preV:"120/80 72 98%",cem:"Cemented tibial"},
+  {id:2,fn:"James",ln:"Rodriguez",age:72,sex:"M",mrn:"TJR-20242",dob:"11/08/1953",jt:"Hip",lat:"Left",proc:"Left THA",sg:"Dr. Patel",ast:"Dr. Brooks (PA)",or:"09:00",rm:"OR-2",wt:95,al:[],asa:"II",anes:"Spinal",anesP:"Dr. Chen",scrub:"M. Davis",circ:"J. Martinez",abx:"Ancef 2g",imp:"Stryker Mako",pos:"Lateral decub",tq:false,tqS:"",tqP:"",prep:"ChloraPrep",vte:"TED+SCD",preV:"138/82 68 97%",cem:"Uncemented"},
+  {id:3,fn:"Dorothy",ln:"Chen",age:65,sex:"F",mrn:"TJR-20243",dob:"07/22/1960",jt:"Knee",lat:"Left",proc:"Left TKA",sg:"Dr. Henderson",ast:"Dr. Kim (PA)",or:"11:00",rm:"OR-1",wt:88,al:["Latex ⚠"],asa:"III",anes:"General",anesP:"Dr. Walsh",scrub:"T. Nguyen",circ:"K. Brown",abx:"Ancef 2g",imp:"S+N LEGION",pos:"Supine",tq:true,tqS:"L thigh",tqP:"250",prep:"ChloraPrep",vte:"TED+SCD (LF)",preV:"142/88 78 98%",cem:"Cemented tibial"},
+  {id:4,fn:"William",ln:"Foster",age:58,sex:"M",mrn:"TJR-20244",dob:"09/03/1967",jt:"Hip",lat:"Right",proc:"Right THA",sg:"Dr. Patel",ast:"Dr. Brooks (PA)",or:"13:00",rm:"OR-2",wt:78,al:["Codeine"],asa:"I",anes:"Spinal",anesP:"Dr. Chen",scrub:"M. Davis",circ:"K. Brown",abx:"Ancef 2g",imp:"Stryker Mako",pos:"Lateral decub",tq:false,tqS:"",tqP:"",prep:"ChloraPrep",vte:"TED+SCD",preV:"118/76 66 99%",cem:"Uncemented"}
+];
+
+function mkEvs(c){
+  const k=c.jt==="Knee";
+  return[
+    {id:"enter",ph:"SETUP",lb:"Patient in OR",sb:`${c.rm} · monitors on`},
+    {id:"position",ph:"SETUP",lb:"Positioned",sb:c.pos},
+    {id:"ground",ph:"SETUP",lb:"Grounding Pad",sb:""},
+    {id:"warming",ph:"SETUP",lb:"Warming Device",sb:"Bair Hugger"},
+    ...(k?[{id:"tq_on",ph:"SETUP",lb:"Tourniquet Applied",sb:`${c.tqS} · ${c.tqP} mmHg`}]:[]),
+    {id:"timeout",ph:"TIME-OUT",lb:"Time-Out Verified",sb:`${c.fn} ${c.ln} · ${c.proc} · ${c.lat} · ${c.sg} · ${c.al.length?c.al.join(", "):"NKDA"} · ${c.abx} · ${c.imp}`},
+    {id:"abx",ph:"TIME-OUT",lb:"Antibiotic Given",sb:c.abx},
+    {id:"prep",ph:"PROCEDURE",lb:"Skin Prep",sb:c.prep},
+    {id:"drape",ph:"PROCEDURE",lb:"Draped",sb:""},
+    {id:"incision",ph:"PROCEDURE",lb:"Incision",sb:c.sg},
+    ...(k?[{id:"tq_up",ph:"PROCEDURE",lb:"Tourniquet Up",sb:c.tqP+" mmHg"}]:[]),
+    {id:"txa",ph:"PROCEDURE",lb:"TXA Given",sb:"1g IV"},
+    ...(c.cem!=="Uncemented"?[{id:"cement",ph:"PROCEDURE",lb:"Cement Mixed",sb:c.cem}]:[]),
+    {id:"implant",ph:"PROCEDURE",lb:"Implants Placed",sb:"Log in Implants tab",nav:"imp"},
+    ...(!k?[{id:"fluoro",ph:"PROCEDURE",lb:"Intraop Imaging",sb:"Fluoro"}]:[]),
+    {id:"cocktail",ph:"PROCEDURE",lb:"Periarticular Injection",sb:""},
+    {id:"specimen",ph:"PROCEDURE",lb:"Specimens",sb:"",spec:true},
+    ...(k?[{id:"tq_down",ph:"CLOSURE",lb:"Tourniquet Down",sb:""}]:[]),
+    {id:"closing",ph:"CLOSURE",lb:"Closing",sb:""},
+    {id:"counts",ph:"CLOSURE",lb:"Counts Verified",sb:"Verify in Counts tab",nav:"cnt"},
+    {id:"dressing",ph:"CLOSURE",lb:"Dressing",sb:k?"ACE + Cryo":"ABD + Tegaderm"},
+    {id:"close",ph:"CLOSURE",lb:"Procedure End",sb:""},
+    {id:"out",ph:"TRANSFER",lb:"Patient Out → PACU",sb:""},
+  ];
+}
+
+let cur=0,tab="tl";
+const S={};
+C.forEach((_,i)=>{
+  const c=C[i],k=c.jt==="Knee";
+  S[i]={
+    ev:{},editing:null,
+    cnt:{sponges:{n:10,v:null,issue:""},sharps:{n:0,v:null,issue:""},instruments:{n:0,v:null,issue:""}},
+    imps:k?[{nm:"Femoral"},{nm:"Tibial Baseplate"},{nm:"Poly Insert"},{nm:"Patellar Button"}]:[{nm:"Acetabular Shell"},{nm:"Liner"},{nm:"Femoral Stem"},{nm:"Femoral Head"}],
+    impPhotos:{},impData:{},
+    ebl:0,irr:0,notes:"",
+    staff:{sg:c.sg,ast:c.ast,anesP:c.anesP,scrub:c.scrub,circ:c.circ}
+  };
+});
+
+const N=()=>new Date();
+const fm=d=>d?d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}):"—";
+function el(a,b){if(!a||!b)return"";const s=Math.floor((b-a)/1000),m=Math.floor(s/60),h=Math.floor(m/60);return h?`${h}h ${m%60}m`:`${m}m`}
+function elS(a,b){if(!a||!b)return"";const t=Math.floor((b-a)/1000),m=Math.floor(t/60),h=Math.floor(m/60);return h?`${h}h ${m%60}m ${t%60}s`:`${m}m ${t%60}s`}
+
+function selCase(i){cur=i;R()}
+function sw(t){tab=t;document.querySelectorAll('.pane').forEach(p=>p.classList.remove('act'));document.getElementById('p-'+t).classList.add('act');document.querySelectorAll('.bn').forEach(b=>b.classList.toggle('act',b.dataset.t===t));R()}
+
+function tapEv(eid){const s=S[cur];if(s.ev[eid]){s.editing=s.editing===eid?null:eid;R();return}s.ev[eid]={t:N()};s.editing=null;R()}
+function undoEv(eid){delete S[cur].ev[eid];S[cur].editing=null;R()}
+function saveTime(eid){const inp=document.getElementById('te-'+eid);if(!inp?.value)return;const p=inp.value.split(":"),d=new Date(S[cur].ev[eid].t);d.setHours(+p[0],+p[1],p[2]?+p[2]:0);S[cur].ev[eid].t=d;S[cur].editing=null;R()}
+function navEv(eid,t){if(S[cur].ev[eid]){S[cur].editing=S[cur].editing===eid?null:eid;R();return}sw(t)}
+
+function specNone(){S[cur].ev.specimen={t:N(),d:"None"};R()}
+function specLog(){const i=document.getElementById('sp-i');if(!i?.value?.trim())return;S[cur].ev.specimen={t:N(),d:i.value.trim()};R()}
+
+// Counts
+function setCntN(cat,v){S[cur].cnt[cat].n=Math.max(0,parseInt(v)||0);R()}
+function addCnt(cat){S[cur].cnt[cat].n++;R()}
+function vfyCnt(cat,ok){S[cur].cnt[cat].v=ok;R()}
+function undoVfy(cat){S[cur].cnt[cat].v=null;S[cur].cnt[cat].issue="";R()}
+function setCntIssue(cat,v){S[cur].cnt[cat].issue=v}
+function cntsDone(){S[cur].ev.counts={t:N(),d:"All correct"};sw("tl")}
+
+// Implants
+function capPhoto(i){document.getElementById('cam-'+i).click()}
+function onPhoto(i,input){
+  if(!input.files?.[0])return;
+  const r=new FileReader();
+  r.onload=e=>{S[cur].impPhotos[i]=e.target.result;S[cur].impData[i]={st:"reading"};R();readSticker(i,e.target.result)};
+  r.readAsDataURL(input.files[0]);
+}
+async function readSticker(idx,dataUrl){
+  const s=S[cur],c=C[cur],comp=s.imps[idx]?.nm||"component";
+  try{
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:300,
+        messages:[{role:"user",content:[
+          {type:"image",source:{type:"base64",media_type:"image/jpeg",data:dataUrl.split(",")[1]}},
+          {type:"text",text:`Orthopedic implant sticker for ${comp} (${c.proc}). Return ONLY JSON:\n{"manufacturer":"","product":"","size":"","lot":"","ref":""}\nEmpty string if not visible. No markdown.`}
+        ]}]})
+    });
+    const data=await resp.json();
+    const txt=data.content?.find(b=>b.type==="text")?.text||"";
+    s.impData[idx]={st:"done",...JSON.parse(txt.replace(/```json|```/g,"").trim())};
+  }catch(e){s.impData[idx]={st:"error"}}
+  R();
+}
+function setImpF(i,f,v){if(!S[cur].impData[i])S[cur].impData[i]={st:"manual"};S[cur].impData[i][f]=v}
+function addImpSlot(){S[cur].imps.push({nm:"Additional"});R()}
+function confirmImps(){
+  const s=S[cur];
+  s.ev.implant={t:N(),d:s.imps.map((imp,i)=>{const d=s.impData[i]||{};return`${imp.nm}: ${d.size||"?"} L:${d.lot||"?"}`}).join(" · ")};R();
+}
+
+function setEbl(v){S[cur].ebl=parseInt(v)||0;R()}
+function setIrr(v){S[cur].irr=parseInt(v)||0}
+function setNotes(v){S[cur].notes=v}
+function setStaff(role,v){S[cur].staff[role]=v}
+
+// ═══ RENDER ═══
+function R(){
+  const c=C[cur],s=S[cur],events=mkEvs(c);
+  const jc=c.jt==="Hip"?{a:"var(--hp)",bg:"rgba(168,85,247,.08)",bd:"rgba(168,85,247,.2)"}:{a:"var(--kn)",bg:"rgba(59,130,246,.08)",bd:"rgba(59,130,246,.2)"};
+
+  document.getElementById("ctabs").innerHTML=C.map((cs,i)=>
+    `<div class="ctab${i===cur?" act":""}" onclick="selCase(${i})"><span class="jd" style="background:${cs.jt==="Hip"?"var(--hp)":"var(--kn)"}"></span>${cs.or} ${cs.ln}</div>`
+  ).join("");
+
+  const eT=s.ev.enter?.t,iT=s.ev.incision?.t,oT=s.ev.out?.t;
+  let pb=`<span class="pbar-name">${c.ln}, ${c.fn}</span><span class="pbar-tag" style="background:${jc.bg};color:${jc.a};border:1px solid ${jc.bd}">${c.proc}</span>`;
+  c.al.forEach(a=>pb+=`<span class="pbar-al">⚠ ${a}</span>`);
+  pb+=`<div class="pbar-stats"><div class="ps"><div class="psv">${fm(eT)}</div><div class="psl">IN</div></div><div class="ps"><div class="psv">${fm(iT)}</div><div class="psl">CUT</div></div><div class="ps"><div class="psv" style="color:${s.ebl>500?"var(--rdS)":"inherit"}">${s.ebl||"—"}</div><div class="psl">EBL</div></div><div class="ps"><div class="psv">${fm(oT)}</div><div class="psl">OUT</div></div></div>`;
+  document.getElementById("pbar").innerHTML=pb;
+
+  const ce=document.getElementById("caseEl");
+  if(eT&&!oT){ce.textContent="⏱ "+el(eT,N());ce.style.color="var(--ywS)"}
+  else if(eT&&oT){ce.textContent="✓ "+el(eT,oT);ce.style.color="var(--gnS)"}
+  else{ce.textContent=""}
+
+  // ═══ TIMELINE ═══
+  let tl="";
+  if(s.ev.abx?.t&&!oT){const r=240-Math.floor((N()-s.ev.abx.t)/60000);if(r<=30&&r>0)tl+=`<div class="alrt w">⏰ Ancef redose<span class="av">${r}m</span></div>`;else if(r<=0)tl+=`<div class="alrt c">⚠ Redose NOW<span class="av">${Math.abs(r)}m over</span></div>`}
+  if(c.tq&&s.ev.tq_up?.t&&!s.ev.tq_down?.t){const m=Math.floor((N()-s.ev.tq_up.t)/60000);tl+=`<div class="alrt${m>=90?" c":" w"}">🔒 Tourniquet<span class="av" id="tqL">${elS(s.ev.tq_up.t,N())}</span></div>`}
+
+  let ph="";
+  events.forEach((ev,idx)=>{
+    const done=!!s.ev[ev.id],isEd=s.editing===ev.id,comp=s.ev[ev.id];
+    if(ev.ph!==ph){ph=ev.ph;tl+=`<div class="tl-ph">${ph}</div>`}
+    let oc;
+    if(ev.nav&&!done)oc=`onclick="navEv('${ev.id}','${ev.nav}')"`;
+    else if(ev.spec&&!done)oc="";
+    else oc=`onclick="tapEv('${ev.id}')"`;
+
+    tl+=`<div class="ev"><div class="ev-rail"><div class="ev-dot${done?" done":""}"></div>${idx<events.length-1?`<div class="ev-wire${done?" done":""}"></div>`:""}</div>`;
+    tl+=`<div class="ev-card${done?" done":" pend"}" ${oc}>`;
+    tl+=`<div class="ev-row"><span class="ev-title${done?" dn":""}">${ev.lb}</span>`;
+    if(done)tl+=`<span class="ev-stamp">${fm(comp.t)}</span>`;
+    tl+=`</div>`;
+    if(done&&comp.d)tl+=`<div class="ev-sub fl">${comp.d}</div>`;
+    else if(!done&&ev.sb)tl+=`<div class="ev-sub">${ev.sb}</div>`;
+    if(ev.id==="tq_down"&&done&&s.ev.tq_up?.t)tl+=`<div class="ev-sub fl" style="color:var(--ywS)">Total: ${el(s.ev.tq_up.t,comp.t)}</div>`;
+    if(isEd&&done){
+      const t=comp.t,tv=`${String(t.getHours()).padStart(2,"0")}:${String(t.getMinutes()).padStart(2,"0")}:${String(t.getSeconds()).padStart(2,"0")}`;
+      tl+=`<div class="ev-edit"><input type="time" step="1" value="${tv}" id="te-${ev.id}" class="te-inp" onclick="event.stopPropagation()"><div class="ebtn" onclick="event.stopPropagation();saveTime('${ev.id}')">Save</div><div class="ebtn dng" onclick="event.stopPropagation();undoEv('${ev.id}')">Undo</div></div>`;
+    }
+    if(ev.spec&&!done){
+      tl+=`<div class="spec-row" onclick="event.stopPropagation()"><input class="spec-inp" id="sp-i" placeholder="e.g. Femoral head"><div class="spec-btn" style="background:var(--gn);color:#fff;border-color:var(--gnS)" onclick="specLog()">Log</div><div class="spec-btn" style="border-color:#2a2a2a;color:#888" onclick="specNone()">None</div></div>`;
+    }
+    tl+=`</div></div>`;
+  });
+  document.getElementById("p-tl").innerHTML=tl;
+
+  // ═══ COUNTS ═══
+  let cn="";
+  ["sponges","sharps","instruments"].forEach(cat=>{
+    const ct=s.cnt[cat];
+    const cls=ct.v===true?"ok":ct.v===false?"bad":"";
+    const verified=ct.v!==null;
+    cn+=`<div class="cnt"><div class="cnt-hdr"><span class="cnt-name">${cat[0].toUpperCase()+cat.slice(1)}</span>`;
+    if(ct.v===true)cn+=`<span class="cnt-badge" style="background:var(--gnB);color:var(--gnS);border:1px solid rgba(42,107,63,.2)">✓ Verified</span>`;
+    else if(ct.v===false)cn+=`<span class="cnt-badge" style="background:var(--rdB);color:var(--rdS);border:1px solid rgba(139,45,45,.2)">✕ Incorrect</span>`;
+    cn+=`</div>`;
+    // Single number input + add button
+    cn+=`<div class="cnt-num-wrap"><input class="cnt-num-inp ${cls}" type="number" inputmode="numeric" value="${ct.n}" onchange="setCntN('${cat}',this.value)" onclick="this.select()"><div class="cnt-plus" onclick="addCnt('${cat}')">+ 1 Added</div></div>`;
+    // Verify
+    if(!verified){
+      cn+=`<div class="cnt-vfy"><div class="cnt-vb" onclick="vfyCnt('${cat}',true)">✓ Final Count Correct</div><div class="cnt-vb" onclick="vfyCnt('${cat}',false)">✕ Incorrect</div></div>`;
+    }else{
+      // Undo link
+      cn+=`<div class="cnt-undo" onclick="undoVfy('${cat}')">↩ Change verification</div>`;
+      // If incorrect → issue text area
+      if(ct.v===false){
+        cn+=`<div class="cnt-issue"><div class="cnt-issue-lbl">What is missing / discrepancy</div><textarea class="cnt-issue-ta" placeholder="Document count discrepancy and search actions taken..." oninput="setCntIssue('${cat}',this.value)">${ct.issue}</textarea></div>`;
+      }
+    }
+    cn+=`</div>`;
+  });
+  const allOk=["sponges","sharps","instruments"].every(x=>s.cnt[x].v===true);
+  if(allOk&&!s.ev.counts)cn+=`<div class="bigb ok" style="margin-top:8px" onclick="cntsDone()">✓ All Counts Correct → Timeline</div>`;
+  else if(s.ev.counts)cn+=`<div class="done-b">✓ Counts confirmed ${fm(s.ev.counts.t)}</div>`;
+  cn+=`<div class="ebl-row"><div class="ebl-box"><div class="ebl-lbl">EBL (mL)</div><input class="ebl-inp${s.ebl>500?" red":""}" type="number" inputmode="numeric" value="${s.ebl||""}" placeholder="0" onchange="setEbl(this.value)"></div><div class="ebl-box"><div class="ebl-lbl">Irrigation (mL)</div><input class="ebl-inp blue" type="number" inputmode="numeric" value="${s.irr||""}" placeholder="0" onchange="setIrr(this.value)"></div></div>`;
+  document.getElementById("p-cnt").innerHTML=cn;
+
+  // ═══ IMPLANTS ═══
+  let im="";
+  s.imps.forEach((imp,i)=>{
+    const photo=s.impPhotos[i],d=s.impData[i]||{};
+    im+=`<div class="imp-card"><input type="file" accept="image/*" capture="environment" class="cam-input" id="cam-${i}" onchange="onPhoto(${i},this)">`;
+    if(photo)im+=`<div class="imp-cam has" onclick="capPhoto(${i})"><img src="${photo}"></div>`;
+    else im+=`<div class="imp-cam" onclick="capPhoto(${i})">📷<div class="cl">SCAN</div></div>`;
+    im+=`<div class="imp-body"><div class="imp-nm">${imp.nm}</div>`;
+    if(d.st==="reading")im+=`<div class="imp-reading">⏳ Reading sticker...</div>`;
+    else if(d.st==="done"){
+      im+=`<div class="imp-data">`;
+      if(d.manufacturer)im+=`<span class="v">${d.manufacturer}</span>`;
+      if(d.product)im+=` ${d.product}`;
+      im+=`<br>Size: <span class="v">${d.size||"—"}</span> · Lot: <span class="v">${d.lot||"—"}</span>`;
+      if(d.ref)im+=` · Ref: ${d.ref}`;
+      im+=`</div>`;
+      im+=`<input class="imp-fi" placeholder="Edit size" value="${d.size||""}" oninput="setImpF(${i},'size',this.value)">`;
+      im+=`<input class="imp-fi" placeholder="Edit lot" value="${d.lot||""}" oninput="setImpF(${i},'lot',this.value)">`;
+    }else if(d.st==="error"){
+      im+=`<div class="imp-err">Could not read — enter manually</div>`;
+      im+=`<input class="imp-fi" placeholder="Size" oninput="setImpF(${i},'size',this.value)">`;
+      im+=`<input class="imp-fi" placeholder="Lot #" oninput="setImpF(${i},'lot',this.value)">`;
+    }else{
+      im+=`<div class="imp-data" style="color:#444">← Snap sticker photo</div>`;
+    }
+    im+=`</div></div>`;
+  });
+  im+=`<div class="imp-add" onclick="addImpSlot()">+ Add Component</div>`;
+  const hasAny=s.imps.some((_,i)=>s.impPhotos[i]||s.impData[i]?.size);
+  if(!s.ev.implant)im+=`<div class="bigb${hasAny?" ok":""}" style="margin-top:8px" onclick="${hasAny?"confirmImps()":""}">Confirm Implants</div>`;
+  else im+=`<div class="done-b">✓ Implants confirmed ${fm(s.ev.implant.t)}</div>`;
+  document.getElementById("p-imp").innerHTML=im;
+
+  // ═══ INFO ═══
+  let inf="";
+
+  // Notes FIRST
+  inf+=`<div class="isec"><div class="ihdr">Circulator Notes</div><textarea class="nta" placeholder="Complications, events, deviations from plan..." oninput="setNotes(this.value)">${s.notes}</textarea></div>`;
+
+  // Editable staff
+  inf+=`<div class="isec"><div class="ihdr">Staff in Room</div>`;
+  [{role:"sg",lb:"Surgeon"},{role:"ast",lb:"Assist"},{role:"anesP",lb:"Anesthesia"},{role:"scrub",lb:"Scrub"},{role:"circ",lb:"Circulator"}].forEach(r=>{
+    inf+=`<div class="staff-row"><span class="staff-role">${r.lb}</span><input class="staff-name" value="${s.staff[r.role]}" onchange="setStaff('${r.role}',this.value)"></div>`;
+  });
+  inf+=`</div>`;
+
+  // Minimal reference (only stuff not shown elsewhere)
+  inf+=`<div class="isec"><div class="ihdr">Reference</div>`;
+  [{k:"MRN",v:c.mrn},{k:"DOB",v:c.dob},{k:"Weight",v:c.wt+"kg"},{k:"ASA",v:c.asa}].forEach(r=>inf+=`<div class="irow"><span class="ik">${r.k}</span><span class="iv">${r.v}</span></div>`);
+  if(c.tq){const u=s.ev.tq_up?.t,d=s.ev.tq_down?.t;inf+=`<div class="irow"><span class="ik" style="color:var(--ywS)">TQ Time</span><span class="iv" style="color:var(--ywS)">${u?(d?el(u,d):"Running"):"—"}</span></div>`}
+  inf+=`</div>`;
+
+  // PACU Handoff — surgical nursing portion only
+  if(s.ev.out){
+    inf+=`<div class="ho"><div class="ho-t">● PACU Handoff — Surgical Nursing</div>`;
+    const rows=[
+      {k:"Patient",v:`${c.ln}, ${c.fn} · ${c.age}${c.sex} · ${c.wt}kg`},
+      {k:"Procedure",v:`${c.proc} — ${s.staff.sg}`},
+      {k:"Allergies",v:c.al.length?c.al.join(", "):"NKDA"},
+      {k:"EBL",v:`${s.ebl} mL`},
+      {k:"Implants",v:s.ev.implant?.d||"—"},
+    ];
+    if(c.tq&&s.ev.tq_up?.t&&s.ev.tq_down?.t)rows.push({k:"TQ Time",v:el(s.ev.tq_up.t,s.ev.tq_down.t)});
+    rows.push({k:"Counts",v:s.ev.counts?.d||"—"});
+    rows.push({k:"Dressing",v:c.jt==="Knee"?"ACE wrap + Cryo cuff":"ABD pad + Tegaderm"});
+    rows.push({k:"Drain",v:"None"});
+    rows.push({k:"Case Time",v:el(eT,oT)});
+    rows.forEach(r=>inf+=`<div class="ho-row"><span class="ho-k">${r.k}</span><span class="ho-v">${r.v}</span></div>`);
+    if(s.notes)inf+=`<div class="ho-note">${s.notes}</div>`;
+    inf+=`</div>`;
+  }
+
+  document.getElementById("p-info").innerHTML=inf;
+}
+
+function tick(){
+  document.getElementById("clk").textContent=N().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",second:"2-digit"});
+  const s=S[cur],eT=s.ev.enter?.t,oT=s.ev.out?.t,ce=document.getElementById("caseEl");
+  if(eT&&!oT){ce.textContent="⏱ "+el(eT,N());ce.style.color="var(--ywS)"}
+  const tq=document.getElementById("tqL");
+  if(tq&&s.ev.tq_up?.t&&!s.ev.tq_down?.t)tq.textContent=elS(s.ev.tq_up.t,N());
+}
+setInterval(tick,1000);tick();R();
+</script>
+</body>
+</html>
