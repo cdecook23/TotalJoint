@@ -1,0 +1,1870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TJR Hub — Pre-Anesthesia Clinic</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0f2f5;--card:#fff;--border:#e2e8f0;
+  --t1:#0f172a;--t2:#334155;--t3:#64748b;--t4:#94a3b8;
+  --blue:#2563eb;--blueL:#eff6ff;--blueD:#1d4ed8;
+  --green:#16a34a;--greenL:#f0fdf4;--greenB:#dcfce7;--greenD:#15803d;
+  --yellow:#d97706;--yellowL:#fffbeb;--yellowB:#fef3c7;
+  --red:#dc2626;--redL:#fef2f2;--redB:#fee2e2;
+  --purple:#7c3aed;--purpleL:#f5f3ff;
+  --orange:#ea580c;--orangeL:#fff7ed;
+  --shadow:0 1px 3px rgba(0,0,0,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',-apple-system,system-ui,sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;font-size:13px;}
+::selection{background:var(--blue);color:#fff;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px;}
+
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 16px;height:50px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.topbar-l{display:flex;align-items:center;gap:8px;}
+.logo{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#7c3aed,#6d28d9);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:9px;}
+.topbar-t{font-weight:700;font-size:14px;}
+.topbar-s{font-size:10px;color:var(--t3);}
+.topbar-r{display:flex;align-items:center;gap:6px;}
+.search-wrap{position:relative;}
+.search-wrap input{width:180px;padding:6px 8px 6px 26px;border-radius:6px;border:1px solid var(--border);font-size:11px;font-family:inherit;color:var(--t1);}
+.search-wrap input:focus{outline:none;border-color:var(--blue);}
+.search-wrap::before{content:"🔍";position:absolute;left:7px;top:50%;transform:translateY(-50%);font-size:11px;}
+.flt{padding:5px 8px;border-radius:6px;border:1px solid var(--border);font-size:10px;font-family:inherit;color:var(--t2);background:#fff;cursor:pointer;}
+
+.main{padding:10px 12px 40px;}
+
+.stats{display:flex;gap:8px;margin-bottom:10px;}
+.stat{background:var(--card);border-radius:8px;padding:10px 14px;box-shadow:var(--shadow);border-left:3px solid transparent;flex:1;}
+.stat-n{font-size:22px;font-weight:800;line-height:1;margin-bottom:1px;}
+.stat-l{font-size:10px;color:var(--t3);font-weight:500;}
+
+/* TABLE */
+.pac-t{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border-radius:10px;box-shadow:var(--shadow);overflow:hidden;}
+.pac-t thead th{padding:8px 6px;text-align:center;font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid var(--border);background:#fafbfc;white-space:nowrap;}
+.pac-t thead th:first-child,.pac-t thead th:nth-child(2){text-align:left;}
+.pac-t tbody td{padding:0;border-bottom:1px solid #f1f5f9;vertical-align:top;}
+.pac-t tbody tr:last-child td{border-bottom:none;}
+.pac-t tbody tr.dtr td{padding:0;background:#fafbfc;border-bottom:1px solid var(--border);}
+
+.pt-c{padding:8px 8px;display:flex;align-items:center;gap:6px;min-width:160px;}
+.rd{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.rd.ready{background:var(--green);}.rd.pending{background:var(--yellow);}.rd.not-ready{background:var(--red);}
+.pn{font-weight:700;font-size:12px;white-space:nowrap;}
+.ps{font-size:9px;color:var(--t4);}
+
+.proc-c{padding:8px 6px;min-width:90px;}
+.ptag{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap;display:inline-block;}
+.ptag-tka{background:var(--blueL);color:var(--blue);}.ptag-tha{background:var(--purpleL);color:var(--purple);}
+.sd{font-size:10px;font-weight:700;color:var(--t1);margin-top:2px;}
+.scd{font-size:9px;font-weight:700;}
+
+/* STATUS CELL */
+.sc{padding:6px 4px;text-align:center;cursor:pointer;transition:background .1s;min-width:70px;position:relative;}
+.sc:hover{filter:brightness(.97);}
+.sc-g{background:var(--greenL);}.sc-y{background:var(--yellowL);}.sc-r{background:var(--redL);}
+.sc-i{font-size:14px;line-height:1;}
+.sc-lb{font-size:8px;font-weight:700;margin-top:1px;text-transform:uppercase;letter-spacing:.2px;}
+.sc-g .sc-lb{color:var(--green);}.sc-y .sc-lb{color:var(--yellow);}.sc-r .sc-lb{color:var(--red);}
+.sc-s{font-size:8px;color:var(--t4);}
+
+/* Caregiver cell */
+.cg-c{padding:6px;min-width:90px;cursor:pointer;}
+.cg-c:hover{background:#fafbfc;}
+.cg-name{font-size:10px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px;}
+.cg-rel{font-size:8px;color:var(--t4);}
+.cg-conf{font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px;display:inline-block;margin-top:1px;}
+.cg-y{background:var(--greenB);color:var(--green);}.cg-n{background:var(--redB);color:var(--red);}
+
+/* ACT */
+.ac{padding:6px 4px;text-align:center;white-space:nowrap;}
+
+/* DETAIL PANEL */
+.dp{display:none;padding:14px 16px;}
+.dp.open{display:block;}
+.dp-t{font-size:12px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.dp-x{background:none;border:none;font-size:13px;cursor:pointer;color:var(--t4);padding:2px 6px;border-radius:4px;}
+.dp-x:hover{background:#e5e7eb;}
+
+.ck{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:11px;}
+.ck:last-child{border-bottom:none;}
+.ci{width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
+.ci.g{background:var(--greenB);color:var(--green);}.ci.r{background:var(--redB);color:var(--red);}.ci.y{background:var(--yellowB);color:var(--yellow);}
+.ct{flex:1;min-width:0;}
+.ct strong{display:block;font-size:11px;}.ct span{font-size:9px;color:var(--t4);}
+.cf{font-size:8px;font-weight:700;padding:2px 5px;border-radius:3px;white-space:nowrap;}
+.cf-abn{background:var(--redB);color:var(--red);}.cf-ok{background:var(--greenB);color:var(--green);}
+
+.gate{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:6px;margin-bottom:5px;font-size:11px;font-weight:600;}
+.gate-p{background:var(--greenB);color:var(--green);}.gate-f{background:var(--redB);color:var(--red);}
+
+.btn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--t2);transition:all .12s;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;}
+.btn:hover{background:var(--blueL);border-color:var(--blue);color:var(--blue);}
+.btn.p{background:var(--blue);color:#fff;border-color:var(--blue);}.btn.p:hover{background:var(--blueD);}
+.btn.s{padding:2px 6px;font-size:9px;border-radius:4px;}
+.btn.ro{border-color:#fecaca;color:var(--red);}.btn.ro:hover{background:var(--redL);}
+.btn.rm{border:none;background:none;color:var(--t4);font-size:12px;padding:2px 4px;}.btn.rm:hover{color:var(--red);background:var(--redL);}
+
+.dp-ft{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);flex-wrap:wrap;}
+
+/* Med table */
+.mt{width:100%;border-collapse:collapse;font-size:10px;margin-top:6px;}
+.mt th{padding:4px 6px;text-align:left;font-size:8px;font-weight:700;color:var(--t4);text-transform:uppercase;border-bottom:1px solid var(--border);background:#f8fafc;}
+.mt td{padding:5px 6px;border-bottom:1px solid #f5f5f5;}
+.mt tr:last-child td{border-bottom:none;}
+.ab{padding:1px 5px;border-radius:3px;font-size:8px;font-weight:700;white-space:nowrap;}
+.ab-mt{background:var(--greenB);color:var(--green);}.ab-c{background:var(--blueL);color:var(--blue);}
+.ab-h{background:var(--yellowB);color:var(--yellow);}.ab-s{background:var(--redB);color:var(--red);}
+.ab-ps{background:var(--orangeL);color:var(--orange);}.ab-rv{background:#f1f5f9;color:var(--t3);}
+.hs{font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px;}
+.hs-s{background:var(--greenB);color:var(--green);}.hs-a{background:var(--blueL);color:var(--blue);}.hs-n{background:var(--redB);color:var(--red);}
+
+/* Consent */
+.con-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9;font-size:11px;}
+.con-row:last-child{border-bottom:none;}
+.cs{font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;}
+.cs-y{background:var(--greenB);color:var(--green);}.cs-n{background:var(--redB);color:var(--red);}
+
+/* Modal */
+.mo{display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center;}
+.mo.open{display:flex;}
+.md{background:#fff;border-radius:14px;max-width:560px;width:94%;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden;animation:mi .2s;max-height:88vh;overflow-y:auto;}
+@keyframes mi{from{opacity:0;transform:scale(.96) translateY(8px);}to{opacity:1;transform:none;}}
+.md-h{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1;}
+.md-h h3{font-size:13px;font-weight:700;}
+.md-x{width:24px;height:24px;border-radius:5px;border:none;background:transparent;cursor:pointer;font-size:13px;color:var(--t3);display:flex;align-items:center;justify-content:center;}
+.md-x:hover{background:#f1f5f9;}
+.md-b{padding:16px;}
+.md-b p{font-size:12px;color:var(--t2);line-height:1.5;margin-bottom:8px;}
+.md-f{padding:10px 16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:6px;position:sticky;bottom:0;background:#fff;}
+.field{margin-bottom:10px;}.field label{display:block;font-size:10px;font-weight:600;color:var(--t3);margin-bottom:2px;}
+.field input,.field select,.field textarea{width:100%;padding:6px 8px;border-radius:6px;border:1px solid var(--border);font-size:11px;font-family:inherit;color:var(--t1);}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--blue);}
+
+/* H&P Modal - full width */
+.hp-modal{max-width:900px;width:96%;}
+.hp-section{margin-bottom:16px;}
+.hp-section h4{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;padding-bottom:4px;border-bottom:1px solid var(--border);margin-bottom:8px;}
+.hp-field{margin-bottom:8px;}
+.hp-field label{font-size:10px;font-weight:600;color:var(--t4);display:block;margin-bottom:2px;}
+.hp-field textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:11px;font-family:inherit;resize:vertical;min-height:40px;color:var(--t1);}
+.hp-field textarea:focus{outline:none;border-color:var(--blue);}
+.hp-field textarea[readonly]{background:#f8fafc;color:var(--t2);cursor:default;}
+.hp-pre{background:#f8fafc;padding:8px 10px;border-radius:6px;font-size:11px;color:var(--t2);border:1px solid var(--border);line-height:1.5;}
+
+/* ═══════ ORDERS (PP1265/PP1264) ═══════ */
+.ss-cell{text-align:center;cursor:pointer;padding:2px 4px;border-radius:4px;transition:background .12s;}
+.ss-cell:hover{background:#f1f5f9;}
+.ss-type{font-size:8px;font-weight:800;letter-spacing:.5px;padding:1px 5px;border-radius:3px;display:inline-block;}
+.ss-asc{background:#dbeafe;color:#1d4ed8;}
+.ss-hosp{background:#fce7f3;color:#be185d;}
+.ss-loc{font-size:9px;font-weight:600;color:var(--t2);margin-top:1px;}
+.ord-wrap{display:flex;gap:16px;flex-wrap:wrap;}
+.ord-form{flex:1;min-width:380px;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.ord-form-h{padding:8px 12px;background:#f8fafc;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.ord-form-t{font-size:12px;font-weight:800;}
+.ord-form-sub{font-size:8px;color:var(--t4);font-weight:500;}
+.ord-form-b{padding:10px 12px;}
+.ord-sec-h{font-size:10px;font-weight:700;color:var(--t3);margin:8px 0 4px;padding-bottom:3px;border-bottom:1px solid #f1f5f9;}
+.ord-sec-h:first-child{margin-top:0;}
+.orow{display:flex;align-items:flex-start;gap:6px;padding:3px 0;font-size:10px;color:var(--t2);line-height:1.4;}
+.orow label{display:flex;align-items:flex-start;gap:6px;cursor:pointer;flex:1;}
+.orow input[type="checkbox"]{margin-top:2px;accent-color:var(--blue);flex-shrink:0;}
+
+.orow .warn{font-size:8px;font-weight:700;color:var(--yellow);background:var(--yellowB);padding:1px 5px;border-radius:3px;margin-left:4px;flex-shrink:0;}
+.orow .alert{font-size:8px;font-weight:700;color:var(--red);background:var(--redB);padding:1px 5px;border-radius:3px;margin-left:4px;flex-shrink:0;}
+.orow .sub{margin-left:24px;font-size:9px;color:var(--t4);padding:1px 0;}
+.ord-sig{margin-top:10px;padding:8px 10px;border:1px dashed var(--border);border-radius:6px;display:flex;align-items:center;gap:8px;font-size:10px;color:var(--t3);}
+.ord-sig-done{border-color:var(--green);background:var(--greenL);color:var(--green);font-weight:700;}
+.ord-asc-bar{margin-top:8px;padding:8px 12px;border-radius:6px;display:flex;align-items:center;gap:8px;font-size:10px;font-weight:600;}
+.ord-asc-sent{background:var(--purpleL);color:var(--purple);}
+.ord-asc-pend{background:var(--yellowL);color:var(--yellow);}
+
+/* ═══════ INSTRUCTIONS (PP1254) ═══════ */
+.instr-sec{margin-bottom:10px;border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.instr-sec-t{font-size:10px;font-weight:700;color:var(--t3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px;display:flex;align-items:center;gap:4px;}
+.instr-item{font-size:11px;color:var(--t2);padding:2px 0;line-height:1.5;}
+.instr-item strong{color:var(--t1);}
+.instr-warn{font-size:10px;color:var(--red);font-weight:700;padding:2px 0;}
+.instr-ck{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t2);padding:1px 0;}
+.instr-ck::before{content:"☐";font-size:12px;color:var(--t4);}
+.instr-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;}
+.instr-grid-t{font-size:9px;font-weight:700;color:var(--t3);margin-bottom:4px;}
+.instr-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;font-size:9px;font-weight:700;}
+.instr-auto{background:var(--greenB);color:var(--green);}
+.instr-pend{background:var(--yellowB);color:var(--yellow);}
+.instr-none{background:var(--redB);color:var(--red);}
+
+/* ═══════ PROTOCOL SETTINGS ═══════ */
+.proto-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--t2);transition:all .12s;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;}
+.proto-btn:hover{background:var(--purpleL);border-color:var(--purple);color:var(--purple);}
+.proto-btn svg{width:12px;height:12px;}
+
+.proto-ov{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(4px);z-index:200;align-items:flex-start;justify-content:center;padding:24px 16px;}
+.proto-ov.open{display:flex;}
+.proto-md{background:#fff;border-radius:14px;width:100%;max-width:880px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;animation:mi .2s;display:flex;flex-direction:column;max-height:calc(100vh - 48px);}
+.proto-hd{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.proto-hd h2{font-size:15px;font-weight:800;color:var(--t1);}
+.proto-hd-sub{font-size:9px;color:var(--t4);font-weight:500;margin-top:1px;}
+.proto-body{display:flex;flex:1;overflow:hidden;min-height:0;}
+.proto-side{width:200px;border-right:1px solid #f1f5f9;overflow-y:auto;flex-shrink:0;background:#fafbfc;}
+.proto-side-btn{width:100%;text-align:left;padding:10px 14px;font-size:11px;font-weight:500;color:var(--t2);border:none;background:none;cursor:pointer;border-bottom:1px solid #f1f5f9;border-left:3px solid transparent;font-family:inherit;display:flex;align-items:center;gap:6px;transition:all .1s;}
+.proto-side-btn:hover{background:#f1f5f9;}
+.proto-side-btn.active{background:#fff;font-weight:700;color:var(--purple);border-left-color:var(--purple);}
+.proto-side-btn .dot{width:6px;height:6px;border-radius:50%;background:var(--yellow);flex-shrink:0;display:none;}
+.proto-side-btn.changed .dot{display:block;}
+.proto-rules{flex:1;overflow-y:auto;padding:16px 20px;}
+.proto-rule{padding:12px 14px;border-radius:8px;border:1px solid var(--border);margin-bottom:8px;background:#fff;transition:all .15s;}
+.proto-rule.changed{border-color:var(--yellow);background:var(--yellowL);}
+.proto-rule-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.proto-rule-label{font-size:11px;font-weight:700;color:var(--t1);}
+.proto-rule-note{font-size:9px;color:var(--t4);margin-top:1px;}
+.proto-rule-input{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.proto-rule-input .comp{font-size:9px;font-weight:700;color:var(--t4);background:#f1f5f9;padding:2px 6px;border-radius:4px;font-family:'DM Sans',monospace;}
+.proto-rule-input input[type="number"]{width:80px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',monospace;text-align:right;font-weight:700;color:var(--t1);}
+.proto-rule-input input[type="number"]:focus{outline:none;border-color:var(--purple);box-shadow:0 0 0 2px rgba(124,58,237,.12);}
+.proto-rule-input input[type="text"]{width:240px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-family:inherit;color:var(--t1);}
+.proto-rule-input input[type="text"]:focus{outline:none;border-color:var(--purple);}
+.proto-rule-input .unit{font-size:9px;color:var(--t4);min-width:30px;}
+.proto-rule-diff{margin-top:6px;font-size:9px;display:flex;align-items:center;gap:4px;}
+.proto-rule-diff .old{color:var(--red);text-decoration:line-through;font-family:monospace;font-weight:600;}
+.proto-rule-diff .arrow{color:var(--t4);}
+.proto-rule-diff .new{color:var(--green);font-family:monospace;font-weight:700;}
+.proto-ft{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:#fafbfc;}
+.proto-ft-l{font-size:10px;color:var(--yellow);font-weight:600;}
+.proto-ft-r{display:flex;gap:6px;}
+
+/* Confirm panel */
+.proto-confirm{padding:14px;background:var(--yellowL);border:1px solid #fbbf24;border-radius:8px;margin-bottom:12px;}
+.proto-confirm h4{font-size:11px;font-weight:700;color:var(--yellow);margin-bottom:6px;}
+.proto-confirm-item{font-size:10px;color:var(--t2);padding:2px 0;font-family:monospace;}
+.proto-confirm-item .lbl{font-family:'DM Sans',sans-serif;font-weight:600;}
+.proto-confirm-name{display:flex;align-items:center;gap:8px;margin-top:8px;}
+.proto-confirm-name input{flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-family:inherit;}
+.proto-confirm-name input:focus{outline:none;border-color:var(--purple);}
+
+/* History modal */
+.hist-entry{border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;}
+.hist-entry-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.hist-entry-who{font-size:11px;font-weight:700;color:var(--t1);}
+.hist-entry-when{font-size:9px;color:var(--t4);}
+.hist-entry-item{font-size:10px;color:var(--t2);padding:2px 0;display:flex;gap:6px;align-items:center;}
+.hist-entry-item .lbl{font-weight:600;min-width:120px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-l">
+    <div class="logo">PAC</div>
+    <div><div class="topbar-t">Pre-Anesthesia Clinic</div><div class="topbar-s">Surgical Readiness · Protocol <span id="protoVer">Q4 2025</span></div></div>
+  </div>
+  <div class="topbar-r">
+    <button class="proto-btn" onclick="openProtoHistory()" title="Change History">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      History
+    </button>
+    <button class="proto-btn" onclick="openProtoSettings()" style="background:var(--purpleL);border-color:var(--purple);color:var(--purple);" title="Protocol Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+      Protocol
+    </button>
+    <div style="width:1px;height:20px;background:var(--border);margin:0 2px;"></div>
+    <div class="search-wrap"><input id="qInput" placeholder="Search patient, MRN…" oninput="render()"></div>
+    <input type="date" class="flt" id="dateFilter" onchange="render()" title="Surgery Date">
+    <select class="flt" id="locFilter" onchange="render()"><option value="all">All Locations</option><option value="Cumming">Cumming</option><option value="Gwinnett">Gwinnett</option><option value="Cherokee">Cherokee</option><option value="Sandy Springs">Sandy Springs</option></select>
+    <select class="flt" id="readFilter" onchange="render()"><option value="all">All</option><option value="not-ready">🔴 Not Ready</option><option value="pending">🟡 Pending</option><option value="ready">🟢 Ready</option></select>
+    <select class="flt" id="provFilter" onchange="render()"><option value="all">All Surgeons</option><option value="DeCook">Dr. DeCook</option><option value="Smith">Dr. Smith</option></select>
+  </div>
+</div>
+
+<div class="main" id="main"></div>
+<div class="mo" id="modalOv" onclick="if(event.target===this)closeModal()"><div class="md" id="modal"></div></div>
+
+<!-- Protocol Settings Overlay -->
+<div class="proto-ov" id="protoOv" onclick="if(event.target===this)closeProto()">
+  <div class="proto-md" id="protoMd"></div>
+</div>
+
+<!-- History Overlay -->
+<div class="proto-ov" id="histOv" onclick="if(event.target===this)closeHist()">
+  <div class="proto-md" id="histMd" style="max-width:640px;"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════════
+// PROTOCOL CONFIGURATION — Q4 2025 (from TJS Standardized Care Protocol)
+// All thresholds are editable via the Protocol Settings panel
+// ═══════════════════════════════════════════════════════════════════════════════
+const PROTO_DEFAULT = {
+  version: "Q4 2025",
+  lastModified: "2025-10-01T00:00:00Z",
+  modifiedBy: "",
+  cats: {
+    obesity: {
+      label: "Obesity / BMI",
+      icon: "⚖️",
+      rules: [
+        {id:"bmi_non_dm",label:"BMI limit (non-diabetic)",val:47,type:"num",unit:"",comp:"<",note:"Exception form required if proceeding above limit"},
+        {id:"bmi_dm",label:"BMI limit (diabetic)",val:40,type:"num",unit:"",comp:"<",note:""},
+      ]
+    },
+    diabetes: {
+      label: "Diabetes / Glycemic",
+      icon: "🩸",
+      rules: [
+        {id:"a1c_trigger",label:"HbA1c — trigger fructosamine draw",val:7.5,type:"num",unit:"%",comp:">",note:"If above, draw serum fructosamine"},
+        {id:"fruct_clear",label:"Fructosamine — clearance limit",val:292,type:"num",unit:"µmol/L",comp:"≤",note:"≤ this = cleared to schedule"},
+      ]
+    },
+    smoking: {
+      label: "Nicotine Cessation",
+      icon: "🚭",
+      rules: [
+        {id:"nic_pre_wk",label:"Weeks nicotine-free before surgery",val:4,type:"num",unit:"wk",comp:"≥",note:"All nicotine products"},
+        {id:"nic_post_wk",label:"Weeks nicotine-free after surgery",val:4,type:"num",unit:"wk",comp:"≥",note:""},
+      ]
+    },
+    timing: {
+      label: "Surgical Timing Delays",
+      icon: "⏱️",
+      rules: [
+        {id:"inj_delay",label:"Delay after intra-articular injection",val:6,type:"num",unit:"wk",comp:"≥",note:"Any intra-articular injection"},
+        {id:"scope_delay",label:"Delay after knee arthroscopy",val:6,type:"num",unit:"mo",comp:"≥",note:""},
+        {id:"mi_stent_delay",label:"Delay after MI / coronary stents",val:6,type:"num",unit:"mo",comp:"≥",note:"Cardiac clearance also required"},
+        {id:"dvt_pe_delay",label:"Delay after DVT / PE",val:3,type:"num",unit:"mo",comp:"≥",note:"If >3mo still on anticoag → clearance"},
+        {id:"cva_delay",label:"Delay after CVA",val:6,type:"num",unit:"mo",comp:"≥",note:"Neurology clearance also required"},
+      ]
+    },
+    heme: {
+      label: "Hematology",
+      icon: "🔬",
+      rules: [
+        {id:"hb_tka",label:"Hemoglobin min — TKA (ASC)",val:9.5,type:"num",unit:"g/dL",comp:"≥",note:"If plt >100k"},
+        {id:"hb_tha",label:"Hemoglobin min — THA (ASC)",val:10.0,type:"num",unit:"g/dL",comp:"≥",note:"If plt >100k"},
+        {id:"plt_min",label:"Platelet minimum (ASC)",val:100,type:"num",unit:"k",comp:">",note:""},
+        {id:"plt_iso",label:"Isolated thrombocytopenia cutoff",val:80,type:"num",unit:"k",comp:"<",note:"Below this = excluded"},
+        {id:"inr_max",label:"INR maximum (ASC)",val:1.5,type:"num",unit:"",comp:"<",note:"Check only if hx liver dz or anticoag"},
+      ]
+    },
+    chem: {
+      label: "Chemistry / Metabolic",
+      icon: "🧪",
+      rules: [
+        {id:"na_min",label:"Sodium minimum",val:130,type:"num",unit:"mEq/L",comp:"≥",note:""},
+        {id:"na_max",label:"Sodium maximum",val:145,type:"num",unit:"mEq/L",comp:"≤",note:""},
+        {id:"k_min",label:"Potassium minimum",val:3.0,type:"num",unit:"mEq/L",comp:"≥",note:""},
+        {id:"k_max",label:"Potassium maximum",val:5.2,type:"num",unit:"mEq/L",comp:"≤",note:""},
+        {id:"cr_asc",label:"Creatinine — ASC clear",val:2.0,type:"num",unit:"mg/dL",comp:"<",note:"No additional requirements"},
+        {id:"cr_cond",label:"Creatinine — ASC conditional",val:2.5,type:"num",unit:"mg/dL",comp:"≤",note:"2.0-2.5: OK if normal lytes within 7d"},
+        {id:"cr_hosp",label:"Creatinine — hospital required",val:2.5,type:"num",unit:"mg/dL",comp:">",note:"Cannot do at ASC"},
+        {id:"alb_min",label:"Albumin minimum",val:3.5,type:"num",unit:"g/dL",comp:"≥",note:"If below → nutrition consult, defer"},
+      ]
+    },
+    cardiac: {
+      label: "Cardiac Testing",
+      icon: "❤️",
+      rules: [
+        {id:"ekg_mo",label:"EKG validity window",val:6,type:"num",unit:"mo",comp:"within",note:""},
+        {id:"echo_ef",label:"Echo EF minimum",val:35,type:"num",unit:"%",comp:">",note:""},
+      ]
+    },
+    vitd: {
+      label: "Vitamin D",
+      icon: "☀️",
+      rules: [
+        {id:"vitd_rx",label:"Vit D — Rx threshold",val:20,type:"num",unit:"ng/mL",comp:"<",note:"Rx 50,000 IU weekly x 8wk"},
+        {id:"vitd_otc",label:"Vit D — OTC threshold",val:30,type:"num",unit:"ng/mL",comp:"<",note:"OTC 5,000 IU daily x 8wk (if ≥20)"},
+      ]
+    },
+    labs_val: {
+      label: "Lab Validity",
+      icon: "📅",
+      rules: [
+        {id:"labs_mo",label:"General labs validity",val:3,type:"num",unit:"mo",comp:"within",note:""},
+      ]
+    },
+    anticoag: {
+      label: "Anticoagulation Mgmt",
+      icon: "💊",
+      rules: [
+        {id:"coum_stop",label:"Coumadin stop (days before)",val:5,type:"num",unit:"d",comp:"≥",note:"No bridging for nonvalvular AFib / chronic VTE"},
+        {id:"doac_stop",label:"DOAC stop (days before)",val:3,type:"num",unit:"d",comp:"≥",note:""},
+        {id:"asa_policy",label:"ASA policy",val:"Do not stop — convert 325mg → 81mg",type:"txt",unit:"",comp:"",note:""},
+      ]
+    },
+    nsaid_renal: {
+      label: "NSAID / Renal",
+      icon: "🫘",
+      rules: [
+        {id:"cr_no_nsaid",label:"Creatinine cutoff — no NSAIDs",val:1.3,type:"num",unit:"mg/dL",comp:"≥",note:"Use Celecoxib or dex taper"},
+      ]
+    },
+    infx: {
+      label: "Infection Prevention",
+      icon: "🛡️",
+      rules: [
+        {id:"mrsa_screen",label:"Universal MRSA screening",val:"No — only if PA/NP deems needed",type:"txt",unit:"",comp:"",note:""},
+        {id:"hibi_days",label:"Hibiclens shower days (MRSA/HCW)",val:5,type:"num",unit:"d",comp:"",note:"Before surgery"},
+        {id:"mupi_days",label:"Mupirocin days (MRSA/HCW)",val:5,type:"num",unit:"d",comp:"",note:"Before surgery"},
+      ]
+    },
+    abx: {
+      label: "Preop Antibiotics",
+      icon: "💉",
+      rules: [
+        {id:"ancef_lt120",label:"IV Ancef dose < 120kg",val:2,type:"num",unit:"g",comp:"",note:""},
+        {id:"ancef_gt120",label:"IV Ancef dose ≥ 120kg",val:3,type:"num",unit:"g",comp:"",note:""},
+        {id:"vanco_lt85",label:"IV Vanco dose < 85kg",val:1,type:"num",unit:"g",comp:"",note:""},
+        {id:"vanco_gt85",label:"IV Vanco dose ≥ 85kg",val:1.5,type:"num",unit:"g",comp:"",note:""},
+      ]
+    },
+    postop_rx: {
+      label: "Post-Op Prescriptions",
+      icon: "📋",
+      rules: [
+        {id:"asa_dose",label:"Chewable ASA dose",val:81,type:"num",unit:"mg BID",comp:"",note:"x 6 weeks"},
+        {id:"oxy_hip",label:"Oxycodone 5mg — hip qty",val:10,type:"num",unit:"tabs",comp:"",note:""},
+        {id:"oxy_knee",label:"Oxycodone 5mg — knee qty",val:30,type:"num",unit:"tabs",comp:"",note:""},
+        {id:"oxy_rev",label:"Oxycodone 5mg — revision qty",val:40,type:"num",unit:"tabs",comp:"",note:""},
+        {id:"dil_hip",label:"Dilaudid 2mg — hip qty",val:10,type:"num",unit:"tabs",comp:"",note:""},
+        {id:"dil_knee",label:"Dilaudid 2mg — knee qty",val:30,type:"num",unit:"tabs",comp:"",note:""},
+        {id:"lyrica_dose",label:"Lyrica dose",val:75,type:"num",unit:"mg qHS",comp:"",note:"#30 with 1 prn refill"},
+        {id:"ibu_dose",label:"Ibuprofen dose",val:800,type:"num",unit:"mg TID",comp:"",note:"x 4 weeks; no NSAIDs if Cr ≥ 1.3"},
+        {id:"dex_dose",label:"Decadron dose",val:4,type:"num",unit:"mg BID",comp:"",note:"x 4 days; not for diabetics"},
+        {id:"txa_oral",label:"Oral TXA dose",val:1.95,type:"num",unit:"g QD",comp:"",note:"x 4 days; 1st dose at home day-of"},
+        {id:"omnicef_dose",label:"Omnicef dose",val:300,type:"num",unit:"mg BID",comp:"",note:"x 7 days"},
+      ]
+    },
+    intraop: {
+      label: "Intraop Medications",
+      icon: "🏥",
+      rules: [
+        {id:"txa_iv",label:"TXA IV dose",val:1,type:"num",unit:"g",comp:"",note:"No contraindications — give to all"},
+        {id:"dex_iv",label:"Decadron IV dose",val:16,type:"num",unit:"mg",comp:"",note:"All patients including diabetics"},
+        {id:"bupiv_cc",label:"Periarticular bupivacaine",val:30,type:"num",unit:"cc (⅜%)",comp:"",note:"Plain bupivacaine"},
+        {id:"toradol_mg",label:"Periarticular Toradol",val:15,type:"num",unit:"mg",comp:"",note:""},
+        {id:"depo_mg",label:"Periarticular Depo-Medrol",val:80,type:"num",unit:"mg",comp:"",note:""},
+      ]
+    },
+  }
+};
+
+// Live protocol state — cloned from defaults, overwritten by storage
+let PROTO = JSON.parse(JSON.stringify(PROTO_DEFAULT));
+let PROTO_HISTORY = [];
+
+// Load from storage
+(async function loadProto(){
+  try{
+    const r=await window.storage.get("tjr-pac-proto");
+    if(r&&r.value)PROTO=JSON.parse(r.value);
+  }catch(e){}
+  try{
+    const r=await window.storage.get("tjr-pac-proto-history");
+    if(r&&r.value)PROTO_HISTORY=JSON.parse(r.value);
+  }catch(e){}
+  document.getElementById("protoVer").textContent=PROTO.version;
+  render();
+})();
+
+async function saveProto(){
+  try{await window.storage.set("tjr-pac-proto",JSON.stringify(PROTO));}catch(e){}
+  try{await window.storage.set("tjr-pac-proto-history",JSON.stringify(PROTO_HISTORY));}catch(e){}
+}
+
+// Helper to get a proto value
+function pv(catId,ruleId){
+  const cat=PROTO.cats[catId];if(!cat)return null;
+  const r=cat.rules.find(x=>x.id===ruleId);
+  return r?r.val:null;
+}
+
+// ═══════ DYNAMIC GATES (read from protocol) ═══════
+function getBMIGate(isDiabetic){return isDiabetic?pv("obesity","bmi_dm"):pv("obesity","bmi_non_dm");}
+function getA1CGate(){return pv("diabetes","a1c_trigger");}
+
+// These are used by the existing dashboard — keep them as live getters
+Object.defineProperty(window,'BMI_GATE',{get:()=>pv("obesity","bmi_non_dm")});
+Object.defineProperty(window,'A1C_GATE',{get:()=>pv("diabetes","a1c_trigger")});
+
+const LAB_N={cbc:"CBC",bmp:"BMP",ptinr:"PT/INR",ua:"Urinalysis",ts:"Type & Screen",hba1c:"HbA1c"};
+const CLR_N={pcp:"PCP",cardiac:"Cardiac",heme:"Hematology",dental:"Dental",rheum:"Rheumatology",vasc:"Vascular",onc:"Oncology",pulm:"Pulmonology",endo:"Endocrinology"};
+const SURG_SITES={
+  asc:["Sandy Springs","Forsyth","Gwinnett","Cherokee"],
+  hosp:["Forsyth","Atlanta","Cherokee","Gwinnett Duluth","Gwinnett Lawrenceville"]
+};
+const CLR_LINKS={};
+const CON_N={tjs_surg:"TJS Informed Consent (PP1366)",nhs:"Northside Hospital Surgery Consent",acjs_surg:"ACJS Facility Consent to Operation",acjs_fa:"First Assist Consent (SSA/ABN)",acjs_anes:"ACJS Anesthesia Consent"};
+
+const MDB={
+  "Eliquis 5mg":{cls:"DOAC",ac:"per_specialist",pre:"Per Cardiologist — bridge",post:"Resume per specialist",restart:"Per hematology"},
+  "Warfarin 5mg":{cls:"Anticoagulant",ac:"per_specialist",pre:"Per Cardiologist — bridge",post:"Per specialist",restart:"Per hematology"},
+  "Metformin 1000mg":{cls:"Biguanide",ac:"hold",pre:"Hold 12hr before",post:"Resume when eating",restart:"POD#1 with meal"},
+  "atorvastatin 40mg":{cls:"Statin",ac:"continue",pre:"Take night before",post:"Resume",restart:""},
+  "sertraline 50mg":{cls:"SSRI",ac:"continue",pre:"Take w/ sip water",post:"Resume",restart:""},
+  "pantoprazole 40mg":{cls:"PPI",ac:"continue",pre:"Continue",post:"Resume",restart:""},
+  "meloxicam 15mg":{cls:"NSAID",ac:"hold",pre:"Hold 4 days prior",post:"Resume when cleared",restart:"2 weeks post-op"},
+  "amlodipine 5mg":{cls:"CCB",ac:"continue",pre:"Continue",post:"Resume",restart:""},
+  "metoprolol 50mg":{cls:"Beta Blocker",ac:"must_take",pre:"MUST take morning of",post:"Resume",restart:""},
+  "Ozempic 0.5mg":{cls:"GLP-1 RA",ac:"hold",pre:"Hold 1 week prior",post:"Resume when eating",restart:"1 week post-op"},
+  "empagliflozin 25mg":{cls:"SGLT2i",ac:"stop",pre:"STOP 3-4d prior — DKA risk",post:"Resume when eating",restart:"1 week post-op"},
+  "levothyroxine 75mcg":{cls:"Thyroid",ac:"must_take",pre:"Take w/ sip water",post:"Resume",restart:""},
+  "lisinopril 20mg":{cls:"ACE Inhibitor",ac:"hold",pre:"Hold morning of surgery",post:"Resume POD#1",restart:"POD#1"},
+  "tamsulosin 0.4mg":{cls:"Alpha Blocker",ac:"continue",pre:"Continue",post:"Resume",restart:""},
+  "Aspirin 81mg":{cls:"Antiplatelet",ac:"continue",pre:"Continue per protocol",post:"Continue",restart:""},
+  "famotidine 20mg":{cls:"H2 Blocker",ac:"continue",pre:"Continue",post:"Resume",restart:""},
+  "Vitamin D3 2000IU":{cls:"Supplement",ac:"continue",pre:"May continue",post:"Resume",restart:""},
+  "Calcium 600mg":{cls:"Supplement",ac:"continue",pre:"May continue",post:"Resume",restart:""},
+};
+function mInfo(n){return MDB[n]||{cls:"—",ac:"review",pre:"Review",post:"Review",restart:""};}
+
+const P=[
+{id:1,f:"Margaret",l:"Thompson",mrn:"NTH-2847561",age:68,prov:"DeCook",loc:"Cumming",proc:"tka",side:"Left",surgSite:{type:"asc",loc:"Forsyth"},
+  surgDate:"2026-03-22",phone:"(770) 555-0143",email:"m.thompson@email.com",
+  ht_in:64,wt_lb:185,a1c:{val:7.2,date:"03/01"},
+  cg:{name:"Thomas Thompson",rel:"Husband",phone:"(770) 555-0143",conf:true},
+  labs:{cbc:{done:true,date:"03/10",abn:false,vals:"WBC 6.8, Hgb 13.2, Hct 39.8, Plt 245"},bmp:{done:true,date:"03/10",abn:false,vals:"Na 140, K 4.2, BUN 18, Cr 0.9, Glu 112"},ptinr:{done:true,date:"03/10",abn:false,vals:"PT 12.1, INR 1.0"},ua:{done:true,date:"03/10",abn:false,vals:"Negative"},ts:{done:true,date:"03/10",abn:false,vals:"A+"},hba1c:{done:true,date:"03/01",abn:false,vals:"7.2%"}},
+  ekg:{done:true,date:"03/10",abn:false,note:"NSR, rate 72, no ST changes",cardiacClr:null},
+  clrs:{pcp:{need:true,done:true,date:"03/08",note:"Cleared",doc:"Dr. Patel",docPh:"(770) 555-2100"},cardiac:{need:true,done:true,date:"03/05",note:"Cleared — stent 2019",doc:"Dr. Nguyen",docPh:"(770) 555-2200"},heme:{need:true,done:false,note:"Eliquis bridge pending",doc:"Dr. Sharma",docPh:"(770) 555-2300"},dental:{need:true,done:true,date:"03/01",doc:"Dr. Kim",docPh:"(770) 555-2400"}},
+  meds:["Eliquis 5mg","Metformin 1000mg","atorvastatin 40mg","sertraline 50mg","pantoprazole 40mg","Calcium 600mg","meloxicam 15mg","amlodipine 5mg","metoprolol 50mg","Ozempic 0.5mg","empagliflozin 25mg"],
+  medH:{"Eliquis 5mg":{sent:true,ack:true,sp:false},"Metformin 1000mg":{sent:true,ack:true},"meloxicam 15mg":{sent:true,ack:true},"Ozempic 0.5mg":{sent:true,ack:false},"empagliflozin 25mg":{sent:true,ack:true}},
+  cons:{tjs_surg:{signed:true},nhs:{signed:true},acjs_surg:{signed:true},acjs_fa:{signed:true},acjs_anes:{signed:true}},
+  cls:{st:"done",date:"03/12"},npo:{sent:true,conf:true},
+  hp:{st:"none"},
+  orders:{pre:{st:"signed",date:"03/14"},post:{st:"signed",date:"03/14"},mrsa:false,pcn_allergy:false,asc_sent:true,addl:""},
+  instr:{sent:true,sentDate:"03/12",conf:true,method:"sms",resends:0}
+},
+{id:2,f:"Robert",l:"Williams",mrn:"NTH-5518293",age:71,prov:"DeCook",loc:"Gwinnett",proc:"tka",side:"Bilateral",surgSite:{type:"hosp",loc:"Gwinnett Lawrenceville"},
+  surgDate:"2026-03-24",phone:"(770) 555-0298",email:"r.williams@email.com",
+  ht_in:70,wt_lb:217,a1c:null,
+  cg:{name:"Barbara Williams",rel:"Wife",phone:"(770) 555-0298",conf:true},
+  labs:{cbc:{done:true,date:"03/12",abn:false,vals:"WBC 7.1, Hgb 14.0, Hct 41.2, Plt 198"},bmp:{done:true,date:"03/12",abn:true,vals:"Na 139, K 5.3 (H), BUN 22, Cr 1.1, Glu 98"},ptinr:{done:true,date:"03/12",abn:false,vals:"PT 11.8, INR 1.0"},ua:{done:false},ts:{done:false}},
+  ekg:{done:true,date:"03/12",abn:false,note:"NSR, rate 68",cardiacClr:null},
+  clrs:{pcp:{need:true,done:true,date:"03/10",doc:"Dr. Johnson",docPh:"(770) 555-3100"},dental:{need:true,done:false,doc:"Dr. Lee",docPh:"(770) 555-3200"}},
+  meds:["atorvastatin 40mg","amlodipine 5mg","pantoprazole 40mg","Vitamin D3 2000IU"],
+  medH:{},
+  cons:{tjs_surg:{signed:false},nhs:{signed:true},acjs_surg:{signed:false},acjs_fa:{signed:false},acjs_anes:{signed:true}},
+  cls:{st:"scheduled",date:"03/18"},npo:{sent:false,conf:false},
+  hp:{st:"none"},
+  orders:{pre:{st:"none",date:null},post:{st:"none",date:null},mrsa:false,pcn_allergy:false,asc_sent:false,addl:""},
+  instr:{sent:false,sentDate:null,conf:false,method:null,resends:0}
+},
+{id:3,f:"Patricia",l:"Garcia",mrn:"NTH-6629104",age:66,prov:"Smith",loc:"Cumming",proc:"tka",side:"Right",surgSite:{type:"asc",loc:"Forsyth"},
+  surgDate:"2026-03-20",phone:"(678) 555-0187",email:"p.garcia@email.com",
+  ht_in:62,wt_lb:148,a1c:null,
+  cg:{name:"Maria Garcia",rel:"Daughter",phone:"(678) 555-0187",conf:true},
+  labs:{cbc:{done:true,date:"03/08",abn:false,vals:"WBC 5.9, Hgb 12.8, Hct 38.4, Plt 267"},bmp:{done:true,date:"03/08",abn:false,vals:"Na 141, K 4.0, BUN 15, Cr 0.7, Glu 94"},ptinr:{done:true,date:"03/08",abn:false,vals:"PT 11.5, INR 1.0"},ua:{done:true,date:"03/08",abn:false,vals:"Negative"},ts:{done:true,date:"03/08",abn:false,vals:"O+"}},
+  ekg:{done:true,date:"03/08",abn:false,note:"NSR, rate 74",cardiacClr:null},
+  clrs:{pcp:{need:true,done:true,date:"03/06",doc:"Dr. Martinez",docPh:"(678) 555-4100"},dental:{need:true,done:true,date:"03/02",doc:"Dr. Chen",docPh:"(678) 555-4200"}},
+  meds:["levothyroxine 75mcg","atorvastatin 40mg","Calcium 600mg","famotidine 20mg"],
+  medH:{},
+  cons:{tjs_surg:{signed:true},nhs:{signed:true},acjs_surg:{signed:true},acjs_fa:{signed:true},acjs_anes:{signed:true}},
+  cls:{st:"done",date:"03/10"},npo:{sent:true,conf:true},
+  hp:{st:"signed",date:"03/14"},
+  orders:{pre:{st:"signed",date:"03/12"},post:{st:"signed",date:"03/12"},mrsa:false,pcn_allergy:false,asc_sent:true,addl:""},
+  instr:{sent:true,sentDate:"03/10",conf:true,method:"sms",resends:0}
+},
+{id:4,f:"Helen",l:"Kowalski",mrn:"NTH-6618492",age:67,prov:"DeCook",loc:"Cherokee",proc:"tha",side:"Right",surgSite:{type:"asc",loc:"Cherokee"},
+  surgDate:"2026-03-26",phone:"(678) 555-0492",email:"h.kowalski@email.com",
+  ht_in:63,wt_lb:272,a1c:{val:8.4,date:"02/20"},
+  cg:null,
+  labs:{cbc:{done:false},bmp:{done:false},ptinr:{done:false},ua:{done:false},ts:{done:false}},
+  ekg:{done:false,cardiacClr:null},
+  clrs:{pcp:{need:true,done:false,doc:"Dr. Adams",docPh:"(678) 555-5100"},dental:{need:true,done:false,doc:"Dr. Park",docPh:"(678) 555-5200"}},
+  meds:["Metformin 1000mg","amlodipine 5mg","atorvastatin 40mg"],
+  medH:{"Metformin 1000mg":{sent:false,ack:false}},
+  cons:{tjs_surg:{signed:false},nhs:{signed:false},acjs_surg:{signed:false},acjs_fa:{signed:false},acjs_anes:{signed:false}},
+  cls:{st:"none",date:null},npo:{sent:false,conf:false},
+  hp:{st:"none"},
+  orders:{pre:{st:"none",date:null},post:{st:"none",date:null},mrsa:false,pcn_allergy:false,asc_sent:false,addl:""},
+  instr:{sent:false,sentDate:null,conf:false,method:null,resends:0}
+},
+{id:5,f:"Maria",l:"Gonzalez",mrn:"NTH-8834127",age:72,prov:"Smith",loc:"Sandy Springs",proc:"tha",side:"Left",surgSite:{type:"asc",loc:"Sandy Springs"},
+  surgDate:"2026-04-02",phone:"(678) 555-0127",email:"m.gonzalez@email.com",
+  ht_in:60,wt_lb:166,a1c:null,
+  cg:{name:"Rosa Gonzalez",rel:"Daughter",phone:"(678) 555-0341",conf:false},
+  labs:{cbc:{done:true,date:"03/14",abn:false,vals:"WBC 6.2, Hgb 11.8, Hct 35.4, Plt 312"},bmp:{done:true,date:"03/14",abn:false,vals:"Na 138, K 4.5, BUN 20, Cr 0.8, Glu 102"},ptinr:{done:true,date:"03/14",abn:true,vals:"PT 16.2, INR 1.8 (H)"},ua:{done:false},ts:{done:false}},
+  ekg:{done:true,date:"03/14",abn:true,note:"Left axis deviation, LVH criteria",cardiacClr:null},
+  clrs:{pcp:{need:true,done:true,date:"03/10",doc:"Dr. Rivera",docPh:"(678) 555-6100"},cardiac:{need:true,done:false,note:"Awaiting echo",doc:"Dr. Gupta",docPh:"(678) 555-6200"},dental:{need:true,done:true,date:"02/28",doc:"Dr. Wong",docPh:"(678) 555-6300"}},
+  meds:["Warfarin 5mg","amlodipine 5mg","lisinopril 20mg","atorvastatin 40mg","tamsulosin 0.4mg"],
+  medH:{"Warfarin 5mg":{sent:true,ack:true,sp:false},"lisinopril 20mg":{sent:true,ack:true}},
+  cons:{tjs_surg:{signed:false},nhs:{signed:false},acjs_surg:{signed:false},acjs_fa:{signed:false},acjs_anes:{signed:true}},
+  cls:{st:"none",date:null},npo:{sent:false,conf:false},
+  hp:{st:"draft",date:"03/14"},
+  orders:{pre:{st:"draft",date:null},post:{st:"none",date:null},mrsa:false,pcn_allergy:true,asc_sent:false,addl:""},
+  instr:{sent:true,sentDate:"03/14",conf:false,method:"sms",resends:0}
+},
+{id:6,f:"William",l:"Foster",mrn:"NTH-5512837",age:70,prov:"DeCook",loc:"Gwinnett",proc:"tka",side:"Right",surgSite:{type:"asc",loc:"Gwinnett"},
+  surgDate:"2026-03-28",phone:"(770) 555-0837",email:"w.foster@email.com",
+  ht_in:72,wt_lb:210,a1c:null,
+  cg:{name:"Susan Foster",rel:"Wife",phone:"(770) 555-0838",conf:true},
+  labs:{cbc:{done:true,date:"03/11",abn:false,vals:"WBC 6.5, Hgb 15.1, Hct 44.2, Plt 221"},bmp:{done:true,date:"03/11",abn:false,vals:"Na 142, K 4.1, BUN 16, Cr 0.9, Glu 96"},ptinr:{done:true,date:"03/11",abn:false,vals:"PT 12.0, INR 1.0"},ua:{done:true,date:"03/11",abn:false,vals:"Negative"},ts:{done:true,date:"03/11",abn:false,vals:"B+"}},
+  ekg:{done:true,date:"03/11",abn:false,note:"NSR, rate 66",cardiacClr:null},
+  clrs:{pcp:{need:true,done:true,date:"03/08",doc:"Dr. Brooks",docPh:"(770) 555-7100"},heme:{need:true,done:true,date:"03/06",note:"Bridge plan documented",doc:"Dr. Patel",docPh:"(770) 555-7200"},dental:{need:true,done:true,date:"03/01",doc:"Dr. Taylor",docPh:"(770) 555-7300"}},
+  meds:["Eliquis 5mg","atorvastatin 40mg","pantoprazole 40mg","Aspirin 81mg"],
+  medH:{"Eliquis 5mg":{sent:true,ack:true,sp:true}},
+  cons:{tjs_surg:{signed:true},nhs:{signed:true},acjs_surg:{signed:true},acjs_fa:{signed:true},acjs_anes:{signed:true}},
+  cls:{st:"done",date:"03/09"},npo:{sent:true,conf:true},
+  hp:{st:"signed",date:"03/15"},
+  orders:{pre:{st:"signed",date:"03/14"},post:{st:"signed",date:"03/14"},mrsa:false,pcn_allergy:false,asc_sent:true,addl:""},
+  instr:{sent:true,sentDate:"03/09",conf:true,method:"sms",resends:0}
+}
+];
+
+// ═══════ HELPERS ═══════
+function esc(s){const d=document.createElement("div");d.textContent=s||"";return d.innerHTML;}
+function bmi(p){return+(p.wt_lb/((p.ht_in/39.37)**2)).toFixed(1);}
+function goalWt(p){const g=getBMIGate(false);const ht_m=p.ht_in*0.0254;return Math.floor(g*ht_m*ht_m*2.205);}
+
+// ═══════ READINESS ═══════
+function readiness(p){
+  let h=0,s=0;
+  const today=new Date(),sd=new Date(p.surgDate+"T00:00:00");
+  const d=Math.ceil((sd-today)/864e5);
+  if(p.a1c&&p.a1c.val>=A1C_GATE)h++;
+  if(bmi(p)>=BMI_GATE)h++;
+  if(!p.cg)h++;
+  ["cbc","bmp","ptinr","ua","ts"].forEach(k=>{if(!p.labs[k]?.done)s++;});
+  if(!p.ekg?.done)s++;
+  if(p.ekg?.abn&&p.ekg.cardiacClr===null)s++;
+  Object.values(p.clrs).forEach(c=>{if(c.need&&!c.done)s++;});
+  Object.entries(p.medH).forEach(([k,v])=>{if(!v.sent||!v.ack)s++;if(v.sp===false)s++;});
+  Object.values(p.cons).forEach(c=>{if(!c.signed)s++;});
+  if(p.cls?.st!=="done")s++;
+  if(!p.npo?.conf)s++;
+  if(p.hp?.st!=="signed")s++;
+  if(!p.instr?.sent)s++;
+  if(p.orders?.pre?.st!=="signed")s++;
+  if(p.orders?.post?.st!=="signed")s++;
+  let st="ready";
+  if(h>0)st="not-ready";else if(s>0&&d<=7)st="not-ready";else if(s>0)st="pending";
+  return{st,h,s,d};
+}
+
+// Column statuses
+function labSt(p){const k=["cbc","bmp","ptinr","ua","ts"];const dn=k.filter(x=>p.labs[x]?.done).length;const ab=k.filter(x=>p.labs[x]?.abn).length;if(dn===k.length&&!ab)return{c:"g",i:"✓",lb:`${dn}/${k.length}`,s:""};if(ab)return{c:"y",i:"⚠",lb:`${dn}/${k.length}`,s:`${ab} abn`};return{c:"r",i:"✕",lb:`${dn}/${k.length}`,s:`${k.length-dn} miss`};}
+function ekgSt(p){if(!p.ekg?.done)return{c:"r",i:"✕",lb:"Not Done",s:""};if(p.ekg.abn&&p.ekg.cardiacClr===null)return{c:"y",i:"⚠",lb:"Abnormal",s:"Review"};if(p.ekg.abn&&p.ekg.cardiacClr!==null)return{c:"g",i:"✓",lb:"Reviewed",s:""};return{c:"g",i:"✓",lb:"Normal",s:p.ekg.date};}
+function clrSt(p){const n=Object.values(p.clrs).filter(c=>c.need);if(!n.length)return{c:"g",i:"✓",lb:"None",s:""};const d=n.filter(c=>c.done).length;if(d===n.length)return{c:"g",i:"✓",lb:`${d}/${n.length}`,s:""};return{c:"r",i:"✕",lb:`${d}/${n.length}`,s:`${n.length-d} need`};}
+function conSt(p){const k=Object.keys(p.cons);const s=k.filter(x=>p.cons[x].signed).length;if(s===k.length)return{c:"g",i:"✓",lb:`${s}/${k.length}`,s:""};return{c:"r",i:"✕",lb:`${s}/${k.length}`,s:`${k.length-s} unsign`};}
+function clsSt(p){if(p.cls?.st==="done")return{c:"g",i:"✓",lb:"Done",s:p.cls.date||""};if(p.cls?.st==="scheduled")return{c:"y",i:"📅",lb:"Sched",s:p.cls.date||""};return{c:"r",i:"✕",lb:"None",s:""};}
+function medSt(p){const h=Object.entries(p.medH);if(!h.length)return{c:"g",i:"✓",lb:"No Holds",s:`${p.meds.length} meds`};const ok=h.every(([k,v])=>v.sent&&v.ack&&v.sp!==false);if(ok)return{c:"g",i:"✓",lb:"Conf'd",s:`${h.length} holds`};return{c:"y",i:"⚠",lb:"Pending",s:`${h.length} holds`};}
+function bmiSt(p){const b=bmi(p);if(b<BMI_GATE)return{c:"g",i:"✓",lb:b+"",s:""};return{c:"r",i:"✕",lb:b+"",s:`Goal: ${goalWt(p)}lb`};}
+function cgSt(p){if(!p.cg)return{c:"r"};return{c:"g"};}
+function hpSt(p){if(p.hp?.st==="signed")return{c:"g",i:"✓",lb:"Signed",s:p.hp.date||""};if(p.hp?.st==="draft")return{c:"y",i:"✏",lb:"Draft",s:""};return{c:"r",i:"✕",lb:"None",s:""};}
+function instrSt(p){
+  if(p.instr?.sent&&p.instr?.conf)return{c:"g",i:"✓",lb:"Conf'd",s:p.instr.sentDate||""};
+  if(p.instr?.sent)return{c:"y",i:"📱",lb:"Sent",s:"Unconf"};
+  return{c:"r",i:"✕",lb:"Not Sent",s:""};
+}
+function ordSt(p){
+  const pre=p.orders?.pre?.st||"none",post=p.orders?.post?.st||"none";
+  if(pre==="signed"&&post==="signed"){
+    if(p.orders?.asc_sent)return{c:"g",i:"✓",lb:"Signed",s:"→ ASC"};
+    return{c:"g",i:"✓",lb:"Signed",s:"Send ASC"};
+  }
+  if(pre!=="none"||post!=="none")return{c:"y",i:"✏",lb:"Partial",s:""};
+  return{c:"r",i:"✕",lb:"None",s:""};
+}
+function wt_kg(p){return+(p.wt_lb/2.205).toFixed(1);}
+const LOC_ADDR={Cumming:"Forsyth - 2000 Howard Farm Drive, Suite T100, Cumming, GA 30041",Gwinnett:"Gwinnett - 2800 Buford Drive, Suite 100, Lawrenceville, GA 30043","Sandy Springs":"Atlanta - 1150 Hammond Drive, Suite 600, Sandy Springs, GA 30328",Cherokee:""};
+// ═══════ FILTER ═══════
+let openPn={};
+
+function getF(){
+  const q=(document.getElementById("qInput")?.value||"").toLowerCase();
+  const rf=document.getElementById("readFilter")?.value||"all";
+  const pf=document.getElementById("provFilter")?.value||"all";
+  const lf=document.getElementById("locFilter")?.value||"all";
+  const df=document.getElementById("dateFilter")?.value||"";
+  return P.filter(p=>{
+    if(pf!=="all"&&p.prov!==pf)return false;
+    if(lf!=="all"&&p.loc!==lf)return false;
+    if(df&&p.surgDate!==df)return false;
+    const r=readiness(p);if(rf!=="all"&&r.st!==rf)return false;
+    if(q&&!`${p.f} ${p.l} ${p.mrn}`.toLowerCase().includes(q))return false;
+    return true;
+  }).sort((a,b)=>{const ra=readiness(a),rb=readiness(b);const o={"not-ready":0,pending:1,ready:2};if(o[ra.st]!==o[rb.st])return o[ra.st]-o[rb.st];return new Date(a.surgDate)-new Date(b.surgDate);});
+}
+
+// ═══════ RENDER ═══════
+function render(){
+  const pts=getF();
+  const all=P.map(p=>readiness(p));
+  const rN=all.filter(r=>r.st==="ready").length,pN=all.filter(r=>r.st==="pending").length,nN=all.filter(r=>r.st==="not-ready").length;
+
+  let h=`<div class="stats">
+    <div class="stat" style="border-left-color:var(--blue);"><div class="stat-n" style="color:var(--blue);">${P.length}</div><div class="stat-l">Upcoming Surgeries</div></div>
+    <div class="stat" style="border-left-color:var(--green);"><div class="stat-n" style="color:var(--green);">${rN}</div><div class="stat-l">🟢 Ready</div></div>
+    <div class="stat" style="border-left-color:var(--yellow);"><div class="stat-n" style="color:var(--yellow);">${pN}</div><div class="stat-l">🟡 Pending</div></div>
+    <div class="stat" style="border-left-color:var(--red);"><div class="stat-n" style="color:var(--red);">${nN}</div><div class="stat-l">🔴 Not Ready</div></div>
+  </div>`;
+
+  h+=`<table class="pac-t"><thead><tr>
+    <th style="text-align:left;">Patient</th><th style="text-align:left;">Procedure</th><th>Surgeon</th><th>Surg. Site</th>
+    <th>BMI</th><th>Labs</th><th>EKG</th><th>Clearances</th><th>Consents</th><th>Class</th><th>Meds</th><th>Caregiver</th><th>H&P</th><th>Orders</th><th>Instruct</th><th>Act</th>
+  </tr></thead><tbody>`;
+
+  pts.forEach(p=>{
+    const r=readiness(p);
+    const sd=new Date(p.surgDate+"T00:00:00");
+    const sdS=sd.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+    const cdL=r.d<=0?"TODAY":r.d===1?"TMRW":`${r.d}d`;
+    const cdC=r.d<=3?"var(--red)":r.d<=7?"var(--yellow)":"var(--t4)";
+
+    const ls=labSt(p),es=ekgSt(p),cs=clrSt(p),cos=conSt(p),cls2=clsSt(p),ms=medSt(p),bs=bmiSt(p),hs=hpSt(p),ost=ordSt(p),ist=instrSt(p);
+
+    h+=`<tr>`;
+    h+=`<td><div class="pt-c"><div class="rd ${r.st}"></div><div><div class="pn">${esc(p.l)}, ${esc(p.f)}</div><div class="ps">${esc(p.mrn)} · ${p.age}yo · ${esc(p.loc)}</div></div></div></td>`;
+    h+=`<td><div class="proc-c"><span class="ptag ${p.proc==='tka'?'ptag-tka':'ptag-tha'}">${p.side} ${p.proc.toUpperCase()}</span><div class="sd">${sdS} <span class="scd" style="color:${cdC};">(${cdL})</span></div></div></td>`;
+    h+=`<td><div style="font-size:10px;font-weight:600;color:var(--t2);text-align:center;">Dr. ${esc(p.prov)}</div></td>`;
+
+    // Surgery Site
+    const ss=p.surgSite||{type:"asc",loc:""};
+    const ssLabel=ss.type==="asc"?"ASC":"HOSP";
+    const ssCls=ss.type==="asc"?"ss-asc":"ss-hosp";
+    h+=`<td><div class="ss-cell" onclick="event.stopPropagation();editSurgSite(${p.id})"><span class="ss-type ${ssCls}">${ssLabel}</span><div class="ss-loc">${esc(ss.loc||'Not set')}</div></div></td>`;
+
+    // BMI
+    h+=`<td><div class="sc sc-${bs.c}" onclick="togglePn(${p.id},'bmi')"><div class="sc-i">${bs.i}</div><div class="sc-lb">${bs.lb}</div>${bs.s?`<div class="sc-s">${bs.s}</div>`:''}</div></td>`;
+
+    // 6 status cols
+    [["labs",ls],["ekg",es],["clrs",cs],["cons",cos],["class",cls2],["meds",ms]].forEach(([k,s])=>{
+      const act=openPn[p.id]===k;
+      h+=`<td><div class="sc sc-${s.c}" onclick="togglePn(${p.id},'${k}')" style="${act?'box-shadow:inset 0 -2px 0 currentColor;':''}"><div class="sc-i">${s.i}</div><div class="sc-lb">${s.lb}</div>${s.s?`<div class="sc-s">${s.s}</div>`:''}</div></td>`;
+    });
+
+    // Caregiver
+    const cgs=cgSt(p);
+    h+=`<td><div class="cg-c" style="background:${cgs.c==='g'?'var(--greenL)':cgs.c==='y'?'var(--yellowL)':'var(--redL)'};" onclick="editCg(${p.id})">`;
+    if(p.cg){
+      h+=`<div class="cg-name">${esc(p.cg.name)}</div><div class="cg-rel">${esc(p.cg.rel)} · ${esc(p.cg.phone)}</div>`;
+    } else {
+      h+=`<div style="font-size:9px;font-weight:700;color:var(--red);">NONE</div>`;
+    }
+    h+=`</div></td>`;
+
+    // H&P
+    h+=`<td><div class="sc sc-${hs.c}" onclick="${hs.c==='r'?`startHP(${p.id})`:`togglePn(${p.id},'hp')`}"><div class="sc-i">${hs.c==='r'?'<span style="font-size:16px;cursor:pointer;">＋</span>':hs.i}</div><div class="sc-lb">${hs.lb}</div>${hs.s?`<div class="sc-s">${hs.s}</div>`:''}</div></td>`;
+
+    // Orders (PP1265/PP1264)
+    const oAct=openPn[p.id]==='orders';
+    h+=`<td><div class="sc sc-${ost.c}" onclick="togglePn(${p.id},'orders')" style="${oAct?'box-shadow:inset 0 -2px 0 currentColor;':''}"><div class="sc-i">${ost.i}</div><div class="sc-lb">${ost.lb}</div>${ost.s?`<div class="sc-s">${ost.s}</div>`:''}</div></td>`;
+
+    // Instructions (PP1254)
+    const iAct=openPn[p.id]==='instr';
+    h+=`<td><div class="sc sc-${ist.c}" onclick="togglePn(${p.id},'instr')" style="${iAct?'box-shadow:inset 0 -2px 0 currentColor;':''}"><div class="sc-i">${ist.i}</div><div class="sc-lb">${ist.lb}</div>${ist.s?`<div class="sc-s">${ist.s}</div>`:''}</div></td>`;
+
+    // Actions
+    h+=`<td class="ac"><button class="btn s" onclick="sendReminder(${p.id})" title="Remind">📱</button> <button class="btn s" onclick="showMsg(${p.id})" title="Message">💬</button></td>`;
+    h+=`</tr>`;
+
+    if(openPn[p.id]){
+      h+=`<tr class="dtr"><td colspan="16"><div class="dp open">${renderPn(p,openPn[p.id])}</div></td></tr>`;
+    }
+  });
+  h+=`</tbody></table>`;
+  document.getElementById("main").innerHTML=h;
+}
+
+function togglePn(id,k){if(openPn[id]===k)delete openPn[id];else openPn[id]=k;render();}
+
+// ═══════ PANELS ═══════
+function renderPn(p,k){
+  const fn={bmi:pnBMI,labs:pnLabs,ekg:pnEKG,clrs:pnClrs,cons:pnCons,class:pnClass,meds:pnMeds,hp:pnHP,orders:pnOrders,instr:pnInstr};
+  return(fn[k]||function(){return"";})(p);
+}
+
+function pnBMI(p){
+  const b=bmi(p);const pass=b<BMI_GATE;
+  let h=`<div class="dp-t">BMI Assessment <button class="dp-x" onclick="delete openPn[${p.id}];render()">✕</button></div>`;
+  h+=`<div class="gate ${pass?'gate-p':'gate-f'}">${pass?'✓':'✕'} BMI: <strong>${b}</strong> ${pass?`(< ${BMI_GATE})`:`≥ ${BMI_GATE} — SURGERY HOLD`}</div>`;
+  h+=`<div style="font-size:11px;color:var(--t2);margin-top:6px;">Height: ${Math.floor(p.ht_in/12)}' ${p.ht_in%12}" · Weight: ${p.wt_lb} lbs</div>`;
+  if(!pass){
+    h+=`<div style="margin-top:8px;padding:10px;background:var(--yellowB);border-radius:6px;font-size:11px;font-weight:600;color:var(--yellow);">
+      🎯 Goal weight for BMI < ${BMI_GATE}: <strong>${goalWt(p)} lbs</strong> (need to lose ${p.wt_lb-goalWt(p)} lbs)
+    </div>`;
+  }
+  if(p.a1c){
+    const ap=p.a1c.val<A1C_GATE;
+    h+=`<div class="gate ${ap?'gate-p':'gate-f'}" style="margin-top:8px;">${ap?'✓':'✕'} A1c: <strong>${p.a1c.val}%</strong> ${ap?`(< ${A1C_GATE})`:`≥ ${A1C_GATE} — SURGERY HOLD`}</div>`;
+  }
+  return h;
+}
+
+function pnLabs(p){
+  let h=`<div class="dp-t">Labs <button class="dp-x" onclick="delete openPn[${p.id}];render()">✕</button></div>`;
+  ["cbc","bmp","ptinr","ua","ts"].forEach(k=>{
+    const lb=p.labs[k];
+    if(!lb||!lb.done){h+=`<div class="ck"><div class="ci r">✕</div><div class="ct"><strong>${LAB_N[k]}</strong><span>Pending</span></div></div>`;return;}
+    const flag=lb.abn?`<span class="cf cf-abn">⚠ ABN</span>`:`<span class="cf cf-ok">NL</span>`;
+    h+=`<div class="ck"><div class="ci ${lb.abn?'y':'g'}">${lb.abn?'⚠':'✓'}</div><div class="ct"><strong>${LAB_N[k]}</strong><span>${esc(lb.date)} · ${esc(lb.vals||'')}</span></div>${flag}</div>`;
+  });
+  if(p.a1c&&p.labs.hba1c?.done){
+    h+=`<div class="ck"><div class="ci g">✓</div><div class="ct"><strong>HbA1c</strong><span>${esc(p.labs.hba1c.date)} · ${esc(p.labs.hba1c.vals)}</span></div><span class="cf cf-ok">NL</span></div>`;
+  }
+  return h;
+}
+
+function pnEKG(p){
+  let h=`<div class="dp-t">EKG <button class="dp-x" onclick="delete openPn[${p.id}];render()">✕</button></div>`;
+  if(!p.ekg?.done){
+    h+=`<div class="ck"><div class="ci r">✕</div><div class="ct"><strong>EKG not completed</strong></div></div>`;
+    h+=`<div class="dp-ft"><button class="btn" onclick="event.stopPropagation();uploadEKG(${p.id})">📷 Upload EKG Photo</button></div>`;
+  } else {
+    const flag=p.ekg.abn?`<span class="cf cf-abn">⚠ ABNORMAL</span>`:`<span class="cf cf-ok">Normal</span>`;
+    h+=`<div class="ck"><div class="ci ${p.ekg.abn?'y':'g'}">${p.ekg.abn?'⚠':'✓'}</div><div class="ct"><strong>EKG — ${esc(p.ekg.date)}</strong><span>${esc(p.ekg.note)}</span></div>${flag}</div>`;
+    if(p.ekg.abn&&p.ekg.cardiacClr===null){
+      h+=`<div style="margin-top:10px;padding:12px;background:var(--yellowB);border-radius:8px;border:1px solid #fbbf24;">
+        <div style="font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:8px;">⚠ Abnormal EKG — Does this require cardiac clearance?</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn p" onclick="event.stopPropagation();setEKGClr(${p.id},true)">Yes — Require Cardiac Clearance</button>
+          <button class="btn" onclick="event.stopPropagation();setEKGClr(${p.id},false)">No — Clearance Not Required</button>
+        </div>
+      </div>`;
+    } else if(p.ekg.abn&&p.ekg.cardiacClr!==null){
+      if(p.ekg.cardiacClr){
+        h+=`<div style="margin-top:6px;font-size:11px;color:var(--yellow);font-weight:600;">→ Cardiac clearance required and added to Clearances</div>`;
+      } else {
+        h+=`<div style="margin-top:6px;font-size:11px;color:var(--green);font-weight:600;">✓ Reviewed — Cardiac clearance not required</div>`;
+      }
+    }
+    h+=`<div class="dp-ft"><button class="btn" onclick="event.stopPropagation();uploadEKG(${p.id})">📷 Replace EKG Photo</button></div>`;
+  }
+  return h;
+}
+
+function pnClrs(p){
+  let h=`<div class="dp-t">Clearances <button class="dp-x" onclick="delete openPn[${p.id}];render()">✕</button></div>`;
+  const pending=[];
+  Object.entries(p.clrs).forEach(([k,c])=>{
+    if(!c.need)return;
+    const docInfo=c.doc?`<div style="font-size:9px;color:var(--t4);margin-top:1px;">${esc(c.doc)} · ${esc(c.docPh||'')}</div>`:'';
+    if(c.done){
+      const meth=c.method||'upload';
+      const mIcon=meth==='provider_link'?'🔗 Provider':'📷 Upload';
+      h+=`<div class="ck"><div class="ci g">✓</div><div class="ct"><strong>${CLR_N[k]||k}</strong>${docInfo}<span>${esc(c.date||'')}${c.note?' · '+esc(c.note):''} · ${mIcon}</span></div>
+        <button class="btn s" onclick="event.stopPropagation();">📎 View</button>
+        <button class="btn s" onclick="event.stopPropagation();editClrDoc(${p.id},'${k}')" title="Edit provider info">✏️</button>
+        <button class="btn rm" onclick="event.stopPropagation();rmClr(${p.id},'${k}')" title="Remove">✕</button></div>`;
+    } else {
+      pending.push(k);
+      const linkKey=p.id+'_'+k;
+      const hasLink=CLR_LINKS[linkKey];
+      h+=`<div class="ck"><div class="ci r">✕</div><div class="ct"><strong>${CLR_N[k]||k}</strong>${docInfo}<span>${c.note?esc(c.note):'Not received'}${hasLink?' · <span style=\'color:var(--purple);font-weight:700;\'>🔗 Link sent</span>':''}</span></div>
+        <button class="btn s" onclick="event.stopPropagation();uploadClr(${p.id},'${k}')" title="Upload from your device">📷</button>
+        <button class="btn s" onclick="event.stopPropagation();providerLink(${p.id},'${k}')" title="Send link to provider" style="color:var(--purple);">🔗</button>
+        <button class="btn s" onclick="event.stopPropagation();editClrDoc(${p.id},'${k}')" title="Edit provider info">✏️</button>
+        <button class="btn rm" onclick="event.stopPropagation();rmClr(${p.id},'${k}')" title="Remove">✕</button></div>`;
+    }
+  });
+  h+=`<div class="dp-ft"><button class="btn" onclick="event.stopPropagation();addClr(${p.id})">+ Add Clearance</button>`;
+  if(pending.length) h+=`<button class="btn" onclick="event.stopPropagation();providerLinkAll(${p.id})" style="color:var(--purple);border-color:var(--purple);">🔗 Provider Links</button>`;
+  h+=`<button class="btn p" onclick="event.stopPropagation();sendAllClr(${p.id})" style="margin-left:auto;">📱 Send All Missing</button></div>`;
+  return h;
+}
+
+
+function pnCons(p){
+  let h=`<div class="dp-t">Consents <button class="dp-x" onclick="delete openPn[${p.id}];render()">✕</button></div>`;
+  const unsigned=[];
+  Object.entries(p.cons).forEach(([k,c])=>{
+    h+=`<div class="con-row"><div class="ci ${c.signed?'g':'r'}">${c.signed?'✓':'✕'}</div><strong style="flex:1;font-size:11px;">${CON_N[k]||k}</strong>`;
+    if(c.signed){
+      const method=c.method||'esign';
+      const mLabel=method==='photo'?'📷 Photo':'✍ E-Signed';
+      h+=`<button class="btn s" onclick="event.stopPropagation();viewConsent(${p.id},'${k}')">📄 Open</button>`;
+      h+=`<span class="cs cs-y" style="display:inline-flex;align-items:center;gap:3px;">${mLabel}</span>`;
+    } else {
+      unsigned.push(k);
+      h+=`<button class="btn s" onclick="event.stopPropagation();viewConsent(${p.id},'${k}')">📄 Open</button>`;
+      h+=`<button class="btn s" onclick="event.stopPropagation();uploadCons(${p.id},'${k}')" title="Upload photo of signed consent">📷</button>`;
+      h+=`<span class="cs cs-n">Unsigned</span>`;
+    }
+    h+=`</div>`;
+  });
+  if(unsigned.length){
+    h+=`<div class="dp-ft">`;
+    h+=`<button class="btn p" onclick="event.stopPropagation();sendCons(${p.id})">📱 Text ${unsigned.length} for E-Signature</button>`;
+    h+=`</div>`;
+  }
+  return h;
+}
+
+function pnClass(p){
+  let h=`<div class="dp-t">Pre-Op Education <button class="dp-x" onclick="delete openPn[${p.id}];render()">✕</button></div>`;
+  if(p.cls?.st==="done"){
+    h+=`<div class="ck"><div class="ci g">✓</div><div class="ct"><strong>Completed</strong><span>${esc(p.cls.date||'')}</span></div></div>`;
+  } else if(p.cls?.st==="scheduled"){
+    h+=`<div class="ck"><div class="ci y">📅</div><div class="ct"><strong>Scheduled: ${esc(p.cls.date)}</strong><span>Not yet completed</span></div></div>`;
+  } else {
+    h+=`<div class="ck"><div class="ci r">✕</div><div class="ct"><strong>Not scheduled</strong></div></div>`;
+  }
+  h+=`<div class="dp-ft"><button class="btn" onclick="event.stopPropagation();schedCls(${p.id})">📅 Schedule</button>
+    <button class="btn p" onclick="event.stopPropagation();shareVid(${p.id})">🎥 Share Video</button></div>`;
+  h+=`<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);"><div style="font-size:10px;font-weight:700;color:var(--t4);margin-bottom:4px;">NPO INSTRUCTIONS</div>`;
+  if(p.npo?.conf) h+=`<div class="ck"><div class="ci g">✓</div><div class="ct"><strong>Sent & Confirmed</strong></div></div>`;
+  else if(p.npo?.sent) h+=`<div class="ck"><div class="ci y">⚠</div><div class="ct"><strong>Sent — not confirmed</strong></div></div>`;
+  else h+=`<div class="ck"><div class="ci r">✕</div><div class="ct"><strong>Not sent</strong></div><button class="btn s" onclick="event.stopPropagation();P.find(x=>x.id===${p.id}).npo={sent:true,conf:false};render();">📱 Send</button></div>`;
+  h+=`</div>`;
+  return h;
+}
+
+function pnMeds(p){
+  let h=`<div class="dp-t">Medications (${p.meds.length}) <button class="dp-x" onclick="delete openPn[${p.id}];render()">✕</button></div>`;
+  h+=`<table class="mt"><thead><tr><th>Medication</th><th>Class</th><th>Action</th><th>Pre-Op</th><th>Hold Status</th><th>Restart</th><th></th></tr></thead><tbody>`;
+  const sorted=[...p.meds].sort((a,b)=>{const o={stop:0,per_specialist:1,must_take:2,hold:3,continue:4,review:5};return(o[mInfo(a).ac]||5)-(o[mInfo(b).ac]||5);});
+  sorted.forEach(med=>{
+    const m=mInfo(med);
+    const acMap={must_take:["ab-mt","MUST TAKE"],continue:["ab-c","CONTINUE"],hold:["ab-h","HOLD"],stop:["ab-s","STOP"],per_specialist:["ab-ps","PER SPEC"],review:["ab-rv","REVIEW"]};
+    const[acC,acL]=acMap[m.ac]||["ab-rv","REVIEW"];
+    const mh=p.medH[med];
+    let hsH='<span style="color:var(--t4);font-size:8px;">—</span>';
+    if(mh){
+      if(!mh.sent) hsH=`<span class="hs hs-n">Not Sent</span>`;
+      else if(!mh.ack) hsH=`<span class="hs hs-s">Sent</span>`;
+      else hsH=`<span class="hs hs-a">✓ Ack</span>`;
+      if(mh.sp===true) hsH+=` <span class="hs hs-a">✓ Bridge</span>`;
+      else if(mh.sp===false) hsH+=` <span class="hs hs-n">Bridge TBD</span>`;
+    }
+    h+=`<tr>
+      <td style="font-weight:600;">${esc(med)}</td>
+      <td style="font-size:9px;color:var(--t3);">${esc(m.cls)}</td>
+      <td><span class="${acC}" style="padding:1px 5px;border-radius:3px;font-size:8px;font-weight:700;">${acL}</span></td>
+      <td style="font-size:9px;">${esc(m.pre)}</td>
+      <td>${hsH}</td>
+      <td style="font-size:9px;color:var(--t3);">${esc(m.restart||'—')}</td>
+      <td style="text-align:right;"><button class="btn s" onclick="event.stopPropagation();editMed(${p.id},'${esc(med)}')" title="Edit">✏️</button><button class="btn rm" onclick="event.stopPropagation();removeMed(${p.id},'${esc(med)}')" title="Remove">✕</button></td>
+    </tr>`;
+  });
+  h+=`</tbody></table>`;
+  h+=`<div class="dp-ft"><button class="btn" onclick="event.stopPropagation();addMed(${p.id})">+ Add Medication</button>
+    <button class="btn p" onclick="event.stopPropagation();sendMedInstr(${p.id})" style="margin-left:auto;">📱 Send Medication Instructions</button></div>`;
+  return h;
+}
+
+function pnHP(p){
+  let h=`<div class="dp-t">History & Physical <button class="dp-x" onclick="delete openPn[${p.id}];render()">✕</button></div>`;
+  if(p.hp?.st==="signed"){
+    h+=`<div class="ck"><div class="ci g">✓</div><div class="ct"><strong>H&P Signed — ${esc(p.hp.date||'')}</strong><span>Within 30 days of surgery ✓</span></div></div>`;
+    h+=`<div class="dp-ft"><button class="btn" onclick="event.stopPropagation();startHP(${p.id})">📄 View / Edit</button></div>`;
+  } else if(p.hp?.st==="draft"){
+    h+=`<div class="ck"><div class="ci y">✏</div><div class="ct"><strong>Draft — not signed</strong></div></div>`;
+    h+=`<div class="dp-ft"><button class="btn p" onclick="event.stopPropagation();startHP(${p.id})">✏ Continue H&P</button></div>`;
+  } else {
+    h+=`<div class="ck"><div class="ci r">✕</div><div class="ct"><strong>H&P not started</strong><span>Required within 30 days of surgery</span></div></div>`;
+    h+=`<div class="dp-ft"><button class="btn p" onclick="event.stopPropagation();startHP(${p.id})">＋ Start H&P</button></div>`;
+  }
+  return h;
+}
+
+
+// ═══════ ORDERS PANEL (PP1265 Pre-Op / PP1264 Post-Op) ═══════
+function pnOrders(p){
+  const kg=wt_kg(p);
+  const ancefDose=kg>=120?pv("abx","ancef_gt120")||3:pv("abx","ancef_lt120")||2;
+  const vancoDose=kg>=85?pv("abx","vanco_gt85")||1.5:pv("abx","vanco_lt85")||1;
+  const crVal=parseFloat((p.labs?.bmp?.vals||"").match(/Cr\s*([\d.]+)/)?.[1])||0;
+  const toradolDose=crVal>=1.2?15:30;
+  const pre=p.orders?.pre||{st:"none"};
+  const post=p.orders?.post||{st:"none"};
+  const mrsa=p.orders?.mrsa||false;
+  const pcn=p.orders?.pcn_allergy||false;
+  const preSigned=pre.st==="signed";
+  const postSigned=post.st==="signed";
+  const preId="ord_pre_"+p.id;
+  const postId="ord_post_"+p.id;
+
+  let h=`<div class="dp-t">Physician Orders
+    <div style="display:flex;gap:6px;align-items:center;">`;
+  if(preSigned&&postSigned){
+    if(p.orders?.asc_sent) h+=`<span style="font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--purpleL);color:var(--purple);">✓ Sent to ASC</span>`;
+    else h+=`<button class="btn s" style="background:var(--purpleL);border-color:var(--purple);color:var(--purple);" onclick="event.stopPropagation();sendOrdersASC(${p.id})">🏥 Send to ASC</button>`;
+  }
+  h+=`<button class="dp-x" onclick="delete openPn[${p.id}];render()">✕</button></div></div>`;
+
+  // ═══ PRE-OP ORDERS (PP1265) ═══
+  h+=`<div class="ord-wrap">`;
+  h+=`<div class="ord-form">`;
+  h+=`<div class="ord-form-h"><div><div class="ord-form-t">Pre-Operative Orders</div><div class="ord-form-sub">PP1265 (TJS) · Rev. 02/15/2024</div></div>`;
+  if(preSigned) h+=`<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;background:var(--greenB);color:var(--green);">✓ Signed ${pre.date||''}</span>`;
+  else if(pre.st==="draft") h+=`<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;background:var(--yellowB);color:var(--yellow);">Draft</span>`;
+  h+=`</div>`;
+  h+=`<div class="ord-form-b">`;
+
+  // 1. Antibiotic Prophylaxis
+  h+=`<div class="ord-sec-h">1. Antibiotic Prophylaxis</div>`;
+  h+=`<div class="orow"><label><input type="checkbox" id="${preId}_mrsa" ${mrsa?'checked':''} ${preSigned?'disabled':''} onchange="toggleMRSA(${p.id},this.checked)"> H/O MRSA if checked. Give both Ancef and Vancomycin.</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${preSigned?'disabled':''}> Cefazolin (Ancef) ${ancefDose}g IV x 1. Begin infusion within 60 min prior to incision.</label></div>`;
+  h+=`<div class="orow sub" style="margin-left:28px;font-size:9px;color:var(--t3);">Patient: ${p.wt_lb} lbs (${kg} kg) → ${kg>=120?'≥120kg: '+ancefDose+'g':'<120kg: '+ancefDose+'g'}</div>`;
+  h+=`<div class="orow"><label><input type="checkbox" id="${preId}_pcn" ${pcn?'checked':''} ${preSigned?'disabled':''} onchange="togglePCN(${p.id},this.checked)"> <strong>PCN allergy</strong>: Give test dose first.</label>${pcn?'<span class="warn">⚠ PCN ALLERGY</span>':''}</div>`;
+  h+=`<div class="orow sub" style="margin-left:28px;font-size:9px;">May add vancomycin to cefazolin (Ancef) for history of MRSA</div>`;
+  h+=`<div class="orow sub" style="margin-left:28px;font-size:9px;color:var(--t4);">If severe allergy to Cephalosporins (anaphylaxis, pharyngeal swelling, hives), use vancomycin.</div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${preSigned?'disabled':''}> Vancomycin ${vancoDose}g (${kg>=85?'≥':'<'}85kg) IV over 90 min x 1 dose pre-op within 120 min prior</label></div>`;
+
+  // 2. VTE Prophylaxis
+  h+=`<div class="ord-sec-h">2. VTE Prophylaxis</div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${preSigned?'disabled':''}> TED Stockings</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${preSigned?'disabled':''}> SCD</label></div>`;
+
+  // 3. Surgical Skin Preparation
+  h+=`<div class="ord-sec-h">3. Surgical Skin Preparation</div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${preSigned?'disabled':''}> Standard hip or knee hair removal by clippers</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${preSigned?'disabled':''}> Full body cleanse with SAGE 2% CHG cloth AND intranasal Providone/Iodine</label></div>`;
+
+  // 4. Anesthesia
+  h+=`<div class="ord-sec-h">4. Anesthesia</div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${preSigned?'disabled':''}> Consult Anesthesia for Regional Nerve Block</label></div>`;
+
+  // 5. TXA
+  h+=`<div class="ord-sec-h">5. Tranexamic Acid</div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${preSigned?'disabled':''}> TXA ${pv("intraop","txa_iv")||1}g IV x 1 dose</label></div>`;
+
+  // Additional Orders
+  h+=`<div class="ord-sec-h">Additional Orders</div>`;
+  h+=`<div class="orow"><textarea style="width:100%;border:1px solid var(--border);border-radius:4px;padding:4px 6px;font-size:10px;font-family:inherit;resize:vertical;min-height:28px;" placeholder="Additional pre-op orders…" ${preSigned?'disabled':''}>${esc(p.orders?.addl||'')}</textarea></div>`;
+
+  // Signature
+  if(preSigned){
+    h+=`<div class="ord-sig ord-sig-done" style="justify-content:space-between;">✓ Signed by ${esc(p.prov)} — ${esc(pre.date)}<button class="btn" onclick="event.stopPropagation();unsignOrder(${p.id},'pre')" style="font-size:9px;padding:2px 8px;border-color:var(--yellow);color:var(--yellow);background:#fff;">🔓 Unsign</button></div>`;
+  } else {
+    h+=`<div style="margin-top:10px;"><button class="btn p" onclick="event.stopPropagation();signSingleOrder(${p.id},'pre')" style="width:100%;">✍ Sign Pre-Op Orders</button></div>`;
+  }
+  h+=`</div></div>`;
+
+  // ═══ POST-OP ORDERS (PP1264) ═══
+  h+=`<div class="ord-form">`;
+  h+=`<div class="ord-form-h"><div><div class="ord-form-t">Post-Operative Orders</div><div class="ord-form-sub">PP1264 (TJS) · Rev. 03/21/2024</div></div>`;
+  if(postSigned) h+=`<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;background:var(--greenB);color:var(--green);">✓ Signed ${post.date||''}</span>`;
+  else if(post.st==="draft") h+=`<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;background:var(--yellowB);color:var(--yellow);">Draft</span>`;
+  h+=`</div>`;
+  h+=`<div class="ord-form-b">`;
+
+  // 1. Vital Signs
+  h+=`<div class="ord-sec-h">1. Vital Signs</div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${postSigned?'disabled':''}> Q5min x3 → Q15min x2 → Q30min x2 → Q1hr x2 → Q4hr until d/c</label></div>`;
+
+  // 2. Dressing
+  h+=`<div class="ord-sec-h">2. Dressing</div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${postSigned?'disabled':''}> AquaCel in place at discharge. DO NOT CHANGE UNLESS &gt;75% SATURATED.</label></div>`;
+
+  // 3. Nutrition
+  h+=`<div class="ord-sec-h">3. Nutrition</div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${postSigned?'disabled':''}> Advance as tolerated</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${postSigned?'disabled':''}> Blood Glucose Monitoring: Per Protocol</label></div>`;
+
+  // 4. IV Fluids
+  h+=`<div class="ord-sec-h">4. IV Fluids</div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${postSigned?'disabled':''}> Bolus NS 500cc over 30 min, then LR at 150cc/hr. After 4hr adjust to 75cc/hr.</label></div>`;
+
+  // 5. Bladder
+  h+=`<div class="ord-sec-h">5. Bladder</div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${postSigned?'disabled':''}> No Foley. Bladder Scan if unable to void in 2 hours, notify physician.</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" ${postSigned?'disabled':''}> Rapaflo 8mg PO qd</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" ${postSigned?'disabled':''}> Rapaflo 4mg PO qd if CrCl 30-50</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" ${postSigned?'disabled':''}> Urecholine 10 mg q1h until response</label></div>`;
+
+  // 6. Ice
+  h+=`<div class="ord-sec-h">6. Ice Therapy</div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${postSigned?'disabled':''}> Ice Therapy (PRN)</label></div>`;
+
+  // 7. PT
+  h+=`<div class="ord-sec-h">7. Physical Therapy</div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${postSigned?'disabled':''}> Total ${p.proc==="tka"?"Knee":"Hip"} Physical Therapy Evaluation & Treatment</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${postSigned?'disabled':''}> Exercises per PT</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${postSigned?'disabled':''}> WBAT</label></div>`;
+
+  // 8. Pain Management
+  h+=`<div class="ord-sec-h">8. Pain Management</div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${postSigned?'disabled':''}> Acetaminophen 1000 mg PO x 1 dose</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${postSigned?'disabled':''}> Patient is to receive no other acetaminophen containing products</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${postSigned?'disabled':''}> Oxycodone 5-10 mg PO Q4H prn pain. Or Tramadol 50-150 mg PO if allergic to oxycodone.</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${postSigned?'disabled':''}> Robaxin 750 mg POX 1 for mild pain</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${postSigned?'disabled':''}> Dilaudid 0.2 mg IV x 1 for severe pain</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${postSigned?'disabled':''}> Toradol ${toradolDose} mg IV x 1 dose ${crVal>=1.2?'(Cr '+crVal+' ≥ 1.2 → 15mg)':'(Cr '+(crVal||'?')+' < 1.2 → 30mg)'}</label>${crVal>=1.2?'<span class="warn">⚠ Renal</span>':''}</div>`;
+
+  // 9. Nausea
+  h+=`<div class="ord-sec-h">9. Medications / Nausea</div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${postSigned?'disabled':''}> Zofran 4 mg IV x 1 dose</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${postSigned?'disabled':''}> May D/C patient when discharge criteria met</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${postSigned?'disabled':''}> Educate VTE prophylaxis as ordered</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" checked ${postSigned?'disabled':''}> Educate Bowel Regimen as ordered</label></div>`;
+
+  // 10. Discharge Meds
+  const ibuDose=pv("postop_rx","ibu_dose")||800;
+  const lyricaDose=pv("postop_rx","lyrica_dose")||75;
+  const dexDose=pv("postop_rx","dex_dose")||4;
+  const omnicefDose=pv("postop_rx","omnicef_dose")||300;
+  const oxyHip=pv("postop_rx","oxy_hip")||10;
+  const oxyKnee=pv("postop_rx","oxy_knee")||30;
+  const asaDose=pv("postop_rx","asa_dose")||81;
+  const isKnee=p.proc==="tka";
+
+  h+=`<div class="ord-sec-h">10. Medications AFTER Discharge (HC Rx)</div>`;
+  h+=`<div class="orow"><label><input type="checkbox" ${postSigned?'disabled':''}> Tylenol (acetaminophen) 1000 mg PO Q8H prn mild to moderate pain</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" ${postSigned?'disabled':''}> Ibuprofen ${ibuDose} mg PO Q8H prn mild to moderate pain</label>${crVal>=1.3?'<span class="alert">⚠ Cr ≥1.3 — consider Celecoxib</span>':''}</div>`;
+  h+=`<div class="orow"><label><input type="checkbox" ${postSigned?'disabled':''}> Lyrica ${lyricaDose} mg PO @ bedtime</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" ${postSigned?'disabled':''}> Oxycodone 5-10 mg prn pain (${isKnee?'Knee: '+oxyKnee+' tabs':'Hip: '+oxyHip+' tabs'})</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" ${postSigned?'disabled':''}> Protonix 40 mg daily</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" ${postSigned?'disabled':''}> Aspirin ${asaDose} mg PO twice for 6 weeks</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" ${postSigned?'disabled':''}> Decadron ${dexDose} mg PO start night of surgery then Q12H until done</label></div>`;
+  h+=`<div class="orow"><label><input type="checkbox" ${postSigned?'disabled':''}> Cefdinir ${omnicefDose} mg BID x 7 days start night of surgery</label></div>`;
+
+  // Signature
+  if(postSigned){
+    h+=`<div class="ord-sig ord-sig-done" style="justify-content:space-between;">✓ Signed by ${esc(p.prov)} — ${esc(post.date)}<button class="btn" onclick="event.stopPropagation();unsignOrder(${p.id},'post')" style="font-size:9px;padding:2px 8px;border-color:var(--yellow);color:var(--yellow);background:#fff;">🔓 Unsign</button></div>`;
+  } else {
+    h+=`<div style="margin-top:10px;"><button class="btn p" onclick="event.stopPropagation();signSingleOrder(${p.id},'post')" style="width:100%;">✍ Sign Post-Op Orders</button></div>`;
+  }
+  h+=`</div></div>`;
+  h+=`</div>`; // close ord-wrap
+
+  // Footer buttons
+  h+=`<div class="dp-ft">`;
+  if(!preSigned||!postSigned){
+    if(pre.st!=="signed") h+=`<button class="btn" onclick="event.stopPropagation();saveOrders(${p.id},'pre','draft')">💾 Save Pre-Op Draft</button>`;
+    if(post.st!=="signed") h+=`<button class="btn" onclick="event.stopPropagation();saveOrders(${p.id},'post','draft')">💾 Save Post-Op Draft</button>`;
+  } else if(!p.orders?.asc_sent){
+    h+=`<button class="btn" style="background:var(--purpleL);border-color:var(--purple);color:var(--purple);margin-left:auto;" onclick="event.stopPropagation();sendOrdersASC(${p.id})">🏥 Send to ASC</button>`;
+  }
+  h+=`</div>`;
+  return h;
+}
+
+function unsignOrder(id,which){
+  const p=findP(id);if(!p||!p.orders)return;
+  p.orders[which]={st:"draft",date:null};
+  if(p.orders.asc_sent) p.orders.asc_sent=false;
+  render();
+}
+function signSingleOrder(id,which){
+  const p=findP(id);if(!p||!p.orders)return;
+  const label=which==='pre'?'Pre-Operative':'Post-Operative';
+  showModal("Sign "+label+" Orders",`
+    <p>Sign <strong>${label} Orders</strong> for <strong>${esc(p.f)} ${esc(p.l)}</strong>?</p>
+    <p style="font-size:10px;color:var(--t3);">This will lock the order set. Changes require a new order.</p>
+    <div style="margin-top:8px;"><div class="field"><label>Signing Physician</label><input value="Dr. ${esc(p.prov)}" id="ordSignDoc"></div></div>
+  `,[{l:"Cancel"},{l:"✍ Sign Orders",p:true,action:`doSignSingle(${id},'${which}')`}]);
+}
+function doSignSingle(id,which){
+  const p=findP(id);if(!p||!p.orders)return;
+  const d=new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit"});
+  p.orders[which]={st:"signed",date:d};
+  closeModal();render();
+}
+function editSurgSite(id){
+  const p=findP(id);if(!p)return;
+  const ss=p.surgSite||{type:"asc",loc:""};
+  const ascOpts=SURG_SITES.asc.map(l=>`<option value="${l}" ${ss.type==='asc'&&ss.loc===l?'selected':''}>${l}</option>`).join('');
+  const hospOpts=SURG_SITES.hosp.map(l=>`<option value="${l}" ${ss.type==='hosp'&&ss.loc===l?'selected':''}>${l}</option>`).join('');
+  showModal(`Surgery Site — ${esc(p.f)} ${esc(p.l)}`,`
+    <div class="field"><label>Facility Type</label>
+      <select id="ssType" onchange="document.getElementById('ssLocAsc').style.display=this.value==='asc'?'block':'none';document.getElementById('ssLocHosp').style.display=this.value==='hosp'?'block':'none';">
+        <option value="asc" ${ss.type==='asc'?'selected':''}>ASC (Ambulatory Surgery Center)</option>
+        <option value="hosp" ${ss.type==='hosp'?'selected':''}>Hospital</option>
+      </select>
+    </div>
+    <div class="field" id="ssLocAsc" style="display:${ss.type==='asc'?'block':'none'};"><label>ASC Location</label>
+      <select id="ssLocAscSel">${ascOpts}</select>
+    </div>
+    <div class="field" id="ssLocHosp" style="display:${ss.type==='hosp'?'block':'none'};"><label>Hospital Location</label>
+      <select id="ssLocHospSel">${hospOpts}</select>
+    </div>
+  `,[{l:"Cancel"},{l:"Save",p:true,action:`doSaveSurgSite(${id})`}]);
+}
+function doSaveSurgSite(id){
+  const p=findP(id);if(!p)return;
+  const t=document.getElementById("ssType").value;
+  const loc=t==='asc'?document.getElementById("ssLocAscSel").value:document.getElementById("ssLocHospSel").value;
+  p.surgSite={type:t,loc:loc};
+  closeModal();render();
+}
+function toggleMRSA(id,val){const p=findP(id);if(!p||!p.orders)return;p.orders.mrsa=val;render();}
+function togglePCN(id,val){const p=findP(id);if(!p||!p.orders)return;p.orders.pcn_allergy=val;render();}
+function saveOrders(id,which,st){
+  const p=findP(id);if(!p||!p.orders)return;
+  const d=new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit"});
+  p.orders[which]={st:st,date:d};
+  render();
+}
+function signOrders(id){
+  const p=findP(id);if(!p||!p.orders)return;
+  showModal("Sign Physician Orders",`
+    <p>Sign Pre-Op (PP1265) and Post-Op (PP1264) orders for <strong>${esc(p.f)} ${esc(p.l)}</strong>?</p>
+    <p style="font-size:10px;color:var(--t3);">This will lock both order sets. Changes require a new order.</p>
+    <div style="margin-top:8px;"><div class="field"><label>Signing Physician</label><input value="Dr. ${esc(p.prov)}" id="ordSignDoc"></div></div>
+  `,[{l:"Cancel"},{l:"✍ Sign Both Orders",p:true,action:`doSignOrders(${id})`}]);
+}
+function doSignOrders(id){
+  const p=findP(id);if(!p||!p.orders)return;
+  const d=new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit"});
+  p.orders.pre={st:"signed",date:d};
+  p.orders.post={st:"signed",date:d};
+  closeModal();render();
+}
+function sendOrdersASC(id){
+  const p=findP(id);if(!p||!p.orders)return;
+  showModal("Send Orders to ASC",`
+    <p>Transmit signed Pre-Op and Post-Op orders for <strong>${esc(p.f)} ${esc(p.l)}</strong> to <strong>${esc(p.loc)} ASC</strong>?</p>
+    <p style="font-size:10px;color:var(--t3);">Orders will be available in the ASC Pre-Op and PACU dashboards.</p>
+  `,[{l:"Cancel"},{l:"🏥 Send to ASC",p:true,action:`doSendOrdersASC(${id})`}]);
+}
+function doSendOrdersASC(id){
+  const p=findP(id);if(!p||!p.orders)return;
+  p.orders.asc_sent=true;
+  closeModal();render();
+}
+
+// ═══════ INSTRUCTIONS PANEL (PP1254 — Surgery Center Preop Packet) ═══════
+function pnInstr(p){
+  const addr=LOC_ADDR[p.loc]||p.loc;
+  const isKnee=p.proc==="tka";
+  const sd=new Date(p.surgDate+"T00:00:00");
+  const sdFmt=sd.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
+  let h=`<div class="dp-t">Surgery Center Preop Packet <span style="font-size:9px;font-weight:400;color:var(--t4);">PP1254 (TJS) · Rev. 02/27/2024</span>
+    <div style="display:flex;gap:6px;align-items:center;">`;
+  if(p.instr?.sent&&p.instr?.conf) h+=`<span class="instr-badge instr-auto">✓ Confirmed ${esc(p.instr.sentDate||'')}</span>`;
+  else if(p.instr?.sent) h+=`<span class="instr-badge instr-pend">📱 Sent ${esc(p.instr.sentDate||'')} — awaiting</span>`;
+  else h+=`<span class="instr-badge instr-none">✕ Not sent</span>`;
+  h+=`<button class="dp-x" onclick="delete openPn[${p.id}];render()">✕</button></div></div>`;
+  h+=`<div class="instr-sec"><div class="instr-sec-t">📍 Surgery Location & Date</div>
+    <div class="instr-item"><strong>Total Joint Specialists — ${esc(p.loc)}</strong></div>
+    ${addr?`<div class="instr-item" style="font-size:10px;color:var(--t3);">${esc(addr)}</div>`:''}
+    <div class="instr-item">Surgery Date: <strong>${esc(sdFmt)}</strong></div>
+    <div class="instr-item"><strong>Arrival Time:</strong> You will be called 24-48 hours before surgery</div></div>`;
+  h+=`<div class="instr-sec"><div class="instr-sec-t">🚫 Day-Of Surgery Instructions</div>
+    <div class="instr-item"><strong>1. Food:</strong> Do <strong>NOT</strong> eat after midnight the night before your surgery</div>
+    <div class="instr-item" style="margin-left:16px;">Drink: Water or Gatorade up to <strong>ONE</strong> hour prior to arrival</div>
+    <div class="instr-item"><strong>2. Medications:</strong> Refer to your enclosed <strong>Personal Medication Record</strong></div>
+    <div class="instr-item"><strong>3. Clothing:</strong> Comfortable loose-fitting clothes, no face make-up, no body lotion on legs, no jewelry. Deodorant and nail polish OK.</div>
+    <div class="instr-item"><strong>4. Devices:</strong> Glasses, contacts, wigs, dentures removed prior to surgery in your private pre-op room</div></div>`;
+  h+=`<div class="instr-sec"><div class="instr-sec-t">👤 Caregiver Requirement</div>
+    <div class="instr-item"><strong>5.</strong> Someone must drive you home and remain with you for at least <strong>12 hours</strong></div>
+    <div class="instr-warn">You are NOT permitted to take Uber or public transportation home</div>
+    ${p.cg?`<div class="instr-item" style="padding:4px 8px;background:var(--greenL);border-radius:4px;margin-top:4px;">Caregiver: <strong>${esc(p.cg.name)}</strong> (${esc(p.cg.rel)}) — ${esc(p.cg.phone)}</div>`:`<div class="instr-warn" style="padding:4px 8px;background:var(--redL);border-radius:4px;margin-top:4px;">⚠ NO CAREGIVER ASSIGNED</div>`}</div>`;
+  h+=`<div class="instr-sec"><div class="instr-sec-t">🧴 Sage Wipes & MRSA</div>
+    <div class="instr-item"><strong>6.</strong> Shower night before surgery, wait one hour, then use <strong>Sage Wipes</strong>. Sleep in clean pajamas on clean bedsheets. <strong>DO NOT</strong> shower day of surgery.</div>
+    <div class="instr-item"><strong>7. MRSA History:</strong> Hibiclens Scrub whole body (except face) for <strong>5 nights</strong> before surgery. Mupirocin Ointment — pea size in each nostril, <strong>5 days</strong> before surgery.</div></div>`;
+  h+=`<div style="font-size:11px;font-weight:800;color:var(--t1);margin:10px 0 4px;padding-bottom:4px;border-bottom:2px solid var(--border);">Home Discharge Instructions</div>`;
+  h+=`<div class="instr-sec"><div class="instr-sec-t">🏠 Recovery</div>
+    <div class="instr-item"><strong>1. PT:</strong> Arranged prior to surgery by your surgeon</div>
+    <div class="instr-item"><strong>2. Equipment:</strong> <u>You</u> are responsible for rolling walker and cane</div>
+    <div class="instr-item"><strong>3. Incision:</strong> Dissolvable sutures + <strong>waterproof bandage</strong>. Staples if revision.</div>
+    <div class="instr-item"><strong>4. Showering:</strong> Day after surgery OK. Bandage stays <strong>7 days</strong>. No submersion <strong>4 weeks</strong>. Notify office if draining after 7d.</div>
+    <div class="instr-item"><strong>5. Driving:</strong> Once walking without walker and off narcotic pain meds (typically 1-4 weeks)</div>
+    <div class="instr-item"><strong>6. Swelling:</strong> ${isKnee?'Compress, elevate and ice several times daily. Wear TED stockings during day for 2 weeks. Ice and elevate 30 min frequently.':'Use ice pack over incision area as needed.'}</div>
+    <div class="instr-item"><strong>7. Blood Thinner:</strong> Aspirin 81 mg BID x 6 weeks — <span style="color:var(--red);font-weight:700;">this is NOT optional</span></div></div>`;
+  h+=`<div style="font-size:11px;font-weight:800;color:var(--t1);margin:10px 0 4px;padding-bottom:4px;border-bottom:2px solid var(--border);">Pain Medications</div>`;
+  h+=`<div class="instr-sec"><div class="instr-sec-t">💊 Multimodal Protocol</div>
+    <div class="instr-item" style="font-weight:700;">*** Take Ibuprofen + Tylenol at same time with food</div>
+    <div class="instr-item" style="margin-left:16px;">☐ Ibuprofen ${pv("postop_rx","ibu_dose")||800} mg TID · ☐ Extra Strength Tylenol 500 mg TID</div>
+    <div class="instr-item" style="margin-left:16px;">☐ Protonix 40 mg daily x 30d · ☐ Lyrica ${pv("postop_rx","lyrica_dose")||75} mg qHS</div>
+    <div class="instr-item" style="margin-left:16px;">☐ Decadron ${pv("postop_rx","dex_dose")||4} mg q12h until done · ☐ Cefdinir ${pv("postop_rx","omnicef_dose")||300} mg BID x 7d</div>
+    <div class="instr-item" style="margin-top:4px;">For severe pain: ☐ Oxycodone 5 mg PRN</div>
+    <div class="instr-item" style="font-size:10px;">Rx sent to Northside Homecare Pharmacy, given prior to discharge.</div>
+    <div class="instr-warn">Narcotics CANNOT be called in. No refills after hours/weekends.</div>
+    <div class="instr-item"><strong>9. Constipation:</strong> OTC Colace or Miralax recommended</div>
+    <div class="instr-item"><strong>10.</strong> No dental cleanings 3 months. No colonoscopy 6 months.</div>
+    <div class="instr-item"><strong>11.</strong> Emergency: 911. Business hours: FORCE or nurse triage. After hours orthopedic emergency: <strong>770-292-6500</strong></div></div>`;
+  h+=`<div style="font-size:11px;font-weight:800;color:var(--t1);margin:10px 0 4px;padding-bottom:4px;border-bottom:2px solid var(--border);">Surgery Checklist</div>`;
+  h+=`<div class="instr-sec"><div class="instr-grid">
+    <div><div class="instr-grid-t">YOU Need to Get:</div>
+      <div class="instr-ck">Rolling Walker with wheels</div><div class="instr-ck">Cane</div><div class="instr-ck">Gatorade or water</div>
+      <div class="instr-ck">${isKnee?'ACE Bandage (for knees)':'Gauze Bandages & Tape (for hips)'}</div>
+      <div class="instr-ck">Extra Strength Tylenol 500 mg</div><div class="instr-ck">Colace or Miralax</div></div>
+    <div><div class="instr-grid-t">WE will Provide:</div>
+      <div class="instr-ck">Sage Wipes</div>${isKnee?'<div class="instr-ck">Thigh High TED hose (Knees)</div><div class="instr-ck">Ice pack (Knees)</div>':''}
+      <div class="instr-ck">Ibuprofen ${pv("postop_rx","ibu_dose")||800} mg</div><div class="instr-ck">Lyrica ${pv("postop_rx","lyrica_dose")||75} mg</div>
+      <div class="instr-ck">Oxycodone 5 mg</div><div class="instr-ck">Protonix 40 mg</div><div class="instr-ck">Aspirin 81 mg</div>
+      <div class="instr-ck">Decadron ${pv("postop_rx","dex_dose")||4} mg</div><div class="instr-ck">Post-op Antibiotic</div></div>
+  </div></div>`;
+  h+=`<div class="dp-ft">`;
+  if(!p.instr?.sent) h+=`<button class="btn p" onclick="event.stopPropagation();sendInstr(${p.id})">📱 Auto-Text Instructions to Patient</button>`;
+  else{
+    h+=`<button class="btn" onclick="event.stopPropagation();resendInstr(${p.id})">📱 Resend Instructions</button>`;
+    if(!p.instr?.conf) h+=`<button class="btn" onclick="event.stopPropagation();confInstr(${p.id})">✓ Mark Confirmed</button>`;
+    if(p.instr.resends>0) h+=`<span style="font-size:9px;color:var(--t4);margin-left:auto;">Resent ${p.instr.resends}x</span>`;
+  }
+  h+=`</div>`;
+  return h;
+}
+
+function sendInstr(id){
+  const p=findP(id);if(!p)return;
+  showModal("Send Surgery Instructions",`
+    <p style="margin-bottom:8px;">Auto-text the full <strong>Surgery Center Preop Packet (PP1254)</strong> to <strong>${esc(p.f)} ${esc(p.l)}</strong>.</p>
+    <div style="padding:10px;background:#f8fafc;border-radius:6px;border:1px solid var(--border);font-size:10px;color:var(--t2);margin-bottom:8px;">
+      <div style="font-weight:700;margin-bottom:4px;">Packet includes:</div>
+      <div>• Day-of instructions (NPO, clothing, devices)</div>
+      <div>• Caregiver requirement</div>
+      <div>• Sage Wipes / infection prevention / MRSA protocol</div>
+      <div>• Home discharge instructions (PT, incision care, showering, driving)</div>
+      <div>• Pain medication protocol (multimodal)</div>
+      <div>• Surgery checklist (what patient brings vs. what we provide)</div></div>
+    <div style="display:flex;gap:8px;">
+      <label style="font-size:11px;display:flex;gap:4px;cursor:pointer;"><input type="radio" name="instrM" value="sms" checked> 📱 SMS to ${esc(p.phone)}</label>
+      <label style="font-size:11px;display:flex;gap:4px;cursor:pointer;"><input type="radio" name="instrM" value="email"> ✉️ Email ${esc(p.email)}</label></div>
+    <div style="font-size:9px;color:var(--t4);margin-top:6px;">Patient receives a secure link to view their personalized packet. Opening the link marks as confirmed.</div>
+  `,[{l:"Cancel"},{l:"📱 Send Packet",p:true,action:`doSendInstr(${id})`}]);
+}
+function doSendInstr(id){
+  const p=findP(id);if(!p)return;
+  const m=document.querySelector('input[name="instrM"]:checked')?.value||"sms";
+  const d=new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit"});
+  p.instr={sent:true,sentDate:d,conf:false,method:m,resends:0};
+  closeModal();render();
+}
+function resendInstr(id){
+  const p=findP(id);if(!p)return;
+  showModal("Resend Instructions",`
+    <p>Resend the Surgery Center Preop Packet to <strong>${esc(p.f)} ${esc(p.l)}</strong> via ${p.instr?.method==="email"?"email":"SMS"}?</p>
+    <p style="font-size:10px;color:var(--t3);">Originally sent: ${esc(p.instr?.sentDate||'')}${p.instr?.resends>0?' · Resent '+p.instr.resends+'x':''}</p>
+  `,[{l:"Cancel"},{l:"📱 Resend Now",p:true,action:`doResendInstr(${id})`}]);
+}
+function doResendInstr(id){
+  const p=findP(id);if(!p)return;
+  p.instr.sentDate=new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit"});
+  p.instr.resends=(p.instr.resends||0)+1;
+  closeModal();render();
+}
+function confInstr(id){const p=findP(id);if(!p)return;p.instr.conf=true;render();}
+
+// ═══════ ACTIONS ═══════
+function findP(id){return P.find(p=>p.id===id);}
+
+function setEKGClr(id,need){
+  const p=findP(id);if(!p)return;
+  p.ekg.cardiacClr=need;
+  if(need&&!p.clrs.cardiac){p.clrs.cardiac={need:true,done:false,note:"Added from abnormal EKG"};}
+  else if(need&&p.clrs.cardiac){p.clrs.cardiac.need=true;}
+  render();
+}
+
+function uploadEKG(id){
+  showModal("Upload EKG",`<div style="padding:20px;border:2px dashed var(--border);border-radius:10px;text-align:center;cursor:pointer;background:#fafbfc;" onclick="document.getElementById('ekgF').click()">
+    <div style="font-size:24px;margin-bottom:6px;">📷</div><div style="font-size:12px;font-weight:600;">Drop EKG photo or click to upload</div>
+    <input type="file" id="ekgF" accept="image/*,.pdf" style="display:none;" onchange="doUploadEKG(${id})">
+  </div>`,[{l:"Cancel"}]);
+}
+
+function doUploadEKG(id){
+  const p=findP(id);if(!p)return;
+  p.ekg={done:true,date:new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit"}),abn:false,note:"Uploaded — pending review",cardiacClr:null};
+  closeModal();render();
+}
+
+function rmClr(id,k){const p=findP(id);if(!p)return;delete p.clrs[k];render();}
+
+function uploadClr(id,k){
+  showModal(`Upload — ${CLR_N[k]||k}`,`<div style="padding:20px;border:2px dashed var(--border);border-radius:10px;text-align:center;cursor:pointer;background:#fafbfc;" onclick="document.getElementById('clrF').click()">
+    <div style="font-size:24px;margin-bottom:6px;">📷</div><div style="font-size:12px;font-weight:600;">Photo, PDF, fax, or EMR API</div>
+    <input type="file" id="clrF" accept="image/*,.pdf" style="display:none;" onchange="doUpClr(${id},'${k}')">
+  </div>`,[{l:"Cancel"}]);
+}
+
+function doUpClr(id,k){const p=findP(id);if(!p)return;p.clrs[k].done=true;p.clrs[k].date=new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit"});p.clrs[k].note="Uploaded";p.clrs[k].method="upload";closeModal();render();}
+
+
+function genLinkCode(pid,k){
+  const key=pid+'_'+k;
+  if(!CLR_LINKS[key]){
+    const chars='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    let code='';for(let i=0;i<8;i++)code+=chars[Math.floor(Math.random()*chars.length)];
+    CLR_LINKS[key]={code:code,created:new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit"}),sent:[]};
+  }
+  return CLR_LINKS[key];
+}
+
+function providerLink(id,k){
+  const p=findP(id);if(!p)return;
+  const c=p.clrs[k];if(!c)return;
+  const link=genLinkCode(id,k);
+  const url=`https://tjrhub.app/clearance/${link.code}`;
+  const clrName=CLR_N[k]||k;
+  const docName=c.doc||'Unknown';
+  const docPh=c.docPh||'';
+  showModal(`Send to ${esc(docName)} — ${clrName}`,`
+    <div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--purpleL);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">🩺</div>
+      <div>
+        <div style="font-size:12px;font-weight:700;">${esc(docName)}</div>
+        <div style="font-size:10px;color:var(--t4);">${esc(docPh)} · ${esc(clrName)}</div>
+      </div>
+    </div>
+    <p style="margin-bottom:10px;font-size:11px;">Send a secure link to <strong>${esc(docName)}</strong>'s office so they can submit the <strong>${esc(clrName)}</strong> clearance for <strong>${esc(p.f)} ${esc(p.l)}</strong>.</p>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:12px;">
+      <div style="font-size:9px;font-weight:600;color:var(--t4);text-transform:uppercase;margin-bottom:4px;">Secure Provider Link</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input value="${url}" readonly style="flex:1;font-size:10px;font-weight:600;padding:5px 8px;border:1px solid var(--border);border-radius:4px;background:#f8fafc;font-family:monospace;">
+        <button class="btn s" onclick="navigator.clipboard.writeText('${url}');this.textContent='✓ Copied';setTimeout(()=>this.textContent='📋 Copy',1500);" style="white-space:nowrap;">📋 Copy</button>
+      </div>
+      <div style="font-size:9px;color:var(--t4);margin-top:4px;">Expires 30 days · Code: ${link.code}</div>
+    </div>
+    <div style="font-size:9px;font-weight:700;color:var(--t3);margin-bottom:6px;">WHAT THEIR OFFICE SEES:</div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:10px;color:var(--t2);line-height:1.5;">
+      <div style="font-weight:700;margin-bottom:4px;">TJS Pre-Op Clearance Portal</div>
+      Patient: ${esc(p.f)} ${esc(p.l)} · DOB: XX/XX/XXXX<br>
+      Clearance: ${esc(clrName)}<br>
+      Surgeon: Dr. ${esc(p.prov)} · Surgery: ${p.surgDate}<br><br>
+      <em style="color:var(--t4);">Upload clearance letter, type note, or take photo → goes straight to PAC dashboard.</em>
+    </div>
+    <div style="margin-top:12px;font-size:10px;font-weight:700;color:var(--t3);margin-bottom:6px;">SEND TO ${esc(docName).toUpperCase()}'S OFFICE:</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="btn p" onclick="event.stopPropagation();sendProvLink(${id},'${k}','sms')" style="flex:1;">📱 Text to ${esc(docPh)||'Office'}</button>
+      <button class="btn" onclick="event.stopPropagation();sendProvLink(${id},'${k}','fax')" style="flex:1;">📠 Fax Cover Sheet</button>
+    </div>
+  `,[{l:"Close"},{l:"✓ Simulate Provider Submission",p:true,action:`simProvSubmit(${id},'${k}')`}]);
+  render();
+}
+
+function providerLinkAll(id){
+  const p=findP(id);if(!p)return;
+  const pending=Object.entries(p.clrs).filter(([k,c])=>c.need&&!c.done);
+  let rows='';
+  pending.forEach(([k,c])=>{
+    const link=genLinkCode(id,k);
+    const url=`https://tjrhub.app/clearance/${link.code}`;
+    rows+=`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f1f5f9;">
+      <div style="flex:1;">
+        <div style="font-size:11px;font-weight:600;">${CLR_N[k]||k}</div>
+        <div style="font-size:10px;color:var(--t2);">${esc(c.doc||'No provider')} · ${esc(c.docPh||'No phone')}</div>
+        <div style="font-size:9px;color:var(--t4);font-family:monospace;margin-top:2px;">${url}</div>
+      </div>
+      <button class="btn s" onclick="navigator.clipboard.writeText('${url}');this.textContent='✓';setTimeout(()=>this.textContent='📋',1500);">📋</button>
+    </div>`;
+  });
+  showModal(`Provider Links — ${esc(p.f)} ${esc(p.l)}`,`
+    <p style="margin-bottom:10px;">Secure links for ${pending.length} pending clearance${pending.length>1?'s':''}. Each link goes to that provider's office.</p>
+    <div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:12px;">${rows}</div>
+    <div style="display:flex;gap:6px;">
+      <button class="btn p" onclick="event.stopPropagation();sendAllProvLinks(${id},'sms')" style="flex:1;">📱 Text All Provider Offices</button>
+      <button class="btn" onclick="event.stopPropagation();sendAllProvLinks(${id},'fax')" style="flex:1;">📠 Fax All Cover Sheets</button>
+    </div>
+  `,[{l:"Close"}]);
+  render();
+}
+
+function sendProvLink(id,k,method){
+  const p=findP(id);if(!p)return;
+  const c=p.clrs[k];
+  const link=CLR_LINKS[id+'_'+k];
+  if(link)link.sent.push({method:method,date:new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit"})});
+  closeModal();
+  const docName=c?.doc||'Provider';
+  const docPh=c?.docPh||'';
+  const dest=method==='sms'?docPh:method==='fax'?'fax number on file':'email on file';
+  showModal("Link Sent",`<div style="text-align:center;padding:12px;"><div style="font-size:32px;margin-bottom:8px;">${method==='sms'?'📱':method==='fax'?'📠':'✉️'}</div><div style="font-size:12px;font-weight:600;">${esc(CLR_N[k]||k)} link sent to ${esc(docName)}</div><div style="font-size:11px;color:var(--t3);margin-top:2px;">${method==='sms'?'Texted to '+esc(dest):method==='fax'?'Fax cover sheet with QR code':'Emailed'}</div><div style="font-size:10px;color:var(--t4);margin-top:6px;">When they open the link and submit, the clearance appears here automatically.</div></div>`,[{l:"Done"}]);
+  render();
+}
+
+function sendAllProvLinks(id,method){
+  const p=findP(id);if(!p)return;
+  Object.entries(p.clrs).filter(([k,c])=>c.need&&!c.done).forEach(([k])=>{
+    const link=CLR_LINKS[id+'_'+k];
+    if(link)link.sent.push({method:method,date:new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit"})});
+  });
+  closeModal();
+  showModal("All Links Sent",`<div style="text-align:center;padding:12px;"><div style="font-size:32px;margin-bottom:8px;">✓</div><div style="font-size:12px;font-weight:600;">All provider links sent via ${method==='sms'?'SMS':'email'}</div></div>`,[{l:"Done"}]);
+  render();
+}
+
+function simProvSubmit(id,k){
+  const p=findP(id);if(!p)return;
+  const d=new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit"});
+  p.clrs[k]={need:true,done:true,date:d,note:"Cleared — via provider portal",method:"provider_link"};
+  closeModal();document.getElementById("modal").className="md";render();
+}
+
+function sendClrReq(id,k){
+  const p=findP(id);if(!p)return;
+  const c=p.clrs[k];
+  providerLink(id,k);
+}
+
+function sendAllClr(id){providerLinkAll(id);}
+
+function addClr(id){
+  const p=findP(id);if(!p)return;
+  const avail=Object.entries(CLR_N).filter(([k])=>!p.clrs[k]||!p.clrs[k].need);
+  showModal("Add Clearance",`
+    <div class="field"><label>Specialty</label><select id="ncType">${avail.map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></div>
+    <div class="field"><label>Provider Name</label><input id="ncDoc" placeholder="e.g. Dr. Patel"></div>
+    <div class="field"><label>Provider Phone</label><input id="ncDocPh" placeholder="(770) 555-0000" type="tel"></div>
+  `,[{l:"Cancel"},{l:"Add",p:true,action:`doAddClr(${id})`}]);
+}
+function doAddClr(id){
+  const p=findP(id);if(!p)return;
+  const k=document.getElementById("ncType").value;
+  const doc=document.getElementById("ncDoc").value.trim();
+  const docPh=document.getElementById("ncDocPh").value.trim();
+  if(!doc||!docPh){alert("Provider name and phone are required.");return;}
+  p.clrs[k]={need:true,done:false,doc:doc,docPh:docPh};
+  closeModal();render();
+}
+function editClrDoc(id,k){
+  const p=findP(id);if(!p)return;
+  const c=p.clrs[k];if(!c)return;
+  showModal(`Edit Provider — ${CLR_N[k]||k}`,`
+    <div class="field"><label>Provider Name</label><input id="edClrDoc" value="${esc(c.doc||'')}"></div>
+    <div class="field"><label>Provider Phone</label><input id="edClrDocPh" value="${esc(c.docPh||'')}" type="tel"></div>
+  `,[{l:"Cancel"},{l:"Save",p:true,action:`doEditClrDoc(${id},'${k}')`}]);
+}
+function doEditClrDoc(id,k){
+  const p=findP(id);if(!p)return;
+  p.clrs[k].doc=document.getElementById("edClrDoc").value.trim();
+  p.clrs[k].docPh=document.getElementById("edClrDocPh").value.trim();
+  closeModal();render();
+}
+
+function sendCons(id){
+  const p=findP(id);if(!p)return;
+  const un=Object.entries(p.cons).filter(([k,c])=>!c.signed).map(([k])=>CON_N[k]);
+  showModal("Send for E-Signature",`
+    <p>Send unsigned consents to <strong>${esc(p.f)} ${esc(p.l)}</strong> for electronic signature:</p>
+    <div style="margin:8px 0;padding:10px;background:#f8fafc;border-radius:6px;border:1px solid var(--border);">
+      ${un.map(c=>`<div style="font-size:12px;padding:4px 0;display:flex;gap:6px;"><input type="checkbox" checked style="accent-color:var(--blue);"><strong>${esc(c)}</strong></div>`).join('')}
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <label style="font-size:11px;display:flex;gap:4px;"><input type="radio" name="cv" checked> 📱 SMS ${esc(p.phone)}</label>
+      <label style="font-size:11px;display:flex;gap:4px;"><input type="radio" name="cv"> ✉️ ${esc(p.email)}</label>
+    </div>
+    <p style="font-size:10px;color:var(--t4);margin-top:6px;">Patient receives secure link, reviews each consent, and signs electronically. Timestamped.</p>
+  `,[{l:"Cancel"},{l:`📱 Send ${un.length} Consent${un.length>1?'s':''}`,p:true}]);
+}
+
+
+function uploadCons(id,k){
+  const p=findP(id);if(!p)return;
+  showModal(`Upload Signed — ${CON_N[k]||k}`,`
+    <p style="margin-bottom:10px;">Upload a photo of the <strong>manually signed</strong> consent for <strong>${esc(p.f)} ${esc(p.l)}</strong>.</p>
+    <div id="consUpArea" style="padding:24px;border:2px dashed var(--border);border-radius:10px;text-align:center;cursor:pointer;background:#fafbfc;transition:all .15s;" onclick="document.getElementById('consF').click()" ondragover="event.preventDefault();this.style.borderColor='var(--blue)';this.style.background='var(--blueL)';" ondragleave="this.style.borderColor='var(--border)';this.style.background='#fafbfc';" ondrop="event.preventDefault();this.style.borderColor='var(--border)';document.getElementById('consF').files=event.dataTransfer.files;doUpCons(${id},'${k}');">
+      <div style="font-size:32px;margin-bottom:8px;">📷</div>
+      <div style="font-size:12px;font-weight:600;color:var(--t1);">Tap to take photo or select file</div>
+      <div style="font-size:10px;color:var(--t4);margin-top:4px;">JPG, PNG, or PDF · Drag & drop supported</div>
+      <input type="file" id="consF" accept="image/*,.pdf" capture="environment" style="display:none;" onchange="doUpCons(${id},'${k}')">
+    </div>
+    <div id="consPreview" style="display:none;margin-top:10px;text-align:center;"></div>
+  `,[{l:"Cancel"},{l:"✓ Mark as Signed",p:true,action:`confirmUpCons(${id},'${k}')`}]);
+}
+
+function doUpCons(id,k){
+  const f=document.getElementById("consF").files[0];
+  if(!f)return;
+  const prev=document.getElementById("consPreview");
+  const area=document.getElementById("consUpArea");
+  if(f.type.startsWith("image/")){
+    const r=new FileReader();
+    r.onload=e=>{
+      area.style.display="none";
+      prev.style.display="block";
+      prev.innerHTML=`<img src="${e.target.result}" style="max-width:100%;max-height:260px;border-radius:8px;border:1px solid var(--border);"><div style="font-size:10px;color:var(--t3);margin-top:6px;">${esc(f.name)} · ${(f.size/1024).toFixed(0)} KB</div>`;
+    };
+    r.readAsDataURL(f);
+  } else {
+    area.style.display="none";
+    prev.style.display="block";
+    prev.innerHTML=`<div style="padding:16px;background:#f8fafc;border-radius:8px;border:1px solid var(--border);"><div style="font-size:24px;">📄</div><div style="font-size:11px;font-weight:600;margin-top:4px;">${esc(f.name)}</div><div style="font-size:10px;color:var(--t4);">${(f.size/1024).toFixed(0)} KB</div></div>`;
+  }
+}
+
+function confirmUpCons(id,k){
+  const p=findP(id);if(!p)return;
+  p.cons[k]={signed:true,method:"photo",date:new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit"})};
+  closeModal();document.getElementById("modal").className="md";render();
+}
+
+function viewConsent(id,k){const p=findP(id);if(!p)return;const contents={tjs_surg:`<div style="text-align:center;margin-bottom:12px;"><div style="font-size:16px;font-weight:800;letter-spacing:1px;">TOTAL JOINT SPECIALISTS</div><div style="font-size:10px;color:var(--t4);">PP1366 · Rev. 01/15/2025 &nbsp;|&nbsp; PP1261 · Rev. 01/15/2025</div></div><div style="font-size:11px;font-weight:700;text-align:center;margin-bottom:10px;border:1px solid var(--border);padding:6px;background:#f8fafc;">INFORMED CONSENT TO SURGICAL OR DIAGNOSTIC PROCEDURES OR TREATMENT</div><div style="font-size:10px;color:var(--t2);line-height:1.5;"><div class="field"><label>Patient Name</label><input value="${esc(p.f)} ${esc(p.l)}" style="font-weight:700;" readonly></div><div class="field"><label>Physician(s) Performing Procedure</label><input value="Dr. ${esc(p.prov)}" style="font-weight:700;" readonly></div><div class="field"><label>Procedure</label><input value="${p.side} ${p.proc==='tka'?'TOTAL KNEE ARTHROPLASTY':'TOTAL HIP ARTHROPLASTY'}" style="font-weight:700;" readonly></div></div><div style="font-size:10px;color:var(--t2);line-height:1.6;margin-top:10px;"><p style="margin-bottom:6px;"><strong>A.1.</strong> I acknowledge the following procedure(s) has been described to me and that there is a material risk including: infection, aspiration, cardiac dysrhythmia, injury to teeth or gums, allergic reaction, severe loss of blood, loss or loss of function of any limb or organ, paralysis, brain damage, cardiac arrest, damage to skin, or death.</p><p style="margin-bottom:6px;"><strong>A.2.</strong> I acknowledge that conditions may develop during the procedure which may reasonably necessitate an extension of the original procedure(s).</p><p style="margin-bottom:6px;"><strong>B.</strong> I have been informed in general terms of: (1) diagnosis, (2) nature and purpose including use of human tissue and implants, (3) material risks and benefits, (4) likelihood of success, (5) prognosis if rejected.</p></div><div style="font-size:11px;font-weight:700;margin:12px 0 6px;border-bottom:1px solid var(--border);padding-bottom:4px;">Joint-Specific Risks (Page 2 — PP1261)</div><div style="font-size:10px;color:var(--t2);line-height:1.6;"><ul style="margin:0 0 0 16px;padding:0;"><li>Impaired function such as shortening/lengthening or deformity of any arm or leg, limp</li><li>Blood vessel and/or nerve injury, paralysis</li><li>Pain or discomfort</li><li>Failure requiring repeat surgical procedure for removal or replacement of mechanical device</li><li>Failure of the bone to heal, bone infection</li><li>Failure of soft tissue to heal, soft tissue infection</li><li>Scar, stiffness, loss of motion of the joint</li><li>Breakage of instruments</li><li>Need for additional / multiple surgical procedures</li><li>Disorders resulting from emboli (fat particles or blood clot traveling to vital organs including lungs, heart or brain)</li></ul></div>`,nhs:`<div style="text-align:center;margin-bottom:12px;"><div style="font-size:16px;font-weight:800;letter-spacing:1px;">NORTHSIDE HOSPITAL</div><div style="font-size:10px;color:var(--t4);">Form #6670 · English - Spanish · Rev. 08/30/2022</div></div><div style="font-size:11px;font-weight:700;text-align:center;margin-bottom:10px;border:1px solid var(--border);padding:6px;background:#f8fafc;">INFORMED CONSENT TO SURGICAL OR DIAGNOSTIC PROCEDURES OR TREATMENT</div><div style="font-size:10px;color:var(--t2);line-height:1.5;"><div class="field"><label>Patient Name</label><input value="${esc(p.f)} ${esc(p.l)}" style="font-weight:700;"></div><div class="field"><label>Procedure(s)</label><input value="${p.side} ${p.proc==='tka'?'TOTAL KNEE ARTHROPLASTY':'TOTAL HIP ARTHROPLASTY'}" style="font-weight:700;"></div></div>`,acjs_surg:`<div style="text-align:center;margin-bottom:12px;"><div style="font-size:14px;font-weight:800;color:#0891b2;">ADVANCED CENTER FOR JOINT SURGERY LLC</div></div><div style="background:#0891b2;color:#fff;text-align:center;padding:8px;font-weight:800;font-size:12px;border-radius:4px;margin-bottom:10px;">FACILITY CONSENT TO OPERATION</div>`,acjs_fa:`<div style="text-align:center;margin-bottom:12px;"><div style="font-size:14px;font-weight:800;">SOUTHERN SURGICAL ASSISTANTS, LLC</div></div>`,acjs_anes:`<div style="text-align:center;margin-bottom:12px;"><div style="font-size:14px;font-weight:800;color:#0891b2;">ADVANCED CENTER FOR JOINT SURGERY LLC</div></div><div style="font-size:11px;font-weight:700;">REQUEST AND CONSENT FOR ANESTHESIA SERVICES</div>`};document.getElementById("modal").className="md hp-modal";showModal(`${CON_N[k]||k}`,contents[k]||`<p>Consent form.</p>`,[{l:"Close",action:`closeModal();document.getElementById('modal').className='md';`}]);}
+
+function schedCls(id){showModal("Schedule Pre-Op Class",`<div class="field"><label>Date</label><input type="date" id="clsDate"></div>`,[{l:"Cancel"},{l:"Schedule",p:true,action:`doSchedCls(${id})`}]);}
+function doSchedCls(id){const p=findP(id);if(!p)return;const d=document.getElementById("clsDate")?.value;p.cls={st:"scheduled",date:d?new Date(d+"T00:00:00").toLocaleDateString("en-US",{month:"2-digit",day:"2-digit"}):""};closeModal();render();}
+
+function shareVid(id){const p=findP(id);if(!p)return;showModal("Share Pre-Op Video",`<div style="padding:14px;background:#0f172a;border-radius:8px;text-align:center;margin-bottom:10px;"><div style="font-size:32px;">🎥</div><div style="color:#e2e8f0;font-size:12px;font-weight:600;margin-top:4px;">Total Joint Replacement: What to Expect</div><div style="color:#94a3b8;font-size:10px;">18 min · Updated Mar 2026</div></div>`,[{l:"Cancel"},{l:"📱 Send Video Link",p:true}]);}
+
+function editCg(id){const p=findP(id);if(!p)return;showModal("Edit Caregiver",`<div class="field"><label>Name</label><input id="cgN" value="${esc(p.cg?.name||'')}"></div><div class="field"><label>Relationship</label><input id="cgR" value="${esc(p.cg?.rel||'')}"></div><div class="field"><label>Phone</label><input id="cgP" value="${esc(p.cg?.phone||'')}"></div>`,[{l:"Cancel"},{l:"Save",p:true,action:`doEditCg(${id})`}]);}
+function doEditCg(id){const p=findP(id);if(!p)return;const n=document.getElementById("cgN").value,r=document.getElementById("cgR").value,ph=document.getElementById("cgP").value;if(n)p.cg={name:n,rel:r,phone:ph,conf:true};else p.cg=null;closeModal();render();}
+
+function editMed(id,med){showModal(`Edit — ${med}`,`<div class="field"><label>Pre-Op Instruction</label><input value="${esc(mInfo(med).pre)}"></div><div class="field"><label>Action</label><select><option>Continue</option><option>Hold</option><option>Must Take</option><option>Stop</option><option>Per Specialist</option></select></div>`,[{l:"Cancel"},{l:"Save",p:true}]);}
+function removeMed(id,med){const p=findP(id);if(!p)return;p.meds=p.meds.filter(m=>m!==med);delete p.medH[med];render();}
+function addMed(id){showModal("Add Medication",`<div class="field"><label>Medication Name</label><input placeholder="e.g. Lisinopril 20mg"></div>`,[{l:"Cancel"},{l:"Add",p:true}]);}
+function sendMedInstr(id){const p=findP(id);if(!p)return;showModal("Send Medication Instructions",`<p>Send medication instructions to <strong>${esc(p.f)} ${esc(p.l)}</strong>.</p><div style="margin:8px 0;padding:8px;background:#f8fafc;border-radius:6px;border:1px solid var(--border);max-height:160px;overflow-y:auto;">${p.meds.map(m=>{const i=mInfo(m);return`<div style="display:flex;justify-content:space-between;font-size:10px;padding:2px 0;"><span>${esc(m)}</span><span style="color:var(--t4);">${esc(i.pre)}</span></div>`;}).join('')}</div>`,[{l:"Cancel"},{l:"📱 Send Instructions",p:true}]);}
+
+function sendReminder(id){const p=findP(id);if(!p)return;const items=[];["cbc","bmp","ptinr","ua","ts"].forEach(k=>{if(!p.labs[k]?.done)items.push(`Lab: ${LAB_N[k]}`);});if(!p.ekg?.done)items.push("EKG");Object.entries(p.clrs).forEach(([k,c])=>{if(c.need&&!c.done)items.push(`Clearance: ${CLR_N[k]}`);});Object.entries(p.cons).forEach(([k,c])=>{if(!c.signed)items.push(`Consent: ${CON_N[k]}`);});if(p.cls?.st!=="done")items.push("Pre-Op Class");if(!p.instr?.sent)items.push("Surgery Instructions (PP1254)");if(p.orders?.pre?.st!=="signed"||p.orders?.post?.st!=="signed")items.push("Physician Orders (PP1265/PP1264)");showModal("Send Reminder",`<p>Remind <strong>${esc(p.f)} ${esc(p.l)}</strong> (${esc(p.phone)}):</p><div style="margin:8px 0;padding:8px;background:#f8fafc;border-radius:6px;border:1px solid var(--border);max-height:160px;overflow-y:auto;">${items.length?items.map(i=>`<div style="font-size:11px;padding:2px 0;display:flex;gap:4px;"><span style="color:var(--red);">✕</span>${esc(i)}</div>`).join(''):'<div style="color:var(--green);font-size:11px;">✓ All complete</div>'}</div>`,[{l:"Cancel"},{l:"📱 Send",p:true}]);}
+
+function showMsg(id){const p=findP(id);if(!p)return;showModal("Message Patient",`<p>To <strong>${esc(p.phone)}</strong>:</p><div class="field"><textarea id="mt" rows="3" placeholder="Message…"></textarea></div><div style="display:flex;gap:4px;flex-wrap:wrap;"><button class="btn s" onclick="document.getElementById('mt').value='Hi ${esc(p.f)}, this is Total Joint Specialists. We still need some items before your surgery. Please call (770) 555-1000.'">Missing Items</button><button class="btn s" onclick="document.getElementById('mt').value='Hi ${esc(p.f)}, reminder: nothing to eat/drink after midnight before surgery.'">NPO</button><button class="btn s" onclick="document.getElementById('mt').value='Hi ${esc(p.f)}, please confirm your caregiver for surgery day. Reply YES to confirm.'">Caregiver</button></div>`,[{l:"Cancel"},{l:"Send",p:true}]);}
+
+// ═══════ H&P NOTE ═══════
+function startHP(id){
+  const p=findP(id);if(!p)return;
+  const b=bmi(p);
+  const signed=p.hp?.st==="signed";
+  const ro=signed?'readonly':'';
+  const labSummary=["cbc","bmp","ptinr","ua","ts"].map(k=>{const l=p.labs[k];return l?.done?`${LAB_N[k]}: ${l.vals||'Normal'}`:null;}).filter(Boolean).join("\n");
+  const medList=p.meds.map(m=>`${m} — ${mInfo(m).pre}`).join("\n");
+  const clrSummary=Object.entries(p.clrs).filter(([k,c])=>c.need).map(([k,c])=>`${CLR_N[k]}: ${c.done?'✓ Cleared'+(c.note?' — '+c.note:''):'Pending'}`).join("\n");
+  const pmh=p.meds.map(m=>{const i=mInfo(m);return i.cls!=='—'?i.cls:null;}).filter(Boolean);
+  const pmhUniq=[...new Set(pmh)];
+  const pmhText=pmhUniq.length?pmhUniq.join(', '):'None reported';
+  const hpi=`${p.age}-year-old presenting for pre-operative evaluation for ${p.side} ${p.proc==='tka'?'Total Knee Arthroplasty':'Total Hip Arthroplasty'}. BMI is ${b}${b>=BMI_GATE?' (exceeds threshold)':''}. ${p.a1c?'HbA1c is '+p.a1c.val+'%'+(p.a1c.val>=A1C_GATE?' (exceeds threshold)':' (within limits)')+'.':''}`;
+  const ekgText=p.ekg?.done?`EKG (${p.ekg.date}): ${p.ekg.note||'Normal sinus rhythm'}`:'EKG: Not yet obtained';
+  const clrComplete=Object.values(p.clrs).filter(c=>c.need&&!c.done).length===0;
+  const assessment=`${p.age}-year-old with osteoarthritis of the ${p.side.toLowerCase()} ${p.proc==='tka'?'knee':'hip'}, ${clrComplete?'medically optimized':'with pending medical optimization'} for ${p.side} ${p.proc==='tka'?'Total Knee Arthroplasty':'Total Hip Arthroplasty'}.`;
+  const plan=`1. ${p.proc==='tka'?'Total Knee Arthroplasty':'Total Hip Arthroplasty'}, ${p.side}, scheduled ${p.surgDate}\n2. Medication holds per protocol\n3. Standard DVT prophylaxis post-op\n4. Same-day discharge with caregiver${p.cg?' ('+p.cg.name+')':'— PENDING'}`;
+
+  let signedBanner='';
+  if(signed) signedBanner=`<div style="margin-bottom:12px;padding:8px 12px;background:var(--greenL);border:1px solid var(--green);border-radius:6px;display:flex;align-items:center;justify-content:space-between;"><span style="font-size:11px;font-weight:700;color:var(--green);">✓ H&P Signed — ${esc(p.hp.date||'')}</span><button class="btn" onclick="unsignHP(${id})" style="font-size:10px;border-color:var(--yellow);color:var(--yellow);">🔓 Unsign to Edit</button></div>`;
+
+  const body=`
+    ${signedBanner}
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding:10px 14px;background:#f8fafc;border-radius:8px;border:1px solid var(--border);">
+      <div><div style="font-size:14px;font-weight:700;">${esc(p.l)}, ${esc(p.f)}</div>
+      <div style="font-size:10px;color:var(--t4);">${esc(p.mrn)} · ${p.age}yo · ${p.side} ${p.proc.toUpperCase()} · Surgery: ${p.surgDate}</div></div>
+    </div>
+    <div class="hp-section"><h4>HPI</h4><div class="hp-field"><textarea rows="3" ${ro}>${esc(hpi)}</textarea></div></div>
+    <div class="hp-section"><h4>PMH</h4><div class="hp-field"><textarea rows="2" ${ro}>${esc(pmhText)}</textarea></div></div>
+    <div class="hp-section"><h4>Medications</h4><div class="hp-field"><textarea rows="${Math.max(3,p.meds.length)}" ${ro}>${esc(medList)}</textarea></div></div>
+    <div class="hp-section"><h4>Labs & Studies</h4><div class="hp-field"><textarea rows="4" ${ro}>${esc(labSummary)}\n${esc(ekgText)}</textarea></div></div>
+    <div class="hp-section"><h4>Clearances</h4><div class="hp-field"><textarea rows="3" ${ro}>${esc(clrSummary)}</textarea></div></div>
+    <div class="hp-section"><h4>Assessment</h4><div class="hp-field"><textarea rows="2" ${ro}>${esc(assessment)}</textarea></div></div>
+    <div class="hp-section"><h4>Plan</h4><div class="hp-field"><textarea rows="3" ${ro}>${esc(plan)}</textarea></div></div>`;
+
+  let buttons;
+  if(signed){
+    buttons=[{l:"Close",action:`closeModal();document.getElementById('modal').className='md';`}];
+  } else {
+    buttons=[
+      {l:"Cancel",action:`closeModal();document.getElementById('modal').className='md';`},
+      {l:"Save Draft",action:`doSaveHP(${id},'draft')`},
+      {l:"✍ Sign H&P",p:true,action:`doSaveHP(${id},'signed')`}
+    ];
+  }
+  document.getElementById("modal").className="md hp-modal";
+  showModal(`History & Physical — ${esc(p.f)} ${esc(p.l)}`, body, buttons);
+}
+function unsignHP(id){
+  const p=findP(id);if(!p)return;
+  p.hp={st:"draft",date:p.hp?.date||null};
+  closeModal();document.getElementById("modal").className="md";
+  render();
+  setTimeout(()=>startHP(id),100);
+}
+
+function doSaveHP(id,st){const p=findP(id);if(!p)return;p.hp={st:st,date:new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit"})};closeModal();document.getElementById("modal").className="md";render();}
+
+// ═══════ MODAL ═══════
+function showModal(title,body,buttons){
+  const m=document.getElementById("modal");
+  let h=`<div class="md-h"><h3>${title}</h3><button class="md-x" onclick="closeModal();document.getElementById('modal').className='md';">✕</button></div><div class="md-b">${body}</div>`;
+  if(buttons?.length)h+=`<div class="md-f">${buttons.map(b=>`<button class="btn ${b.p?'p':''}" onclick="${b.action||'closeModal()'}">${b.l}</button>`).join('')}</div>`;
+  m.innerHTML=h;document.getElementById("modalOv").classList.add("open");
+}
+function closeModal(){document.getElementById("modalOv").classList.remove("open");}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PROTOCOL SETTINGS PANEL
+// ═══════════════════════════════════════════════════════════════════════════════
+let protoCat = null; // active category key
+let protoDraft = null; // working copy during editing
+
+function openProtoSettings(){
+  protoDraft = JSON.parse(JSON.stringify(PROTO));
+  protoCat = Object.keys(protoDraft.cats)[0];
+  renderProtoSettings();
+  document.getElementById("protoOv").classList.add("open");
+}
+function closeProto(){
+  document.getElementById("protoOv").classList.remove("open");
+  protoDraft = null;
+}
+
+function protoChanges(){
+  // Returns array of {catId, ruleId, label, oldVal, newVal}
+  if(!protoDraft)return[];
+  const changes=[];
+  Object.entries(protoDraft.cats).forEach(([catId,cat])=>{
+    cat.rules.forEach(rule=>{
+      const orig=PROTO.cats[catId]?.rules.find(r=>r.id===rule.id);
+      if(orig && String(rule.val)!==String(orig.val)){
+        changes.push({catId,ruleId:rule.id,label:rule.label,oldVal:orig.val,newVal:rule.val});
+      }
+    });
+  });
+  return changes;
+}
+
+function catHasChanges(catId){
+  if(!protoDraft)return false;
+  return protoDraft.cats[catId]?.rules.some(rule=>{
+    const orig=PROTO.cats[catId]?.rules.find(r=>r.id===rule.id);
+    return orig && String(rule.val)!==String(orig.val);
+  });
+}
+
+function renderProtoSettings(){
+  const el=document.getElementById("protoMd");
+  const changes=protoChanges();
+  const cats=Object.entries(protoDraft.cats);
+
+  let sidebar='';
+  cats.forEach(([k,cat])=>{
+    const active=protoCat===k;
+    const changed=catHasChanges(k);
+    sidebar+=`<button class="proto-side-btn ${active?'active':''} ${changed?'changed':''}" onclick="protoCat='${k}';renderProtoSettings()">
+      <span style="font-size:13px;">${cat.icon||'📌'}</span>
+      <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(cat.label)}</span>
+      <span class="dot"></span>
+    </button>`;
+  });
+
+  const activeCat=protoDraft.cats[protoCat];
+  let rules='';
+  if(activeCat){
+    activeCat.rules.forEach(rule=>{
+      const orig=PROTO.cats[protoCat]?.rules.find(r=>r.id===rule.id);
+      const changed=orig && String(rule.val)!==String(orig.val);
+      rules+=`<div class="proto-rule ${changed?'changed':''}">
+        <div class="proto-rule-top">
+          <div>
+            <div class="proto-rule-label">${esc(rule.label)}</div>
+            ${rule.note?`<div class="proto-rule-note">${esc(rule.note)}</div>`:''}
+          </div>
+          <div class="proto-rule-input">
+            ${rule.comp?`<span class="comp">${esc(rule.comp)}</span>`:''}
+            ${rule.type==='num'
+              ?`<input type="number" step="any" value="${rule.val}" onchange="updateProtoRule('${protoCat}','${rule.id}',this.value,'num')">`
+              :`<input type="text" value="${esc(String(rule.val))}" onchange="updateProtoRule('${protoCat}','${rule.id}',this.value,'txt')">`
+            }
+            ${rule.unit?`<span class="unit">${esc(rule.unit)}</span>`:''}
+          </div>
+        </div>
+        ${changed?`<div class="proto-rule-diff"><span class="old">${esc(String(orig.val))}</span><span class="arrow">→</span><span class="new">${esc(String(rule.val))}</span></div>`:''}
+      </div>`;
+    });
+  }
+
+  el.innerHTML=`
+    <div class="proto-hd">
+      <div>
+        <h2>⚙ Protocol Configuration</h2>
+        <div class="proto-hd-sub">Version: ${esc(protoDraft.version)} · ${protoDraft.modifiedBy?'Last modified by '+esc(protoDraft.modifiedBy):''} · ${Object.values(protoDraft.cats).reduce((a,c)=>a+c.rules.length,0)} rules across ${cats.length} categories</div>
+      </div>
+      <button class="md-x" onclick="closeProto()">✕</button>
+    </div>
+    <div class="proto-body">
+      <div class="proto-side">${sidebar}</div>
+      <div class="proto-rules">${rules}</div>
+    </div>
+    <div class="proto-ft">
+      <div class="proto-ft-l">${changes.length?changes.length+' unsaved change'+(changes.length>1?'s':''):''}</div>
+      <div class="proto-ft-r">
+        <button class="btn" onclick="protoDraft=JSON.parse(JSON.stringify(PROTO));renderProtoSettings();" style="font-size:10px;">↺ Reset</button>
+        <button class="btn" onclick="closeProto()">Cancel</button>
+        <button class="btn p" onclick="protoConfirmSave()" ${changes.length===0?'disabled style="opacity:.4;cursor:not-allowed;font-size:10px;"':'style="font-size:10px;"'}>${changes.length?'Review & Save '+changes.length+' Change'+(changes.length>1?'s':''):'No Changes'}</button>
+      </div>
+    </div>
+  `;
+}
+
+function updateProtoRule(catId,ruleId,val,type){
+  const cat=protoDraft.cats[catId];if(!cat)return;
+  const rule=cat.rules.find(r=>r.id===ruleId);if(!rule)return;
+  rule.val = type==='num' ? (parseFloat(val)||0) : val;
+  renderProtoSettings();
+}
+
+let protoConfirmMode=false;
+function protoConfirmSave(){
+  const changes=protoChanges();
+  if(!changes.length)return;
+  
+  const el=document.getElementById("protoMd");
+  // Replace the rules area with confirmation
+  const rulesArea=el.querySelector('.proto-rules');
+  rulesArea.innerHTML=`
+    <div class="proto-confirm">
+      <h4>⚠ Confirm ${changes.length} Protocol Change${changes.length>1?'s':''}</h4>
+      ${changes.map(c=>`<div class="proto-confirm-item"><span class="lbl">${esc(c.label)}:</span> <span style="color:var(--red);text-decoration:line-through;">${esc(String(c.oldVal))}</span> → <span style="color:var(--green);font-weight:700;">${esc(String(c.newVal))}</span></div>`).join('')}
+    </div>
+    <div class="proto-confirm-name">
+      <input type="text" id="protoSaveBy" placeholder="Your name (required to save)">
+      <button class="btn p" onclick="doProtoSave()" style="font-size:10px;">✓ Confirm & Save</button>
+      <button class="btn" onclick="renderProtoSettings()" style="font-size:10px;">← Back</button>
+    </div>
+    <p style="font-size:9px;color:var(--t4);margin-top:8px;">Changes take effect immediately across all patient evaluations. A record will be saved to the change history.</p>
+  `;
+}
+
+function doProtoSave(){
+  const nameEl=document.getElementById("protoSaveBy");
+  const name=nameEl?nameEl.value.trim():'';
+  if(!name){nameEl.style.borderColor='var(--red)';nameEl.focus();return;}
+  
+  const changes=protoChanges();
+  
+  // Record history
+  PROTO_HISTORY.unshift({
+    timestamp:new Date().toISOString(),
+    modifiedBy:name,
+    changes:changes.map(c=>({label:c.label,oldVal:c.oldVal,newVal:c.newVal}))
+  });
+  
+  // Apply
+  protoDraft.lastModified=new Date().toISOString();
+  protoDraft.modifiedBy=name;
+  PROTO=JSON.parse(JSON.stringify(protoDraft));
+  document.getElementById("protoVer").textContent=PROTO.version;
+  
+  saveProto();
+  closeProto();
+  render(); // re-evaluate all patients with new thresholds
+}
+
+// ═══════ CHANGE HISTORY ═══════
+function openProtoHistory(){
+  const el=document.getElementById("histMd");
+  let items='';
+  if(PROTO_HISTORY.length===0){
+    items=`<div style="text-align:center;padding:40px 0;color:var(--t4);font-size:12px;">No protocol changes recorded yet</div>`;
+  } else {
+    PROTO_HISTORY.forEach(entry=>{
+      items+=`<div class="hist-entry">
+        <div class="hist-entry-hd">
+          <div class="hist-entry-who">${esc(entry.modifiedBy)}</div>
+          <div class="hist-entry-when">${new Date(entry.timestamp).toLocaleString()}</div>
+        </div>
+        ${entry.changes.map(c=>`<div class="hist-entry-item">
+          <span class="lbl">${esc(c.label)}</span>
+          <span style="color:var(--red);text-decoration:line-through;font-family:monospace;font-size:10px;">${esc(String(c.oldVal))}</span>
+          <span style="color:var(--t4);">→</span>
+          <span style="color:var(--green);font-family:monospace;font-weight:700;font-size:10px;">${esc(String(c.newVal))}</span>
+        </div>`).join('')}
+      </div>`;
+    });
+  }
+  
+  el.innerHTML=`
+    <div class="proto-hd">
+      <div>
+        <h2>📋 Protocol Change History</h2>
+        <div class="proto-hd-sub">${PROTO_HISTORY.length} recorded change${PROTO_HISTORY.length!==1?'s':''}</div>
+      </div>
+      <button class="md-x" onclick="closeHist()">✕</button>
+    </div>
+    <div style="padding:16px;overflow-y:auto;flex:1;">${items}</div>
+    <div class="proto-ft">
+      <div class="proto-ft-l"></div>
+      <div class="proto-ft-r">
+        ${PROTO_HISTORY.length?`<button class="btn ro" onclick="if(confirm('Reset protocol to Q4 2025 defaults and clear history?')){PROTO=JSON.parse(JSON.stringify(PROTO_DEFAULT));PROTO_HISTORY=[];saveProto();closeHist();render();}" style="font-size:10px;">↺ Reset to Q4 2025 Defaults</button>`:''}
+        <button class="btn" onclick="closeHist()">Close</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("histOv").classList.add("open");
+}
+function closeHist(){document.getElementById("histOv").classList.remove("open");}
+
+render();
+</script>
+</body>
+</html>
