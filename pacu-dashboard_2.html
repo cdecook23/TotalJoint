@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>TJR Hub · PACU</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080808;--tx:#e0e0e0;--dm:#5a5a5a;
+  --gn:#2a6b3f;--gnB:rgba(42,107,63,.10);--gnS:#3a8b5f;
+  --yw:#8a6d2b;--ywB:rgba(138,109,43,.08);--ywS:#b8952f;
+  --rd:#8b2d2d;--rdB:rgba(139,45,45,.10);--rdS:#cf6b6b;
+  --bl:#3b6b8f;--blB:rgba(59,107,143,.08);--blS:#5a9abf;
+  --kn:#3b82f6;--hp:#a855f7;
+  --m:'DM Mono',monospace;--s:'IBM Plex Sans',sans-serif;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+html{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+body{background:var(--bg);color:var(--tx);font-family:var(--s);height:100dvh;overflow:hidden;position:fixed;width:100%;display:flex;flex-direction:column}
+
+.top{padding:5px 16px;border-bottom:1px solid #141414;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10}
+.top-b{font-size:9px;font-weight:700;color:#2a2a2a;font-family:var(--m);letter-spacing:.1em}
+.top-r{display:flex;align-items:baseline;gap:10px}
+.top-el{font-size:11px;font-family:var(--m);font-weight:600}
+.top-clk{font-size:15px;font-weight:700;font-family:var(--m)}
+
+.ctabs{display:flex;gap:3px;padding:4px 16px;border-bottom:1px solid #111;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ctab{padding:6px 10px;border-radius:6px;font-size:10px;font-family:var(--m);font-weight:600;cursor:pointer;border:1px solid #1a1a1a;background:#0d0d0d;color:#555;white-space:nowrap;min-height:34px;display:flex;align-items:center;gap:4px}
+.ctab.act{border-color:var(--gnS);background:var(--gnB);color:var(--gnS)}
+.ctab .jd{width:5px;height:5px;border-radius:2px;flex-shrink:0}
+
+.pbar{padding:4px 16px;background:#0a0a0a;border-bottom:1px solid #141414;flex-shrink:0}
+.pr1{display:flex;align-items:center;gap:6px;overflow-x:auto}
+.pn{font-size:13px;font-weight:700;white-space:nowrap}
+.ptag{font-size:8px;padding:2px 5px;border-radius:3px;font-family:var(--m);font-weight:700;white-space:nowrap}
+.pal{font-size:8px;padding:2px 5px;border-radius:3px;background:var(--rdB);color:var(--rdS);font-family:var(--m);font-weight:700;border:1px solid rgba(139,45,45,.2);white-space:nowrap}
+.pr2{display:flex;gap:6px;margin-top:3px;align-items:center}
+.ps{text-align:center;min-width:28px}.psv{font-size:11px;font-weight:700;font-family:var(--m);line-height:1.1}.psl{font-size:6px;color:var(--dm);font-family:var(--m);text-transform:uppercase}
+.mbar{flex:1;height:5px;background:#1a1a1a;border-radius:3px;overflow:hidden;margin:0 3px}
+.mfill{height:100%;border-radius:3px;transition:width .3s}
+.mlbl{font-size:9px;font-family:var(--m);font-weight:600;white-space:nowrap}
+
+.content{flex:1;overflow:hidden;position:relative}
+.pane{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 16px 90px;display:none}
+.pane.act{display:block}
+
+.bnav{display:flex;border-top:1px solid #1a1a1a;background:#0a0a0a;flex-shrink:0;padding-bottom:var(--safe-b);z-index:10}
+.bn{flex:1;padding:7px 0 5px;text-align:center;cursor:pointer;position:relative}
+.bn.act{background:rgba(255,255,255,.03)}
+.bn.act::after{content:"";position:absolute;top:0;left:25%;right:25%;height:2px;background:var(--gnS)}
+.bn-i{font-size:15px;line-height:1}.bn-l{font-size:7px;font-family:var(--m);color:#444;margin-top:1px}
+.bn.act .bn-l{color:var(--gnS)}
+
+.sh{font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-family:var(--m);color:#3a3a3a;padding:5px 0 3px;display:flex;justify-content:space-between;align-items:center}
+
+/* Next assessment timer */
+.nxt{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:6px;margin-bottom:6px;font-family:var(--m);font-size:11px;font-weight:600}
+.nxt.due{background:var(--gnB);border:1px solid rgba(42,107,63,.12);color:var(--gnS)}
+.nxt.soon{background:var(--ywB);border:1px solid rgba(138,109,43,.12);color:var(--ywS)}
+.nxt.over{background:var(--rdB);border:1px solid rgba(139,45,45,.12);color:var(--rdS)}
+.nxt-btns{display:flex;gap:3px}
+.nxt-b{padding:4px 7px;border-radius:4px;border:1px solid #333;background:#1a1a1a;color:#666;font-size:8px;font-family:var(--m);font-weight:700;cursor:pointer}
+.nxt-b:active{transform:scale(.9)}.nxt-b.act{border-color:var(--gnS);background:var(--gnB);color:var(--gnS)}
+
+/* Edit mode banner */
+.edit-banner{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:6px;margin-bottom:6px;background:var(--blB);border:1px solid rgba(59,107,143,.15);font-family:var(--m);font-size:11px;color:var(--blS)}
+.edit-time{display:flex;align-items:center;gap:6px}
+.edit-adj{width:32px;height:32px;border-radius:6px;border:1px solid rgba(59,107,143,.2);background:var(--blB);color:var(--blS);font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.edit-adj:active{transform:scale(.85);background:rgba(59,107,143,.2)}
+.edit-cancel{padding:4px 10px;border-radius:4px;border:1px solid rgba(59,107,143,.2);background:transparent;color:var(--blS);font-size:9px;font-family:var(--m);font-weight:700;cursor:pointer}
+
+/* Vitals */
+.vi-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:6px}
+.vi{text-align:center}
+.vi-l{font-size:7px;color:#555;font-family:var(--m);text-transform:uppercase;margin-bottom:1px}
+.vi-i{width:100%;padding:6px 2px;background:#111;border:1px solid #222;border-radius:5px;color:var(--tx);font-size:16px;font-weight:700;font-family:var(--m);text-align:center;outline:none}
+.vi-i:focus{border-color:#444}
+
+/* Pain */
+.pain-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;margin-bottom:6px}
+.pb{padding:10px 0;border-radius:5px;border:1px solid #222;background:#151515;color:#555;font-size:14px;font-family:var(--m);font-weight:700;text-align:center;cursor:pointer;min-height:42px;display:flex;align-items:center;justify-content:center}
+.pb:active{transform:scale(.9)}
+.pb.sel{color:#fff}.pb.g{border-color:var(--gnS);background:var(--gn)}.pb.y{border-color:var(--ywS);background:var(--yw)}.pb.r{border-color:var(--rdS);background:var(--rd)}
+
+/* Exception toggles */
+.exc{display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:6px;border:1px solid rgba(42,107,63,.12);background:var(--gnB);margin-bottom:3px;cursor:pointer;min-height:40px}
+.exc:active{transform:scale(.98)}
+.exc.off{border-color:#1e1e1e;background:rgba(255,255,255,.01)}
+.exc-c{width:16px;height:16px;border-radius:4px;border:2px solid var(--gnS);background:var(--gn);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
+.exc.off .exc-c{border-color:#333;background:transparent;color:transparent}
+.exc-n{font-size:11px;font-weight:600;flex:1}
+.exc-v{font-size:9px;font-family:var(--m);color:var(--gnS)}
+.exc.off .exc-n{color:#777}.exc.off .exc-v{color:#555}
+
+/* Abnormal panel */
+.abn{padding:5px 8px;border:1px solid #222;border-radius:5px;margin-bottom:3px;background:rgba(255,255,255,.012)}
+.abn-opts{display:flex;flex-wrap:wrap;gap:3px}
+.ao{padding:7px 10px;border-radius:5px;border:1px solid #222;background:#151515;color:#666;font-size:10px;font-family:var(--m);cursor:pointer;min-height:34px;display:flex;align-items:center}
+.ao:active{transform:scale(.92)}
+.ao.sel{border-color:var(--ywS);background:var(--ywB);color:var(--ywS)}
+.ao.sel-r{border-color:var(--rdS);background:var(--rdB);color:var(--rdS)}
+.abn-inp{width:100%;padding:8px;background:#111;border:1px solid #222;border-radius:5px;color:var(--tx);font-size:11px;font-family:var(--m);outline:none;margin-top:3px}
+
+/* Log button */
+.logb{width:100%;padding:12px;border-radius:8px;font-family:var(--m);font-size:13px;font-weight:700;border:1px solid #2a2a2a;background:#1a1a1a;color:#444;text-align:center;min-height:48px;cursor:default;margin-top:4px}
+.logb.ok{background:var(--gn);color:#fff;border-color:var(--gnS);cursor:pointer}
+.logb.ok:active{transform:scale(.97);background:var(--gnS)}
+.logb.blue{background:#1a3a5a;color:var(--blS);border-color:rgba(59,107,143,.3);cursor:pointer}
+.logb.blue:active{transform:scale(.97)}
+.logb.arrive{background:#1a3a5a;color:var(--blS);border-color:var(--blS);cursor:pointer;font-size:14px}
+.logb.arrive:active{transform:scale(.97)}
+
+/* Assessment history */
+.axe{display:flex;align-items:flex-start;gap:6px;padding:6px 8px;border-left:3px solid #222;margin-bottom:3px;cursor:pointer}
+.axe:active{background:rgba(255,255,255,.02)}
+.axe-body{flex:1;font-family:var(--m);font-size:9px;color:#666;line-height:1.5}
+.axe .t{color:#555;font-weight:600}.axe .g{color:var(--gnS);font-weight:700}.axe .y{color:var(--ywS);font-weight:700}.axe .r{color:var(--rdS);font-weight:700}
+.axe-edit{font-size:10px;color:#444;flex-shrink:0;padding:2px}
+
+/* ═══ MEDS ═══ */
+.med{display:flex;align-items:center;gap:8px;padding:10px;border-radius:6px;border:1px solid #1e1e1e;background:rgba(255,255,255,.015);cursor:pointer;margin-bottom:4px;min-height:46px}
+.med:active{background:rgba(255,255,255,.04);transform:scale(.98)}
+.med-nm{font-size:12px;font-weight:600;flex:1}
+.med-ds{font-size:10px;color:#666;font-family:var(--m)}
+.med-rt{font-size:8px;padding:2px 5px;border-radius:3px;font-family:var(--m);font-weight:700}
+.med-rt.iv{background:var(--blB);color:var(--blS);border:1px solid rgba(59,107,143,.2)}
+.med-rt.po{background:var(--gnB);color:var(--gnS);border:1px solid rgba(42,107,63,.2)}
+.med-log{font-size:9px;font-family:var(--m);color:#555;padding:3px 8px;border-left:2px solid #222;margin-bottom:2px;line-height:1.4}
+.med-log .mt{color:var(--blS);font-weight:600}
+
+/* I/O + Diet */
+.io-row{display:grid;gap:5px;margin-bottom:6px}
+.io3{grid-template-columns:1fr 1fr 1fr}.io2{grid-template-columns:1fr 1fr}
+.io-box{padding:8px 6px;background:rgba(255,255,255,.015);border:1px solid #1e1e1e;border-radius:6px;text-align:center}
+.io-l{font-size:7px;color:#555;font-family:var(--m);text-transform:uppercase;margin-bottom:2px}
+.io-v{width:100%;text-align:center;background:transparent;border:none;color:var(--tx);font-size:18px;font-weight:700;font-family:var(--m);outline:none}
+.io-v.blue{color:var(--blS)}.io-v.gold{color:var(--ywS)}.io-v.red{color:var(--rdS)}
+.diet-row{display:flex;gap:3px;margin-bottom:6px}
+.diet-b{flex:1;padding:9px 3px;border-radius:5px;border:1px solid #222;background:#151515;color:#555;font-size:9px;font-family:var(--m);font-weight:600;text-align:center;cursor:pointer;min-height:38px;display:flex;align-items:center;justify-content:center}
+.diet-b:active{transform:scale(.92)}
+.diet-b.sel{border-color:var(--gnS);background:var(--gnB);color:var(--gnS)}
+
+/* ═══ DC TAB ═══ */
+/* Timed milestone — single tap timestamps */
+.tm{display:flex;align-items:center;gap:8px;padding:10px;border-radius:6px;border:1px solid #1e1e1e;background:rgba(255,255,255,.015);margin-bottom:4px;cursor:pointer;min-height:46px}
+.tm:active{transform:scale(.98)}
+.tm.done{border-color:rgba(42,107,63,.15);background:var(--gnB)}
+.tm-c{width:20px;height:20px;border-radius:5px;border:2px solid #3a3a3a;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:transparent;flex-shrink:0}
+.tm-c.done{border-color:var(--gnS);background:var(--gn);color:#fff}
+.tm-n{font-size:12px;font-weight:600;flex:1}.tm-n.done{color:#7a7a7a}
+.tm-t{font-size:10px;font-family:var(--m);color:var(--gnS);flex-shrink:0}
+.tm-sub{font-size:8px;color:#555;font-family:var(--m);margin-top:1px}
+
+/* Education items — compact */
+.edu{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:5px;border:1px solid #1a1a1a;background:rgba(255,255,255,.01);margin-bottom:3px;cursor:pointer;min-height:40px}
+.edu:active{transform:scale(.98)}
+.edu.done{border-color:rgba(42,107,63,.12);background:var(--gnB)}
+.edu-c{width:16px;height:16px;border-radius:4px;border:2px solid #333;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:transparent;flex-shrink:0}
+.edu-c.done{border-color:var(--gnS);background:var(--gn);color:#fff}
+.edu-n{font-size:11px;font-weight:600;flex:1}.edu-n.done{color:#7a7a7a}
+.edu-t{font-size:9px;font-family:var(--m);color:var(--gnS);flex-shrink:0}
+
+/* Blockers */
+.blocker{padding:8px 10px;border-radius:6px;background:var(--rdB);border:1px solid rgba(139,45,45,.12);margin-bottom:6px;font-family:var(--m);font-size:10px;color:var(--rdS);line-height:1.5}
+.blocker-item{padding:2px 0}
+
+/* DC ready */
+.dc-box{padding:14px;background:var(--gnB);border:2px solid var(--gnS);border-radius:10px;text-align:center;margin-top:8px}
+.dc-t{font-size:18px;font-weight:700;color:var(--gnS);margin-bottom:3px}
+.dc-s{font-size:10px;color:#888;font-family:var(--m)}
+
+/* Ride name input */
+.ride-inp{width:100%;padding:8px 10px;background:#111;border:1px solid #222;border-radius:5px;color:var(--tx);font-size:12px;font-family:var(--m);outline:none;margin-bottom:4px}
+.ride-inp:focus{border-color:#444}
+
+/* ═══ INFO ═══ */
+.ir{display:flex;justify-content:space-between;padding:2px 0;font-size:9px;font-family:var(--m)}
+.irk{color:#555}.irv{color:#888;text-align:right;max-width:60%}
+.nta{width:100%;padding:10px;background:#111;border:1px solid #1e1e1e;border-radius:6px;color:var(--tx);font-size:12px;font-family:var(--m);outline:none;resize:vertical;min-height:70px}
+.nta:focus{border-color:#333}
+.ho-card{padding:8px;background:rgba(255,255,255,.015);border:1px solid #1e1e1e;border-radius:6px;margin-bottom:6px}
+
+/* Trends */
+.trend{display:flex;gap:4px;flex-wrap:wrap;padding:4px 0}
+.tp{font-family:var(--m);font-size:9px}.tp .v{font-weight:700}.tp .tt{color:#555}
+
+/* Cryo/spinal inline */
+.cryo-row{display:flex;gap:3px;margin-bottom:4px}
+.cryo-b{flex:1;padding:7px 3px;border-radius:4px;border:1px solid #222;background:#151515;color:#555;font-size:9px;font-family:var(--m);text-align:center;cursor:pointer;min-height:32px;display:flex;align-items:center;justify-content:center}
+.cryo-b:active{transform:scale(.92)}.cryo-b.sel{border-color:var(--blS);background:var(--blB);color:var(--blS)}
+
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#1a1a1a;border-radius:2px}
+</style>
+</head>
+<body>
+
+<div class="top"><span class="top-b">TJR HUB · PACU</span><div class="top-r"><span class="top-el" id="pacuEl"></span><span class="top-clk" id="clk"></span></div></div>
+<div class="ctabs" id="ctabs"></div>
+<div class="pbar" id="pbar"></div>
+<div class="content">
+  <div class="pane act" id="p-ax"></div>
+  <div class="pane" id="p-med"></div>
+  <div class="pane" id="p-dc"></div>
+  <div class="pane" id="p-info"></div>
+</div>
+<div class="bnav">
+  <div class="bn act" data-t="ax" onclick="sw('ax')"><div class="bn-i">📊</div><div class="bn-l">ASSESS</div></div>
+  <div class="bn" data-t="med" onclick="sw('med')"><div class="bn-i">💊</div><div class="bn-l">MEDS</div></div>
+  <div class="bn" data-t="dc" onclick="sw('dc')"><div class="bn-i">🏠</div><div class="bn-l">DC</div></div>
+  <div class="bn" data-t="info" onclick="sw('info')"><div class="bn-i">📋</div><div class="bn-l">INFO</div></div>
+</div>
+
+<script>
+const C=[
+  {id:1,fn:"Margaret",ln:"Thompson",age:68,sex:"F",mrn:"TJR-20241",dob:"03/15/1957",jt:"Knee",lat:"Right",proc:"Right TKA",sg:"Dr. Henderson",ast:"Dr. Kim (PA)",wt:82,al:["Penicillin","Sulfa"],anes:"Spinal",anesP:"Dr. Walsh",ebl:180,tqTime:"62m",implants:"Fem:5 · Tib:4 · Poly:10mm · Pat:32",counts:"Correct",caseTime:"1h22m",dress:"ACE+Cryo",orOut:"09:12",orNotes:"",preV:{sbp:120,dbp:80}},
+  {id:2,fn:"James",ln:"Rodriguez",age:72,sex:"M",mrn:"TJR-20242",dob:"11/08/1953",jt:"Hip",lat:"Left",proc:"Left THA",sg:"Dr. Patel",ast:"Dr. Brooks (PA)",wt:95,al:[],anes:"Spinal",anesP:"Dr. Chen",ebl:250,tqTime:"",implants:"Shell:54 · Liner:36 · Stem:5 · Head:32+3",counts:"Correct",caseTime:"1h45m",dress:"ABD+Tegaderm",orOut:"11:05",orNotes:"",preV:{sbp:138,dbp:82}},
+  {id:3,fn:"Dorothy",ln:"Chen",age:65,sex:"F",mrn:"TJR-20243",dob:"07/22/1960",jt:"Knee",lat:"Left",proc:"Left TKA",sg:"Dr. Henderson",ast:"Dr. Kim (PA)",wt:88,al:["Latex ⚠"],anes:"General",anesP:"Dr. Walsh",ebl:220,tqTime:"58m",implants:"Fem:4 · Tib:3 · Poly:9mm · Pat:28",counts:"Correct",caseTime:"1h18m",dress:"ACE+Cryo",orOut:"12:38",orNotes:"LATEX-FREE",preV:{sbp:142,dbp:88}},
+  {id:4,fn:"William",ln:"Foster",age:58,sex:"M",mrn:"TJR-20244",dob:"09/03/1967",jt:"Hip",lat:"Right",proc:"Right THA",sg:"Dr. Patel",ast:"Dr. Brooks (PA)",wt:78,al:["Codeine"],anes:"Spinal",anesP:"Dr. Chen",ebl:190,tqTime:"",implants:"Shell:52 · Liner:32 · Stem:4 · Head:28",counts:"Correct",caseTime:"1h30m",dress:"ABD+Tegaderm",orOut:"14:50",orNotes:"",preV:{sbp:118,dbp:76}}
+];
+
+const MEDS=[
+  {id:"morphine",nm:"Morphine",ds:"2mg",rt:"IV",cat:"iv"},
+  {id:"dilaudid",nm:"Dilaudid",ds:"0.5mg",rt:"IV",cat:"iv"},
+  {id:"ketorolac",nm:"Ketorolac",ds:"30mg",rt:"IV",cat:"iv"},
+  {id:"ondansetron",nm:"Ondansetron",ds:"4mg",rt:"IV",cat:"nv"},
+  {id:"aprepitant",nm:"Aprepitant",ds:"40mg",rt:"PO",cat:"nv"},
+  {id:"apap",nm:"Acetaminophen",ds:"1g",rt:"PO",cat:"po"},
+  {id:"oxy",nm:"Oxycodone",ds:"5mg",rt:"PO",cat:"po"},
+  {id:"celebrex",nm:"Celecoxib",ds:"200mg",rt:"PO",cat:"po"},
+  {id:"gabapentin",nm:"Gabapentin",ds:"300mg",rt:"PO",cat:"po"},
+];
+
+// Education items — TJR specific, joint-conditional
+function eduItems(jt){
+  const items=[
+    {id:"wound",lb:"Wound care & dressing"},
+    {id:"meds",lb:"Discharge medications"},
+    {id:"activity",lb:"Activity & weight bearing"},
+    {id:"signs",lb:"Warning signs (DVT, infection, PE)"},
+  ];
+  if(jt==="Knee") items.push({id:"ice",lb:"Ice, elevation & cryo protocol"});
+  else items.push({id:"hip",lb:"Hip precautions & positioning"});
+  items.push({id:"pt",lb:"PT home exercises"});
+  items.push({id:"followup",lb:"Follow-up appointment"});
+  items.push({id:"dvt",lb:"DVT prophylaxis (meds & SCDs)"});
+  return items;
+}
+
+let cur=0,tab="ax";
+const S={};
+C.forEach((_,i)=>{
+  const c=C[i];
+  S[i]={
+    arrived:null,discharged:null,
+    v:{sbp:"",dbp:"",hr:"",rr:"",spo2:""},
+    pain:null,
+    xAld:true,xNV:true,xDress:true,xO2:true,xNaus:true,
+    abnAld:null,abnNV:null,abnDress:"",o2Method:"RA",nausea:null,
+    spinal:null,temp:"",cryo:"Active",
+    axH:[],medH:[],
+    editIdx:null,editTime:null,
+    ivIn:0,uo:0,drainOut:0,diet:"NPO",
+    // Timed milestones
+    toChair:null,ambulated:null,voided:null,
+    // Manual milestones
+    painPO:false,rxConf:false,
+    // Ride
+    rideName:"",rideHere:false,
+    // Education
+    edu:{},
+    notes:"",
+    axInt:15,lastAx:null
+  };
+});
+
+const N=()=>new Date();
+const fm=d=>d?d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}):"—";
+function el(a,b){if(!a||!b)return"";const t=Math.floor((b-a)/1000),m=Math.floor(t/60),h=Math.floor(m/60);return h?`${h}h${m%60}m`:`${m}m`}
+function minSince(d){return d?Math.floor((N()-d)/60000):999}
+
+function selCase(i){cur=i;cancelEdit();R()}
+function sw(t){tab=t;document.querySelectorAll('.pane').forEach(p=>p.classList.remove('act'));document.getElementById('p-'+t).classList.add('act');document.querySelectorAll('.bn').forEach(b=>b.classList.toggle('act',b.dataset.t===t));R()}
+
+function arrive(){S[cur].arrived=N();R()}
+function setV(f,v){S[cur].v[f]=v}
+function setPain(v){S[cur].pain=v;R()}
+function setTemp(v){S[cur].temp=v}
+function setInt(v){S[cur].axInt=v;R()}
+
+function togX(x){const s=S[cur];s[x]=!s[x];if(s[x]){if(x==="xAld")s.abnAld=null;if(x==="xNV")s.abnNV=null;if(x==="xDress")s.abnDress="";if(x==="xO2")s.o2Method="RA";if(x==="xNaus")s.nausea=null;}R()}
+function setAbnAld(v){S[cur].abnAld=v;R()}
+function setAbnNV(v){S[cur].abnNV=v;R()}
+function setAbnDress(v){S[cur].abnDress=v}
+function setO2(v){S[cur].o2Method=v;S[cur].xO2=(v==="RA");R()}
+function setNaus(v){S[cur].nausea=v;R()}
+function setSpinal(v){S[cur].spinal=v;R()}
+function setCryo(v){S[cur].cryo=v;R()}
+function setDiet(v){S[cur].diet=v;R()}
+function setIO(f,v){S[cur][f]=parseInt(v)||0}
+function setNotes(v){S[cur].notes=v}
+function setRideName(v){S[cur].rideName=v}
+
+// ═══ ASSESSMENT EDIT ═══
+function startEdit(idx){
+  const s=S[cur],e=s.axH[idx];
+  s.editIdx=idx;
+  s.editTime=new Date(e.t);
+  s.v={sbp:String(e.sbp),dbp:String(e.dbp),hr:String(e.hr),rr:String(e.rr),spo2:String(e.spo2)};
+  s.pain=e.pain;s.temp=e.temp||"";
+  s.xAld=e.ald===10;s.abnAld=e.ald<10?e.ald:null;
+  s.xNV=e.nvOk;s.abnNV=e.abnNV;
+  s.xDress=e.dressOk;s.abnDress=e.abnDress||"";
+  s.xO2=e.o2==="RA";s.o2Method=e.o2;
+  s.xNaus=e.nausOk;s.nausea=e.nausea;
+  s.spinal=e.spinal;
+  R();
+}
+function cancelEdit(){
+  const s=S[cur];
+  s.editIdx=null;s.editTime=null;
+  s.v={sbp:"",dbp:"",hr:"",rr:"",spo2:""};
+  s.pain=null;s.temp="";
+  s.xAld=true;s.xNV=true;s.xDress=true;s.xO2=true;s.xNaus=true;
+  s.abnAld=null;s.abnNV=null;s.abnDress="";s.o2Method="RA";s.nausea=null;s.spinal=null;
+  R();
+}
+function adjTime(min){const s=S[cur];if(s.editTime){s.editTime=new Date(s.editTime.getTime()+min*60000);R()}}
+
+function buildEntry(s,c){
+  let ald=10;
+  if(!s.xAld&&s.abnAld!==null)ald=s.abnAld;
+  return{
+    t:s.editIdx!==null?s.editTime:N(),
+    sbp:parseInt(s.v.sbp),dbp:parseInt(s.v.dbp)||0,hr:parseInt(s.v.hr)||0,rr:parseInt(s.v.rr)||0,spo2:parseInt(s.v.spo2)||0,
+    temp:s.temp,ald,pain:s.pain,
+    nvOk:s.xNV,abnNV:s.abnNV,
+    dressOk:s.xDress,abnDress:s.abnDress,
+    o2:s.o2Method,nausOk:s.xNaus,nausea:s.nausea,
+    spinal:s.spinal,cryo:c.jt==="Knee"?s.cryo:null
+  };
+}
+
+function logAx(){
+  const s=S[cur],c=C[cur];
+  if(!parseInt(s.v.sbp)||s.pain===null)return;
+  const entry=buildEntry(s,c);
+  if(s.editIdx!==null){
+    s.axH[s.editIdx]=entry;
+    s.editIdx=null;s.editTime=null;
+  }else{
+    s.axH.unshift(entry);
+    s.lastAx=N();
+  }
+  // Auto milestones from latest entry
+  const latest=s.axH.reduce((a,b)=>a.t>b.t?a:b);
+  if(latest.ald>=9)s.ms_aldrete=s.ms_aldrete||N();
+  else delete s.ms_aldrete;
+  if(latest.nvOk)s.ms_nv=s.ms_nv||N();
+  if(latest.dressOk)s.ms_dress=s.ms_dress||N();
+  // Reset form
+  s.v={sbp:"",dbp:"",hr:"",rr:"",spo2:""};s.pain=null;s.temp="";
+  s.xAld=true;s.xNV=true;s.xDress=true;s.xO2=true;s.xNaus=true;
+  s.abnAld=null;s.abnNV=null;s.abnDress="";s.o2Method="RA";s.nausea=null;s.spinal=null;
+  R();
+}
+
+function logMed(id){const m=MEDS.find(x=>x.id===id);S[cur].medH.unshift({t:N(),nm:m.nm,ds:m.ds,rt:m.rt});R()}
+function togTimed(f){const s=S[cur];s[f]=s[f]?null:N();R()}
+function togManual(f){const s=S[cur];s[f]=!s[f];R()}
+function togEdu(id){const s=S[cur];s.edu[id]=s.edu[id]?null:N();R()}
+function togRide(){const s=S[cur];s.rideHere=!s.rideHere;R()}
+function discharge(){S[cur].discharged=N();R()}
+function msCnt(s,c){
+  let n=0;
+  if(s.toChair)n++;if(s.ambulated)n++;if(s.voided)n++;
+  if(s.ms_aldrete)n++;if(s.painPO)n++;if(s.ms_nv)n++;if(s.ms_dress)n++;
+  if(s.diet==="Tolerating")n++;
+  const ei=eduItems(c.jt);
+  if(ei.every(e=>s.edu[e.id]))n++;
+  if(s.rxConf)n++;if(s.rideHere&&s.rideName)n++;
+  return n;
+}
+const MS_TOTAL=11;// functional(3)+clinical(5)+edu(1)+rx(1)+ride(1)
+
+function dcBlockers(s,c){
+  const b=[];
+  if(s.axH.length<3)b.push(`Need ${3-s.axH.length} more assessment(s) (min 3)`);
+  if(s.axH.length>0){const latest=s.axH.reduce((a,x)=>a.t>x.t?a:x);const m=minSince(latest.t);if(m>30)b.push(`Last assessment ${m}m ago (max 30m)`);}
+  else b.push("No assessments logged");
+  if(!s.toChair)b.push("Not yet to chair");
+  if(!s.ambulated)b.push("Not yet ambulated");
+  if(!s.voided)b.push("Has not voided");
+  if(!s.ms_aldrete)b.push("Aldrete < 9");
+  if(!s.painPO)b.push("Pain not controlled on PO");
+  if(!s.ms_nv)b.push("Neurovascular not verified intact");
+  if(!s.ms_dress)b.push("Dressing not verified intact");
+  if(s.diet!=="Tolerating")b.push("Not tolerating PO (diet: "+s.diet+")");
+  const ei=eduItems(c.jt);
+  const eduDone=ei.every(e=>s.edu[e.id]);
+  if(!eduDone)b.push("Education incomplete");
+  if(!s.rxConf)b.push("Prescriptions not confirmed");
+  if(!s.rideHere||!s.rideName)b.push("Responsible adult not confirmed");
+  return b;
+}
+
+// ═══ RENDER ═══
+function R(){
+  const c=C[cur],s=S[cur];
+  const jc=c.jt==="Hip"?{a:"var(--hp)",bg:"rgba(168,85,247,.08)",bd:"rgba(168,85,247,.2)"}:{a:"var(--kn)",bg:"rgba(59,130,246,.08)",bd:"rgba(59,130,246,.2)"};
+  const isSp=c.anes.includes("Spinal");
+  const isKnee=c.jt==="Knee";
+
+  // Tabs
+  document.getElementById("ctabs").innerHTML=C.map((cs,i)=>{
+    const dc=S[i].discharged?"✓ ":"";
+    return`<div class="ctab${i===cur?" act":""}" onclick="selCase(${i})"><span class="jd" style="background:${cs.jt==="Hip"?"var(--hp)":"var(--kn)"}"></span>${dc}${cs.orOut} ${cs.ln}</div>`;
+  }).join("");
+
+  // Patient bar
+  const mc=msCnt(s,c),pct=Math.round(mc/MS_TOTAL*100);
+  const lAld=s.axH.length?s.axH[0].ald:null;
+  const lPain=s.axH.length?s.axH[0].pain:null;
+  const pc=pct>=90?"var(--gnS)":pct>=50?"var(--ywS)":"var(--blS)";
+  let pb=`<div class="pr1"><span class="pn">${c.ln}, ${c.fn}</span><span class="ptag" style="background:${jc.bg};color:${jc.a};border:1px solid ${jc.bd}">${c.proc}</span>`;
+  c.al.forEach(a=>pb+=`<span class="pal">⚠ ${a}</span>`);
+  pb+=`</div><div class="pr2">`;
+  pb+=`<div class="ps"><div class="psv">${s.arrived?fm(s.arrived):"—"}</div><div class="psl">IN</div></div>`;
+  pb+=`<div class="ps"><div class="psv"${lAld!==null?` style="color:${lAld>=9?"var(--gnS)":"var(--rdS)"}"`:``}>${lAld!==null?lAld:"—"}</div><div class="psl">ALD</div></div>`;
+  pb+=`<div class="ps"><div class="psv"${lPain!==null?` style="color:${lPain<=3?"var(--gnS)":lPain<=6?"var(--ywS)":"var(--rdS)"}"`:``}>${lPain!==null?lPain:"—"}</div><div class="psl">PAIN</div></div>`;
+  pb+=`<div class="mbar"><div class="mfill" style="width:${pct}%;background:${pc}"></div></div><span class="mlbl" style="color:${pc}">${mc}/${MS_TOTAL}</span>`;
+  pb+=`</div>`;
+  document.getElementById("pbar").innerHTML=pb;
+
+  const pe=document.getElementById("pacuEl");
+  if(s.arrived&&!s.discharged){pe.textContent="⏱ "+el(s.arrived,N());pe.style.color="var(--ywS)"}
+  else if(s.discharged){pe.textContent="✓ "+el(s.arrived,s.discharged);pe.style.color="var(--gnS)"}
+  else pe.textContent="";
+
+  // ═══ ASSESS TAB ═══
+  let ax="";
+  if(!s.arrived){
+    ax+=`<div class="logb arrive" onclick="arrive()">Patient Arrived in PACU</div>`;
+    ax+=`<div class="sh" style="margin-top:8px">OR Handoff</div><div class="ho-card">`;
+    [{k:"Procedure",v:`${c.proc} — ${c.sg}`},{k:"Anesthesia",v:`${c.anes} — ${c.anesP}`},{k:"EBL",v:`${c.ebl}mL`},{k:"Implants",v:c.implants},{k:"Counts",v:c.counts},{k:"Case",v:c.caseTime},{k:"Dressing",v:c.dress}].forEach(r=>ax+=`<div class="ir"><span class="irk">${r.k}</span><span class="irv">${r.v}</span></div>`);
+    if(c.tqTime)ax+=`<div class="ir"><span class="irk" style="color:var(--ywS)">TQ</span><span class="irv" style="color:var(--ywS)">${c.tqTime}</span></div>`;
+    if(c.orNotes)ax+=`<div class="ir"><span class="irk">Notes</span><span class="irv">${c.orNotes}</span></div>`;
+    ax+=`</div>`;
+  }else{
+    // Edit mode banner
+    if(s.editIdx!==null){
+      ax+=`<div class="edit-banner"><div class="edit-time"><span>Editing:</span><div class="edit-adj" onclick="adjTime(-5)">−</div><span style="font-weight:700;font-size:13px">${fm(s.editTime)}</span><div class="edit-adj" onclick="adjTime(5)">+</div></div><div class="edit-cancel" onclick="cancelEdit()">Cancel</div></div>`;
+    }else{
+      // Next assessment timer
+      if(s.lastAx){
+        const elapsed=minSince(s.lastAx);
+        const rem=s.axInt-elapsed;
+        const cls=rem>5?"due":rem>0?"soon":"over";
+        const txt=rem>0?`Next in ${rem}m`:`Overdue by ${Math.abs(rem)}m`;
+        ax+=`<div class="nxt ${cls}"><span>${txt}</span><div class="nxt-btns">`;
+        [5,15,30].forEach(v=>ax+=`<div class="nxt-b${s.axInt===v?" act":""}" onclick="setInt(${v})">Q${v}</div>`);
+        ax+=`</div></div>`;
+      }
+    }
+
+    // VITALS
+    ax+=`<div class="sh">Vitals</div><div class="vi-row">`;
+    [{f:"sbp",l:"SBP"},{f:"dbp",l:"DBP"},{f:"hr",l:"HR"},{f:"rr",l:"RR"},{f:"spo2",l:"SpO₂"}].forEach(v=>{
+      ax+=`<div class="vi"><div class="vi-l">${v.l}</div><input class="vi-i" type="number" inputmode="numeric" value="${s.v[v.f]}" placeholder="—" oninput="setV('${v.f}',this.value)"></div>`;
+    });
+    ax+=`</div>`;
+
+    // PAIN
+    ax+=`<div class="sh"><span>Pain</span><span style="font-size:10px;font-weight:700;color:${s.pain!==null?(s.pain<=3?"var(--gnS)":s.pain<=6?"var(--ywS)":"var(--rdS)"):"#555"}">${s.pain!==null?s.pain+"/10":""}</span></div><div class="pain-grid">`;
+    for(let i=0;i<=10;i++){const sel=s.pain===i;const cls=sel?(i<=3?"g":i<=6?"y":"r"):"";ax+=`<div class="pb${sel?" sel "+cls:""}" onclick="setPain(${i})">${i}</div>`;}
+    ax+=`<div></div></div>`;
+
+    // EXCEPTIONS
+    ax+=`<div class="sh">Status · tap exceptions only</div>`;
+
+    // Aldrete
+    ax+=`<div class="exc${s.xAld?"":" off"}" onclick="togX('xAld')"><div class="exc-c">✓</div><span class="exc-n">Aldrete</span><span class="exc-v">${s.xAld?"10/10":s.abnAld!==null?s.abnAld+"/10":"?"}</span></div>`;
+    if(!s.xAld){ax+=`<div class="abn"><div class="abn-opts">`;[5,6,7,8,9].forEach(v=>{ax+=`<div class="ao${s.abnAld===v?(v>=8?" sel":" sel-r"):""}" onclick="event.stopPropagation();setAbnAld(${v})">${v}</div>`;});ax+=`</div></div>`;}
+
+    // NV
+    ax+=`<div class="exc${s.xNV?"":" off"}" onclick="togX('xNV')"><div class="exc-c">✓</div><span class="exc-n">NV · ${isKnee?"DP":"PT"} pulse</span><span class="exc-v">${s.xNV?"Intact":s.abnNV||"?"}</span></div>`;
+    if(!s.xNV){ax+=`<div class="abn"><div class="abn-opts">`;["↓ Pulse","∅ Pulse","↓ Sensation","∅ Sensation","↓ Motor","∅ Motor","Pale/Cool","Edema ↑"].forEach(v=>{ax+=`<div class="ao${s.abnNV===v?" sel-r":""}" onclick="event.stopPropagation();setAbnNV('${v}')">${v}</div>`;});ax+=`</div></div>`;}
+
+    // Dressing
+    ax+=`<div class="exc${s.xDress?"":" off"}" onclick="togX('xDress')"><div class="exc-c">✓</div><span class="exc-n">Dressing</span><span class="exc-v">${s.xDress?"Dry & intact":"Issue"}</span></div>`;
+    if(!s.xDress){ax+=`<div class="abn"><input class="abn-inp" placeholder="Sanguineous drainage, reinforced..." onclick="event.stopPropagation()" oninput="setAbnDress(this.value)" value="${s.abnDress}"></div>`;}
+
+    // O₂
+    ax+=`<div class="exc${s.xO2?"":" off"}" onclick="togX('xO2')"><div class="exc-c">✓</div><span class="exc-n">O₂</span><span class="exc-v">${s.o2Method}</span></div>`;
+    if(!s.xO2){ax+=`<div class="abn"><div class="abn-opts">`;["NC 2L","NC 4L","NC 6L","FM 40%","NRB"].forEach(v=>{ax+=`<div class="ao${s.o2Method===v?" sel":""}" onclick="event.stopPropagation();setO2('${v}')">${v}</div>`;});ax+=`</div></div>`;}
+
+    // Nausea
+    ax+=`<div class="exc${s.xNaus?"":" off"}" onclick="togX('xNaus')"><div class="exc-c">✓</div><span class="exc-n">Nausea</span><span class="exc-v">${s.xNaus?"None":s.nausea||"?"}</span></div>`;
+    if(!s.xNaus){ax+=`<div class="abn"><div class="abn-opts">`;["Mild","Moderate","Severe","Vomiting"].forEach(v=>{ax+=`<div class="ao${s.nausea===v?(v==="Severe"||v==="Vomiting"?" sel-r":" sel"):""}" onclick="event.stopPropagation();setNaus('${v}')">${v}</div>`;});ax+=`</div></div>`;}
+
+    // Spinal (if applicable)
+    if(isSp){
+      ax+=`<div class="sh">Spinal</div><div class="cryo-row">`;
+      ["T10","T12","L2","L4","S1","Clear"].forEach(lv=>{ax+=`<div class="cryo-b${s.spinal===lv?" sel":""}" onclick="setSpinal('${lv}')">${lv}</div>`;});
+      ax+=`</div>`;
+    }
+
+    // Cryo (knee)
+    if(isKnee){
+      ax+=`<div class="sh">Cryo-cuff</div><div class="cryo-row">`;
+      ["Active","Repositioned","Off"].forEach(v=>{ax+=`<div class="cryo-b${s.cryo===v?" sel":""}" onclick="setCryo('${v}')">${v}</div>`;});
+      ax+=`</div>`;
+    }
+
+    // Temp
+    ax+=`<div style="display:flex;align-items:center;gap:6px;margin:4px 0"><span style="font-size:9px;color:#555;font-family:var(--m)">Temp °F</span><input class="vi-i" type="number" inputmode="decimal" value="${s.temp}" placeholder="—" style="width:70px;font-size:14px;padding:5px" oninput="setTemp(this.value)"></div>`;
+
+    // LOG / UPDATE
+    const canLog=s.v.sbp&&s.pain!==null;
+    const isEdit=s.editIdx!==null;
+    ax+=`<div class="logb${canLog?(isEdit?" blue":" ok"):""}" onclick="${canLog?"logAx()":""}">${isEdit?"Update Assessment":"Log Assessment"}${canLog?"":" · needs vitals + pain"}</div>`;
+
+    // HISTORY
+    if(s.axH.length){
+      ax+=`<div class="sh" style="margin-top:8px">History (${s.axH.length})</div>`;
+      s.axH.forEach((e,idx)=>{
+        const ac=e.ald>=9?"g":e.ald>=7?"y":"r";
+        const pc2=e.pain<=3?"g":e.pain<=6?"y":"r";
+        let ln=`<span class="t">${fm(e.t)}</span> ${e.sbp}/${e.dbp} HR${e.hr} RR${e.rr} O₂${e.spo2}`;
+        if(e.temp)ln+=` T${e.temp}`;
+        ln+=` · A<span class="${ac}">${e.ald}</span> P<span class="${pc2}">${e.pain}</span>`;
+        if(!e.nvOk)ln+=` · <span class="r">NV:${e.abnNV||"⚠"}</span>`;
+        if(!e.dressOk)ln+=` · <span class="y">Dress⚠</span>`;
+        if(e.o2!=="RA")ln+=` · ${e.o2}`;
+        if(!e.nausOk)ln+=` · <span class="y">N/V:${e.nausea}</span>`;
+        if(e.spinal)ln+=` · Sp:${e.spinal}`;
+        ax+=`<div class="axe" onclick="startEdit(${idx})"><div class="axe-body">${ln}</div><span class="axe-edit">✏</span></div>`;
+      });
+    }
+  }
+  document.getElementById("p-ax").innerHTML=ax;
+
+  // ═══ MEDS TAB ═══
+  let md="";
+  md+=`<div class="sh">IV Pain</div>`;
+  MEDS.filter(m=>m.cat==="iv").forEach(m=>md+=`<div class="med" onclick="logMed('${m.id}')"><span class="med-nm">${m.nm}</span><span class="med-ds">${m.ds}</span><span class="med-rt iv">IV</span></div>`);
+  md+=`<div class="sh">PO Pain · oral transition</div>`;
+  MEDS.filter(m=>m.cat==="po").forEach(m=>md+=`<div class="med" onclick="logMed('${m.id}')"><span class="med-nm">${m.nm}</span><span class="med-ds">${m.ds}</span><span class="med-rt po">PO</span></div>`);
+  md+=`<div class="sh">Nausea</div>`;
+  MEDS.filter(m=>m.cat==="nv").forEach(m=>md+=`<div class="med" onclick="logMed('${m.id}')"><span class="med-nm">${m.nm}</span><span class="med-ds">${m.ds}</span><span class="med-rt ${m.rt.toLowerCase()}">${m.rt}</span></div>`);
+
+  // I/O
+  md+=`<div class="sh">I/O</div><div class="io-row io3"><div class="io-box"><div class="io-l">IV In (mL)</div><input class="io-v blue" type="number" inputmode="numeric" value="${s.ivIn||""}" placeholder="0" onchange="setIO('ivIn',this.value)"></div><div class="io-box"><div class="io-l">Urine (mL)</div><input class="io-v gold" type="number" inputmode="numeric" value="${s.uo||""}" placeholder="0" onchange="setIO('uo',this.value)"></div><div class="io-box"><div class="io-l">Drain (mL)</div><input class="io-v red" type="number" inputmode="numeric" value="${s.drainOut||""}" placeholder="0" onchange="setIO('drainOut',this.value)"></div></div>`;
+
+  // Diet
+  md+=`<div class="sh">Diet</div><div class="diet-row">`;
+  ["NPO","Ice chips","Sips","Crackers","Tolerating"].forEach(v=>{md+=`<div class="diet-b${s.diet===v?" sel":""}" onclick="setDiet('${v}')">${v}</div>`;});
+  md+=`</div>`;
+
+  // Med log
+  if(s.medH.length){
+    md+=`<div class="sh">Med Log (${s.medH.length})</div>`;
+    s.medH.forEach(e=>md+=`<div class="med-log"><span class="mt">${fm(e.t)}</span> ${e.nm} ${e.ds} ${e.rt}</div>`);
+  }
+  document.getElementById("p-med").innerHTML=md;
+
+  // ═══ DC TAB ═══
+  let dc="";
+  const blockers=dcBlockers(s,c);
+
+  // Functional progress — timed milestones
+  dc+=`<div class="sh">Functional Progress</div>`;
+  [{f:"toChair",lb:"To Chair"},{f:"ambulated",lb:"Ambulated"},{f:"voided",lb:"Voided"}].forEach(m=>{
+    const done=!!s[m.f];
+    dc+=`<div class="tm${done?" done":""}" onclick="togTimed('${m.f}')"><div class="tm-c${done?" done":""}">✓</div><span class="tm-n${done?" done":""}">${m.lb}</span>`;
+    if(done)dc+=`<span class="tm-t">${fm(s[m.f])}</span>`;
+    dc+=`</div>`;
+  });
+
+  // Clinical readiness
+  dc+=`<div class="sh">Clinical Readiness</div>`;
+  // Aldrete (auto)
+  const aldOk=!!s.ms_aldrete;
+  dc+=`<div class="tm${aldOk?" done":""}"><div class="tm-c${aldOk?" done":""}">✓</div><div style="flex:1"><span class="tm-n${aldOk?" done":""}">Aldrete ≥ 9</span>${aldOk?`<div class="tm-sub">Auto from assessment</div>`:""}</div>${aldOk?`<span class="tm-t">${fm(s.ms_aldrete)}</span>`:""}</div>`;
+  // Pain on PO (manual)
+  dc+=`<div class="tm${s.painPO?" done":""}" onclick="togManual('painPO')"><div class="tm-c${s.painPO?" done":""}">✓</div><span class="tm-n${s.painPO?" done":""}">Pain controlled on PO</span></div>`;
+  // NV (auto)
+  const nvOk=!!s.ms_nv;
+  dc+=`<div class="tm${nvOk?" done":""}"><div class="tm-c${nvOk?" done":""}">✓</div><div style="flex:1"><span class="tm-n${nvOk?" done":""}">NV intact</span>${nvOk?`<div class="tm-sub">Auto from assessment</div>`:""}</div>${nvOk?`<span class="tm-t">${fm(s.ms_nv)}</span>`:""}</div>`;
+  // Dressing (auto)
+  const drOk=!!s.ms_dress;
+  dc+=`<div class="tm${drOk?" done":""}"><div class="tm-c${drOk?" done":""}">✓</div><div style="flex:1"><span class="tm-n${drOk?" done":""}">Dressing intact</span>${drOk?`<div class="tm-sub">Auto from assessment</div>`:""}</div>${drOk?`<span class="tm-t">${fm(s.ms_dress)}</span>`:""}</div>`;
+  // Tolerating PO (auto from diet)
+  const tolOk=s.diet==="Tolerating";
+  dc+=`<div class="tm${tolOk?" done":""}"><div class="tm-c${tolOk?" done":""}">✓</div><div style="flex:1"><span class="tm-n${tolOk?" done":""}">Tolerating PO</span><div class="tm-sub">Diet: ${s.diet}</div></div></div>`;
+
+  // Education
+  dc+=`<div class="sh">Patient & Family Education</div>`;
+  const ei=eduItems(c.jt);
+  ei.forEach(e=>{
+    const done=!!s.edu[e.id];
+    dc+=`<div class="edu${done?" done":""}" onclick="togEdu('${e.id}')"><div class="edu-c${done?" done":""}">✓</div><span class="edu-n${done?" done":""}">${e.lb}</span>`;
+    if(done)dc+=`<span class="edu-t">${fm(s.edu[e.id])}</span>`;
+    dc+=`</div>`;
+  });
+
+  // Logistics
+  dc+=`<div class="sh">Logistics</div>`;
+  dc+=`<div class="tm${s.rxConf?" done":""}" onclick="togManual('rxConf')"><div class="tm-c${s.rxConf?" done":""}">✓</div><span class="tm-n${s.rxConf?" done":""}">Prescriptions confirmed</span></div>`;
+  // Ride — with name
+  dc+=`<div class="tm${s.rideHere?" done":""}" onclick="togRide()"><div class="tm-c${s.rideHere?" done":""}">✓</div><div style="flex:1"><span class="tm-n${s.rideHere?" done":""}">Responsible adult present</span>${s.rideName?`<div class="tm-sub">${s.rideName}</div>`:""}</div></div>`;
+  if(!s.rideHere)dc+=`<input class="ride-inp" placeholder="Name of responsible adult" value="${s.rideName}" oninput="setRideName(this.value)" onclick="event.stopPropagation()">`;
+
+  // Blockers or discharge
+  if(s.discharged){
+    dc+=`<div class="dc-box"><div class="dc-t">✓ Discharged</div><div class="dc-s">${fm(s.discharged)} · PACU: ${el(s.arrived,s.discharged)}</div></div>`;
+  }else if(blockers.length===0){
+    dc+=`<div class="logb ok" style="margin-top:8px" onclick="discharge()">Discharge Patient</div>`;
+  }else{
+    dc+=`<div class="blocker" style="margin-top:8px">`;
+    dc+=`<div style="font-weight:700;margin-bottom:3px">Cannot discharge — ${blockers.length} blocker${blockers.length>1?"s":""}</div>`;
+    blockers.forEach(b=>dc+=`<div class="blocker-item">· ${b}</div>`);
+    dc+=`</div>`;
+  }
+  document.getElementById("p-dc").innerHTML=dc;
+
+  // ═══ INFO TAB ═══
+  let inf="";
+  inf+=`<div class="sh">PACU Notes</div><textarea class="nta" placeholder="Complications, events, concerns..." oninput="setNotes(this.value)">${s.notes}</textarea>`;
+  // Trends
+  if(s.axH.length>1){
+    inf+=`<div class="sh" style="margin-top:8px">Trends</div><div class="ho-card">`;
+    inf+=`<div style="font-size:8px;color:#444;font-family:var(--m);margin-bottom:2px">BP / HR</div><div class="trend">`;
+    s.axH.slice().reverse().forEach(e=>inf+=`<span class="tp"><span class="tt">${fm(e.t)}</span> <span class="v">${e.sbp}/${e.dbp}</span> <span class="v" style="color:var(--blS)">${e.hr}</span></span>`);
+    inf+=`</div><div style="font-size:8px;color:#444;font-family:var(--m);margin:3px 0 2px">ALDRETE / PAIN</div><div class="trend">`;
+    s.axH.slice().reverse().forEach(e=>{
+      const ac=e.ald>=9?"var(--gnS)":"var(--rdS)";
+      const pc2=e.pain<=3?"var(--gnS)":e.pain<=6?"var(--ywS)":"var(--rdS)";
+      inf+=`<span class="tp"><span class="tt">${fm(e.t)}</span> <span class="v" style="color:${ac}">${e.ald}</span>/<span class="v" style="color:${pc2}">${e.pain}</span></span>`;
+    });
+    inf+=`</div></div>`;
+  }
+  // OR Handoff — compact reference
+  inf+=`<div class="sh" style="margin-top:8px">OR Reference</div><div class="ho-card">`;
+  [{k:"Implants",v:c.implants},{k:"Pre-op BP",v:`${c.preV.sbp}/${c.preV.dbp}`},{k:"Anes",v:`${c.anes} — ${c.anesP}`}].forEach(r=>inf+=`<div class="ir"><span class="irk">${r.k}</span><span class="irv">${r.v}</span></div>`);
+  inf+=`</div>`;
+  document.getElementById("p-info").innerHTML=inf;
+}
+
+function tick(){
+  document.getElementById("clk").textContent=N().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",second:"2-digit"});
+  const s=S[cur],pe=document.getElementById("pacuEl");
+  if(s.arrived&&!s.discharged){pe.textContent="⏱ "+el(s.arrived,N());pe.style.color="var(--ywS)"}
+  // Live timer update
+  const nxtEl=document.querySelector('.nxt');
+  if(nxtEl&&s.lastAx&&s.editIdx===null){
+    const elapsed=minSince(s.lastAx);
+    const rem=s.axInt-elapsed;
+    const cls=rem>5?"due":rem>0?"soon":"over";
+    const txt=rem>0?`Next in ${rem}m`:`Overdue by ${Math.abs(rem)}m`;
+    nxtEl.className="nxt "+cls;
+    nxtEl.children[0].textContent=txt;
+  }
+}
+setInterval(tick,1000);tick();R();
+</script>
+</body>
+</html>
