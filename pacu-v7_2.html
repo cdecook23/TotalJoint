@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>TJR Hub · PACU</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080808;--tx:#e0e0e0;--dm:#5a5a5a;
+  --gn:#2a6b3f;--gnB:rgba(42,107,63,.10);--gnS:#3a8b5f;
+  --yw:#8a6d2b;--ywB:rgba(138,109,43,.08);--ywS:#b8952f;
+  --rd:#8b2d2d;--rdB:rgba(139,45,45,.10);--rdS:#cf6b6b;
+  --bl:#3b6b8f;--blB:rgba(59,107,143,.08);--blS:#5a9abf;
+  --kn:#3b82f6;--hp:#a855f7;
+  --m:'DM Mono',monospace;--s:'IBM Plex Sans',sans-serif;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+html{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+body{background:var(--bg);color:var(--tx);font-family:var(--s);height:100dvh;overflow:hidden;position:fixed;width:100%;display:flex;flex-direction:column}
+
+.top{padding:5px 16px;border-bottom:1px solid #141414;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10;gap:6px}
+.top-b{font-size:9px;font-weight:700;color:#2a2a2a;font-family:var(--m);letter-spacing:.1em;white-space:nowrap}
+.top-r{display:flex;align-items:baseline;gap:10px;flex-shrink:0}
+.top-el{font-size:11px;font-family:var(--m);font-weight:600}
+.top-clk{font-size:15px;font-weight:700;font-family:var(--m)}
+.status-pill{padding:3px 8px;border-radius:4px;font-size:8px;font-family:var(--m);font-weight:700;letter-spacing:.08em;border:1px solid transparent;white-space:nowrap;flex-shrink:0;cursor:default}
+
+.ctabs{display:flex;gap:3px;padding:4px 16px;border-bottom:1px solid #111;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.ctabs::-webkit-scrollbar{display:none}
+.ctab{padding:6px 10px;border-radius:6px;font-size:10px;font-family:var(--m);font-weight:600;cursor:pointer;border:1px solid #1a1a1a;background:#0d0d0d;color:#555;white-space:nowrap;min-height:34px;display:flex;align-items:center;gap:4px}
+.ctab.act{border-color:var(--gnS);background:var(--gnB);color:var(--gnS)}
+.ctab .jd{width:5px;height:5px;border-radius:2px;flex-shrink:0}
+
+.pbar{padding:4px 16px;background:#0a0a0a;border-bottom:1px solid #141414;flex-shrink:0}
+.pr1{display:flex;align-items:center;gap:6px;overflow-x:auto}
+.pn{font-size:13px;font-weight:700;white-space:nowrap}
+.ptag{font-size:8px;padding:2px 5px;border-radius:3px;font-family:var(--m);font-weight:700;white-space:nowrap}
+.pal{font-size:8px;padding:2px 5px;border-radius:3px;background:var(--rdB);color:var(--rdS);font-family:var(--m);font-weight:700;border:1px solid rgba(139,45,45,.2);white-space:nowrap}
+.pr2{display:flex;gap:6px;margin-top:3px;align-items:center}
+.ps{text-align:center;min-width:28px}.psv{font-size:11px;font-weight:700;font-family:var(--m);line-height:1.1}.psl{font-size:6px;color:var(--dm);font-family:var(--m);text-transform:uppercase}
+.mbar{flex:1;height:5px;background:#1a1a1a;border-radius:3px;overflow:hidden;margin:0 3px}
+.mfill{height:100%;border-radius:3px;transition:width .3s}
+.mlbl{font-size:9px;font-family:var(--m);font-weight:600;white-space:nowrap}
+
+.content{flex:1;overflow:hidden;position:relative}
+.pane{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 16px 90px;display:none}
+.pane.act{display:block}
+
+.bnav{display:flex;border-top:1px solid #1a1a1a;background:#0a0a0a;flex-shrink:0;padding-bottom:var(--safe-b);z-index:10;scrollbar-width:none}
+.bnav::-webkit-scrollbar{display:none}
+.bn{flex:1;padding:7px 0 5px;text-align:center;cursor:pointer;position:relative}
+.bn.act{background:rgba(255,255,255,.03)}
+.bn.act::after{content:"";position:absolute;top:0;left:20%;right:20%;height:2px;background:var(--gnS)}
+.bn-i{font-size:14px;line-height:1}.bn-l{font-size:6px;font-family:var(--m);color:#444;margin-top:1px;letter-spacing:.02em}
+.bn.act .bn-l{color:var(--gnS)}
+
+.sh{font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-family:var(--m);color:#3a3a3a;padding:5px 0 3px;display:flex;justify-content:space-between;align-items:center}
+
+/* Assessment timer */
+.nxt{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:6px;margin-bottom:6px;font-family:var(--m);font-size:11px;font-weight:600}
+.nxt.due{background:var(--gnB);border:1px solid rgba(42,107,63,.12);color:var(--gnS)}
+.nxt.soon{background:var(--ywB);border:1px solid rgba(138,109,43,.12);color:var(--ywS)}
+.nxt.over{background:var(--rdB);border:1px solid rgba(139,45,45,.12);color:var(--rdS)}
+.nxt-btns{display:flex;gap:3px}
+.nxt-b{padding:4px 7px;border-radius:4px;border:1px solid #333;background:#1a1a1a;color:#666;font-size:8px;font-family:var(--m);font-weight:700;cursor:pointer}
+.nxt-b:active{transform:scale(.9)}.nxt-b.act{border-color:var(--gnS);background:var(--gnB);color:var(--gnS)}
+
+/* Edit banner */
+.edit-banner{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:6px;margin-bottom:6px;background:var(--blB);border:1px solid rgba(59,107,143,.15);font-family:var(--m);font-size:11px;color:var(--blS)}
+.edit-time{display:flex;align-items:center;gap:6px}
+.edit-adj{width:32px;height:32px;border-radius:6px;border:1px solid rgba(59,107,143,.2);background:var(--blB);color:var(--blS);font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.edit-adj:active{transform:scale(.85);background:rgba(59,107,143,.2)}
+.edit-cancel{padding:4px 10px;border-radius:4px;border:1px solid rgba(59,107,143,.2);background:transparent;color:var(--blS);font-size:9px;font-family:var(--m);font-weight:700;cursor:pointer}
+
+/* Vitals */
+.vi-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:6px}
+.vi{text-align:center}
+.vi-l{font-size:7px;color:#555;font-family:var(--m);text-transform:uppercase;margin-bottom:1px}
+.vi-i{width:100%;padding:6px 2px;background:#111;border:1px solid #222;border-radius:5px;color:var(--tx);font-size:16px;font-weight:700;font-family:var(--m);text-align:center;outline:none}
+.vi-i:focus{border-color:#444}
+
+/* Pain */
+.pain-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;margin-bottom:6px}
+.pb{padding:10px 0;border-radius:5px;border:1px solid #222;background:#151515;color:#555;font-size:14px;font-family:var(--m);font-weight:700;text-align:center;cursor:pointer;min-height:42px;display:flex;align-items:center;justify-content:center}
+.pb:active{transform:scale(.9)}
+.pb.sel{color:#fff}.pb.g{border-color:var(--gnS);background:var(--gn)}.pb.y{border-color:var(--ywS);background:var(--yw)}.pb.r{border-color:var(--rdS);background:var(--rd)}
+
+/* Exception toggles */
+.exc{display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:6px;border:1px solid rgba(42,107,63,.12);background:var(--gnB);margin-bottom:3px;cursor:pointer;min-height:40px}
+.exc:active{transform:scale(.98)}
+.exc.off{border-color:#1e1e1e;background:rgba(255,255,255,.01)}
+.exc-c{width:16px;height:16px;border-radius:4px;border:2px solid var(--gnS);background:var(--gn);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
+.exc.off .exc-c{border-color:#333;background:transparent;color:transparent}
+.exc-n{font-size:11px;font-weight:600;flex:1}
+.exc-v{font-size:9px;font-family:var(--m);color:var(--gnS)}
+.exc.off .exc-n{color:#777}.exc.off .exc-v{color:#555}
+
+/* Abnormal panel */
+.abn{padding:5px 8px;border:1px solid #222;border-radius:5px;margin-bottom:3px;background:rgba(255,255,255,.012)}
+.abn-opts{display:flex;flex-wrap:wrap;gap:3px}
+.ao{padding:7px 10px;border-radius:5px;border:1px solid #222;background:#151515;color:#666;font-size:10px;font-family:var(--m);cursor:pointer;min-height:34px;display:flex;align-items:center}
+.ao:active{transform:scale(.92)}
+.ao.sel{border-color:var(--ywS);background:var(--ywB);color:var(--ywS)}
+.ao.sel-r{border-color:var(--rdS);background:var(--rdB);color:var(--rdS)}
+.abn-inp{width:100%;padding:8px;background:#111;border:1px solid #222;border-radius:5px;color:var(--tx);font-size:11px;font-family:var(--m);outline:none;margin-top:3px}
+
+/* Log button */
+.logb{width:100%;padding:12px;border-radius:8px;font-family:var(--m);font-size:13px;font-weight:700;border:1px solid #2a2a2a;background:#1a1a1a;color:#444;text-align:center;min-height:48px;cursor:default;margin-top:4px}
+.logb.ok{background:var(--gn);color:#fff;border-color:var(--gnS);cursor:pointer}
+.logb.ok:active{transform:scale(.97);background:var(--gnS)}
+.logb.blue{background:#1a3a5a;color:var(--blS);border-color:rgba(59,107,143,.3);cursor:pointer}
+.logb.blue:active{transform:scale(.97)}
+.logb.arrive{background:#1a3a5a;color:var(--blS);border-color:var(--blS);cursor:pointer;font-size:14px}
+.logb.arrive:active{transform:scale(.97)}
+
+/* Assessment history */
+.axe{display:flex;align-items:flex-start;gap:6px;padding:6px 8px;border-left:3px solid #222;margin-bottom:3px;cursor:pointer}
+.axe:active{background:rgba(255,255,255,.02)}
+.axe-body{flex:1;font-family:var(--m);font-size:9px;color:#666;line-height:1.5}
+.axe .t{color:#555;font-weight:600}.axe .g{color:var(--gnS);font-weight:700}.axe .y{color:var(--ywS);font-weight:700}.axe .r{color:var(--rdS);font-weight:700}
+.axe-edit{font-size:10px;color:#444;flex-shrink:0;padding:2px}
+
+/* I/O */
+.io-row{display:grid;gap:5px;margin-bottom:6px}
+.io3{grid-template-columns:1fr 1fr 1fr}
+.io-box{padding:8px 6px;background:rgba(255,255,255,.015);border:1px solid #1e1e1e;border-radius:6px;text-align:center}
+.io-l{font-size:7px;color:#555;font-family:var(--m);text-transform:uppercase;margin-bottom:2px}
+.io-v{width:100%;text-align:center;background:transparent;border:none;color:var(--tx);font-size:18px;font-weight:700;font-family:var(--m);outline:none}
+.io-v.blue{color:var(--blS)}.io-v.gold{color:var(--ywS)}.io-v.red{color:var(--rdS)}
+
+/* DC milestones */
+.tm{display:flex;align-items:center;gap:8px;padding:10px;border-radius:6px;border:1px solid #1e1e1e;background:rgba(255,255,255,.015);margin-bottom:4px;cursor:pointer;min-height:46px}
+.tm:active{transform:scale(.98)}
+.tm.done{border-color:rgba(42,107,63,.15);background:var(--gnB)}
+.tm-c{width:20px;height:20px;border-radius:5px;border:2px solid #3a3a3a;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:transparent;flex-shrink:0}
+.tm-c.done{border-color:var(--gnS);background:var(--gn);color:#fff}
+.tm-n{font-size:12px;font-weight:600;flex:1}.tm-n.done{color:#7a7a7a}
+.tm-t{font-size:10px;font-family:var(--m);color:var(--gnS);flex-shrink:0}
+.tm-sub{font-size:8px;color:#555;font-family:var(--m);margin-top:1px}
+
+/* Education */
+.edu{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:5px;border:1px solid #1a1a1a;background:rgba(255,255,255,.01);margin-bottom:3px;cursor:pointer;min-height:40px}
+.edu:active{transform:scale(.98)}
+.edu.done{border-color:rgba(42,107,63,.12);background:var(--gnB)}
+.edu-c{width:16px;height:16px;border-radius:4px;border:2px solid #333;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:transparent;flex-shrink:0}
+.edu-c.done{border-color:var(--gnS);background:var(--gn);color:#fff}
+.edu-n{font-size:11px;font-weight:600;flex:1}.edu-n.done{color:#7a7a7a}
+.edu-t{font-size:9px;font-family:var(--m);color:var(--gnS);flex-shrink:0}
+
+/* Blockers */
+.blocker{padding:8px 10px;border-radius:6px;background:var(--rdB);border:1px solid rgba(139,45,45,.12);margin-bottom:6px;font-family:var(--m);font-size:10px;color:var(--rdS);line-height:1.5}
+.blocker-item{padding:2px 0}
+
+/* DC ready */
+.dc-box{padding:14px;background:var(--gnB);border:2px solid var(--gnS);border-radius:10px;text-align:center;margin-top:8px}
+.dc-t{font-size:18px;font-weight:700;color:var(--gnS);margin-bottom:3px}
+.dc-s{font-size:10px;color:#888;font-family:var(--m)}
+
+/* OR reference */
+.ir{display:flex;justify-content:space-between;padding:2px 0;font-size:9px;font-family:var(--m)}
+.irk{color:#555}.irv{color:#888;text-align:right;max-width:60%}
+.ho-card{padding:8px;background:rgba(255,255,255,.015);border:1px solid #1e1e1e;border-radius:6px;margin-bottom:6px}
+
+/* Cryo/spinal */
+.cryo-row{display:flex;gap:3px;margin-bottom:4px}
+.cryo-b{flex:1;padding:7px 3px;border-radius:4px;border:1px solid #222;background:#151515;color:#555;font-size:9px;font-family:var(--m);text-align:center;cursor:pointer;min-height:32px;display:flex;align-items:center;justify-content:center}
+.cryo-b:active{transform:scale(.92)}.cryo-b.sel{border-color:var(--blS);background:var(--blB);color:var(--blS)}
+
+/* ═══ WORKLIST ═══ */
+.sel-all-btn{width:100%;padding:10px;border-radius:6px;background:rgba(59,107,143,.12);border:1px solid rgba(59,107,143,.2);color:var(--blS);font-size:11px;font-family:var(--m);font-weight:700;text-align:center;cursor:pointer;margin-bottom:8px;min-height:40px}
+.sel-all-btn:active{transform:scale(.97);background:rgba(59,107,143,.2)}
+.nurse-sel{width:100%;padding:8px 10px;background:#111;border:1px solid #222;border-radius:5px;color:var(--tx);font-size:12px;font-family:var(--m);outline:none;-webkit-appearance:none;appearance:none;margin-bottom:4px}
+.nurse-sel option{background:#111}
+.wl-row{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:rgba(255,255,255,.015);border:1px solid #1a1a1a;border-radius:6px;margin-bottom:3px;min-height:40px;gap:8px}
+.wl-lbl{font-size:11px;font-weight:600;flex:1;line-height:1.3}
+.tog-pair{display:flex;gap:2px;flex-shrink:0}
+.tb{padding:5px 9px;border-radius:4px;border:1px solid #222;background:#151515;color:#555;font-size:9px;font-family:var(--m);font-weight:700;cursor:pointer;min-height:30px;display:flex;align-items:center}
+.tb:active{transform:scale(.88)}
+.tb.y{border-color:var(--gnS);background:var(--gnB);color:var(--gnS)}
+.tb.n{border-color:var(--rdS);background:var(--rdB);color:var(--rdS)}
+.tb.mid{border-color:var(--ywS);background:var(--ywB);color:var(--ywS)}
+.wl-sel-lbl{font-size:8px;color:#555;font-family:var(--m);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;padding-left:2px}
+
+/* ═══ ORDERS ═══ */
+.order-hdr{padding:6px 10px;background:rgba(255,255,255,.02);border:1px solid #1e1e1e;border-radius:6px;margin-bottom:4px}
+.order-hdr-nm{font-size:10px;font-weight:700;font-family:var(--m);color:#888;letter-spacing:.04em;text-transform:uppercase}
+.order-std{padding:7px 10px;background:rgba(255,255,255,.01);border:1px solid #1a1a1a;border-radius:5px;margin-bottom:3px;font-size:9px;font-family:var(--m);color:#666;line-height:1.6}
+.order-std b{color:#888;font-weight:600}
+.order-med-row{display:flex;align-items:flex-start;gap:8px;padding:10px;background:rgba(255,255,255,.015);border:1px solid #1a1a1a;border-radius:6px;margin-bottom:4px}
+.order-med-info{flex:1;min-width:0}
+.order-med-nm{font-size:12px;font-weight:700;margin-bottom:1px}
+.order-med-detail{font-size:9px;font-family:var(--m);color:#666;line-height:1.5}
+.order-med-warn{font-size:9px;font-family:var(--m);color:var(--ywS);margin-top:2px}
+.order-adm-btn{padding:6px 9px;border-radius:5px;border:1px solid var(--gnS);background:var(--gnB);color:var(--gnS);font-size:9px;font-family:var(--m);font-weight:700;cursor:pointer;flex-shrink:0;min-height:34px;display:flex;align-items:center;white-space:nowrap;align-self:flex-start}
+.order-adm-btn:active{transform:scale(.9)}
+.order-adm-btn.dis{border-color:#2a2a2a;background:#1a1a1a;color:#444;cursor:default}
+.order-adm-log{font-size:9px;font-family:var(--m);color:#555;padding:2px 0 0 6px;border-left:2px solid #222;margin-top:3px;line-height:1.4}
+.order-adm-log .mt{color:var(--blS);font-weight:600}
+.order-dc-note{padding:8px 10px;background:rgba(255,255,255,.012);border:1px solid #1a1a1a;border-radius:5px;font-size:10px;font-family:var(--m);color:#777;line-height:1.6;margin-bottom:3px}
+.dc-med-row{padding:6px 10px;background:rgba(255,255,255,.01);border:1px solid #1a1a1a;border-radius:5px;margin-bottom:3px}
+.dc-med-nm{font-size:11px;font-weight:600}
+.dc-med-ds{font-size:9px;font-family:var(--m);color:#666;margin-top:1px}
+.med-rt{font-size:8px;padding:2px 5px;border-radius:3px;font-family:var(--m);font-weight:700;display:inline}
+.med-rt.iv{background:var(--blB);color:var(--blS);border:1px solid rgba(59,107,143,.2)}
+.med-rt.po{background:var(--gnB);color:var(--gnS);border:1px solid rgba(42,107,63,.2)}
+.med-rt.sl{background:var(--ywB);color:var(--ywS);border:1px solid rgba(138,109,43,.2)}
+.med-log-entry{font-size:9px;font-family:var(--m);color:#555;padding:3px 8px;border-left:2px solid #222;margin-bottom:2px;line-height:1.4}
+.med-log-entry .mt{color:var(--blS);font-weight:600}
+
+/* ═══ SUPPLY ═══ */
+.sup-hdr{display:grid;grid-template-columns:1fr 82px 82px;gap:3px;padding:0 10px 3px;font-size:7px;font-family:var(--m);color:#3a3a3a;text-transform:uppercase;letter-spacing:.06em;text-align:center}
+.sup-hdr span:first-child{text-align:left}
+.sup-row{display:grid;grid-template-columns:1fr 82px 82px;gap:3px;align-items:center;padding:5px 10px;background:rgba(255,255,255,.012);border:1px solid #1a1a1a;border-radius:5px;margin-bottom:2px;min-height:38px}
+.sup-nm{font-size:10px;font-weight:600;line-height:1.2}
+.sup-ctrl{display:flex;align-items:center;justify-content:center;gap:4px}
+.sup-adj{width:22px;height:22px;border-radius:4px;border:1px solid #2a2a2a;background:#1a1a1a;color:#888;font-size:14px;font-family:var(--m);font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;flex-shrink:0}
+.sup-adj:active{transform:scale(.82)}
+.sup-val{font-size:13px;font-weight:700;font-family:var(--m);min-width:18px;text-align:center}
+.sup-val.has{color:var(--blS)}
+
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#1a1a1a;border-radius:2px}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <span class="top-b">TJR HUB · PACU</span>
+  <span class="status-pill" id="statusPill"></span>
+  <div class="top-r"><span class="top-el" id="pacuEl"></span><span class="top-clk" id="clk"></span></div>
+</div>
+<div class="ctabs" id="ctabs"></div>
+<div class="pbar" id="pbar"></div>
+<div class="content">
+  <div class="pane act" id="p-wl"></div>
+  <div class="pane" id="p-ax"></div>
+  <div class="pane" id="p-orders"></div>
+  <div class="pane" id="p-dc"></div>
+  <div class="pane" id="p-supply"></div>
+</div>
+<div class="bnav">
+  <div class="bn act" data-t="wl"     onclick="sw('wl')"    ><div class="bn-i">📋</div><div class="bn-l">WORK</div></div>
+  <div class="bn"     data-t="ax"     onclick="sw('ax')"    ><div class="bn-i">📊</div><div class="bn-l">ASSESS</div></div>
+  <div class="bn"     data-t="orders" onclick="sw('orders')"><div class="bn-i">📝</div><div class="bn-l">ORDERS</div></div>
+  <div class="bn"     data-t="dc"     onclick="sw('dc')"    ><div class="bn-i">🏠</div><div class="bn-l">DC</div></div>
+  <div class="bn"     data-t="supply" onclick="sw('supply')"><div class="bn-i">📦</div><div class="bn-l">SUPPLY</div></div>
+</div>
+
+<script>
+const C=[
+  {id:1,fn:"Margaret",ln:"Thompson",age:68,sex:"F",mrn:"TJR-20241",dob:"03/15/1957",jt:"Knee",lat:"Right",proc:"Right TKA",sg:"Dr. Henderson",ast:"Dr. Kim (PA)",wt:82,al:["Penicillin","Sulfa"],anes:"Spinal",anesP:"Dr. Walsh",ebl:180,tqTime:"62m",implants:"Fem:5 · Tib:4 · Poly:10mm · Pat:32",counts:"Correct",caseTime:"1h22m",dress:"ACE+Cryo",orOut:"09:12",orNotes:"",preV:{sbp:120,dbp:80}},
+  {id:2,fn:"James",ln:"Rodriguez",age:72,sex:"M",mrn:"TJR-20242",dob:"11/08/1953",jt:"Hip",lat:"Left",proc:"Left THA",sg:"Dr. Patel",ast:"Dr. Brooks (PA)",wt:95,al:[],anes:"Spinal",anesP:"Dr. Chen",ebl:250,tqTime:"",implants:"Shell:54 · Liner:36 · Stem:5 · Head:32+3",counts:"Correct",caseTime:"1h45m",dress:"ABD+Tegaderm",orOut:"11:05",orNotes:"",preV:{sbp:138,dbp:82}},
+  {id:3,fn:"Dorothy",ln:"Chen",age:65,sex:"F",mrn:"TJR-20243",dob:"07/22/1960",jt:"Knee",lat:"Left",proc:"Left TKA",sg:"Dr. Henderson",ast:"Dr. Kim (PA)",wt:88,al:["Latex ⚠"],anes:"General",anesP:"Dr. Walsh",ebl:220,tqTime:"58m",implants:"Fem:4 · Tib:3 · Poly:9mm · Pat:28",counts:"Correct",caseTime:"1h18m",dress:"ACE+Cryo",orOut:"12:38",orNotes:"LATEX-FREE",preV:{sbp:142,dbp:88}},
+  {id:4,fn:"William",ln:"Foster",age:58,sex:"M",mrn:"TJR-20244",dob:"09/03/1967",jt:"Hip",lat:"Right",proc:"Right THA",sg:"Dr. Patel",ast:"Dr. Brooks (PA)",wt:78,al:["Codeine"],anes:"Spinal",anesP:"Dr. Chen",ebl:190,tqTime:"",implants:"Shell:52 · Liner:32 · Stem:4 · Head:28",counts:"Correct",caseTime:"1h30m",dress:"ABD+Tegaderm",orOut:"14:50",orNotes:"",preV:{sbp:118,dbp:76}}
+];
+
+const PACU_NURSES=["","Sarah Mitchell RN","Jennifer Torres RN","Michael Chen RN","Lisa Anderson RN","Rachel Park RN"];
+const OR_NURSES=["","Amy Davis RN","James Wilson RN","Patricia Brown RN","Kevin Martinez RN","Diana Lee RN"];
+
+// Anesthesia standard orders (reference)
+const ANES_STD=[
+  {t:"O₂ Therapy",d:"40% faceshield or 3L NC · regulated to maintain SpO₂ >92%"},
+  {t:"Vital Signs",d:"q5m × 3, then q20m throughout PACU phase, then q30m thereafter"},
+  {t:"Monitoring",d:"Pulse oximetry + EKG continuous throughout PACU phase"},
+  {t:"Temperature",d:"Record on arrival to PACU and prior to discharge"},
+  {t:"Blood Glucose",d:"× 1 for all insulin-dependent DM · report <80 or >180 to anesthesia"},
+];
+
+// Surgeon post-op standard orders (reference)
+const SURG_STD=[
+  {t:"Vital Signs",d:"q5m × 3, q15m × 2, q30m × 2, q1h × 2, then q4h until discharge if stable"},
+  {t:"Dressing",d:"AquaCel in place at discharge · DO NOT CHANGE unless >75% saturated"},
+  {t:"IV Fluids",d:"Bolus NS 500cc over 30 min, then LR at 150cc/hr; after 4h adjust to 75cc/hr"},
+  {t:"Bladder",d:"No Foley · Bladder scan if unable to void in 2h — notify physician"},
+  {t:"Ice Therapy",d:"PRN"},
+  {t:"Physical Therapy",d:"Total Knee/Hip PT evaluation & treatment · WBAT · Exercises per PT"},
+  {t:"Nutrition",d:"Advance as tolerated · Blood glucose monitoring per protocol"},
+  {t:"Pain",d:"Patient to receive NO other acetaminophen-containing products"},
+];
+
+// Anesthesia PRN meds
+const ANES_MEDS=[
+  {id:"bethanecol",nm:"Bethanecol",ds:"25mg",rt:"PO",detail:"1 tab PO · prn urinary retention"},
+  {id:"zofran_odt",nm:"Zofran ODT",ds:"4mg",rt:"SL",detail:"1 tab SL · prn nausea/vomiting"},
+  {id:"reglan",nm:"Reglan (Metoclopramide)",ds:"10mg",rt:"IV",detail:"1 dose IV · prn nausea/vomiting"},
+  {id:"phenyl",nm:"Phenylephrine",ds:"100mcg",rt:"IV",detail:"10mg/mL · for SBP <80",warn:"SBP <80 indicated"},
+  {id:"labetalol",nm:"Labetalol",ds:"10mg",rt:"IV",detail:"5mg/mL · prn hypertension"},
+  {id:"hydralazine",nm:"Hydralazine",ds:"5mg",rt:"IV",detail:"20mg/mL · prn"},
+  {id:"ephedrine",nm:"Ephedrine Sulfate",ds:"25mg",rt:"IV",detail:"50mg/mL · for SBP <80",warn:"SBP <80 indicated"},
+  {id:"dilaudid_a",nm:"Dilaudid",ds:"0.5mg",rt:"IV",detail:"1mg/mL · prn intolerable pain · may repeat up to 2mg total",warn:"Max 2mg total · no two doses <30 min apart",special:"dilaudid"},
+  {id:"apap_a",nm:"Acetaminophen",ds:"500mg",rt:"PO",detail:"tablet · prn pain"},
+  {id:"ondansetron_a",nm:"Ondansetron",ds:"4mg",rt:"IV",detail:"prn"},
+  {id:"silodosin",nm:"Silodosin",ds:"8mg",rt:"PO",detail:"1 cap PO · prn urinary retention"},
+  {id:"droperidol",nm:"Droperidol",ds:"0.625mg",rt:"IV",detail:"prn nausea/vomiting"},
+];
+
+// Surgeon PRN meds
+const SURG_MEDS=[
+  {id:"apap_s",nm:"Acetaminophen",ds:"1000mg",rt:"PO",detail:"pain"},
+  {id:"oxy_s",nm:"Oxycodone",ds:"5–10mg",rt:"PO",detail:"Q4H prn pain · Tramadol 50–150mg if oxycodone allergy"},
+  {id:"robaxin",nm:"Robaxin (Methocarbamol)",ds:"750mg",rt:"PO",detail:"mild pain"},
+  {id:"dilaudid_s",nm:"Dilaudid",ds:"0.2mg",rt:"IV",detail:"severe pain"},
+  {id:"toradol",nm:"Toradol (Ketorolac)",ds:"30mg",rt:"IV",detail:"if Cr <1.2 · use 15mg if Cr >1.2",warn:"Check creatinine"},
+  {id:"zofran_s",nm:"Zofran",ds:"4mg",rt:"IV",detail:"nausea"},
+  {id:"rapaflo",nm:"Rapaflo (Silodosin)",ds:"8mg",rt:"PO",detail:"PO qd · bladder retention (4mg if CrCl 30–50)"},
+  {id:"urecholine",nm:"Urecholine (Bethanecol)",ds:"10mg",rt:"PO",detail:"q1h until response · urinary retention"},
+];
+
+// Discharge medications (reference only)
+const DC_MEDS=[
+  {nm:"Tylenol (Acetaminophen)",ds:"1000mg PO Q8H",dt:"prn mild-moderate pain"},
+  {nm:"Ibuprofen",ds:"800mg PO Q8H",dt:"prn mild-moderate pain"},
+  {nm:"Lyrica / Gabapentin",ds:"75mg @ bedtime / 300mg PO",dt:""},
+  {nm:"Oxycodone",ds:"5–10mg",dt:"prn pain"},
+  {nm:"Protonix (Pantoprazole)",ds:"40mg PO daily",dt:""},
+  {nm:"Aspirin",ds:"81mg PO BID × 6 weeks",dt:""},
+  {nm:"Decadron (Dexamethasone)",ds:"6mg PO",dt:"Start night of surgery, then q12h"},
+  {nm:"Cefdinir",ds:"300mg PO BID × 7 days",dt:"Start night of surgery"},
+];
+
+const ALL_MEDS=[...ANES_MEDS,...SURG_MEDS];
+
+function defaultSupplies(){
+  return["Thigh High Stockings","Dura Kold","Conflex Non-Sterile","Sterile Gauze Pads","Ultrasorbs","Sterile Elastic Bandage","Sterile ABD","Belts, Adjustable","Male Urinal","Incontinence Briefs","Knee Immobilizer","Fracture Bedpan"]
+    .map(nm=>({nm,pulled:0,used:0}));
+}
+
+function eduItems(jt){
+  const items=[
+    {id:"wound",lb:"Wound care & dressing"},
+    {id:"meds",lb:"Discharge medications"},
+    {id:"activity",lb:"Activity & weight bearing"},
+    {id:"signs",lb:"Warning signs (DVT, infection, PE)"},
+  ];
+  if(jt==="Knee")items.push({id:"ice",lb:"Ice, elevation & cryo protocol"});
+  else items.push({id:"hip",lb:"Hip precautions & positioning"});
+  items.push({id:"pt",lb:"PT home exercises"});
+  items.push({id:"followup",lb:"Follow-up appointment"});
+  items.push({id:"dvt",lb:"DVT prophylaxis (meds & SCDs)"});
+  return items;
+}
+
+let cur=0,tab="wl";
+const S={};
+C.forEach((_,i)=>{
+  S[i]={
+    arrived:null,discharged:null,
+    v:{sbp:"",dbp:"",hr:"",rr:"",spo2:""},
+    pain:null,
+    xAld:true,xNV:true,xDress:true,xO2:true,xNaus:true,
+    abnAld:null,abnNV:null,abnDress:"",o2Method:"RA",nausea:null,
+    spinal:null,temp:"",cryo:"Active",
+    axH:[],orderAdminH:[],
+    editIdx:null,editTime:null,
+    ivIn:0,uo:0,drainOut:0,
+    toChair:null,ambulated:null,voided:null,ptCleared:null,
+    painPO:false,rxConf:false,rideHere:false,
+    edu:{},
+    axInt:15,lastAx:null,
+    ms_aldrete:null,ms_nv:null,ms_dress:null,
+    anesAck:null,surgAck:null,
+    wl:{
+      admNurse:"",orNurse:"",
+      ptConfirmed:true,bedSafe:true,
+      airPatent:true,airNatural:true,airNasal:false,airOral:false,airETT:false,airLMA:false,
+      anesSpinal:true,mac:true,nerveBlock:true,
+      icePack:true,
+      dvt:"N/A",
+      ssDress:true,ssSoft:true,ssDryIntact:true,
+      dcTeaching:true,dcSwallow:true,dcNVMin:true,dcPainTol:true,dcSkinWNL:true,dcMotor:true,dcInstructions:true,
+      uriVoided:true,uriCath:false,bladderScan:false,uriPrecautions:true,
+      supplies:defaultSupplies()
+    }
+  };
+});
+
+const N=()=>new Date();
+const fm=d=>d?d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}):"—";
+function el(a,b){if(!a||!b)return"";const t=Math.floor((b-a)/1000),m=Math.floor(t/60),h=Math.floor(m/60);return h?`${h}h${m%60}m`:`${m}m`}
+function minSince(d){return d?Math.floor((N()-d)/60000):999}
+
+function getStatus(s){
+  if(s.discharged)return{lb:"D/C",cl:"var(--gnS)",bg:"var(--gnB)",bd:"rgba(42,107,63,.3)"};
+  if(s.ptCleared)return{lb:"CLEARED BY PT",cl:"var(--gnS)",bg:"rgba(42,107,63,.06)",bd:"rgba(42,107,63,.2)"};
+  if(s.ambulated)return{lb:"WALK",cl:"var(--ywS)",bg:"var(--ywB)",bd:"rgba(138,109,43,.2)"};
+  if(s.toChair)return{lb:"IN CHAIR",cl:"var(--blS)",bg:"var(--blB)",bd:"rgba(59,107,143,.25)"};
+  if(s.arrived)return{lb:"ADMIT TO PACU",cl:"var(--blS)",bg:"var(--blB)",bd:"rgba(59,107,143,.25)"};
+  return{lb:"ADMIT TO PACU",cl:"#444",bg:"#161616",bd:"#222"};
+}
+
+function canAdmOrder(id,s){
+  const m=ALL_MEDS.find(x=>x.id===id);
+  if(!m)return{ok:false,reason:"?"};
+  const hist=s.orderAdminH.filter(h=>h.id===id);
+  if(m.maxDoses&&hist.length>=m.maxDoses)return{ok:false,reason:"Given"};
+  if(m.special==="dilaudid"){
+    const totalMg=hist.length*0.5;
+    if(totalMg>=2)return{ok:false,reason:"Max 2mg"};
+    if(hist.length>0){const minAgo=minSince(hist[0].t);if(minAgo<30)return{ok:false,reason:`${30-minAgo}m`};}
+  }
+  return{ok:true};
+}
+
+function selCase(i){cur=i;cancelEdit();R()}
+function sw(t){tab=t;document.querySelectorAll('.pane').forEach(p=>p.classList.remove('act'));document.getElementById('p-'+t).classList.add('act');document.querySelectorAll('.bn').forEach(b=>b.classList.toggle('act',b.dataset.t===t));R()}
+
+function arrive(){S[cur].arrived=N();R()}
+function setV(f,v){S[cur].v[f]=v}
+function setPain(v){S[cur].pain=v;R()}
+function setTemp(v){S[cur].temp=v}
+function setInt(v){S[cur].axInt=v;R()}
+function setIO(f,v){S[cur][f]=parseInt(v)||0}
+function setWL(field,val){S[cur].wl[field]=val;R()}
+function adjSup(idx,field,delta){const sup=S[cur].wl.supplies[idx];sup[field]=Math.max(0,(sup[field]||0)+delta);R()}
+
+function selectAllDC(){
+  const w=S[cur].wl;
+  w.dcTeaching=true;w.dcSwallow=true;w.dcNVMin=true;w.dcPainTol=true;w.dcSkinWNL=true;w.dcMotor=true;w.dcInstructions=true;
+  R();
+}
+function selectAll(){
+  const w=S[cur].wl;
+  w.ptConfirmed=true;w.bedSafe=true;
+  w.airPatent=true;w.airNatural=true;w.airNasal=false;w.airOral=false;w.airETT=false;w.airLMA=false;
+  w.anesSpinal=true;w.mac=true;w.nerveBlock=true;w.icePack=true;w.dvt="N/A";
+  w.ssDress=true;w.ssSoft=true;w.ssDryIntact=true;
+  w.dcTeaching=true;w.dcSwallow=true;w.dcNVMin=true;w.dcPainTol=true;w.dcSkinWNL=true;w.dcMotor=true;w.dcInstructions=true;
+  w.uriVoided=true;w.uriCath=false;w.bladderScan=false;w.uriPrecautions=true;
+  R();
+}
+
+function togX(x){
+  const s=S[cur];s[x]=!s[x];
+  if(s[x]){if(x==="xAld")s.abnAld=null;if(x==="xNV")s.abnNV=null;if(x==="xDress")s.abnDress="";if(x==="xO2")s.o2Method="RA";if(x==="xNaus")s.nausea=null;}
+  R();
+}
+function setAbnAld(v){S[cur].abnAld=v;R()}
+function setAbnNV(v){S[cur].abnNV=v;R()}
+function setAbnDress(v){S[cur].abnDress=v}
+function setO2(v){S[cur].o2Method=v;S[cur].xO2=(v==="RA");R()}
+function setNaus(v){S[cur].nausea=v;R()}
+function setSpinal(v){S[cur].spinal=v;R()}
+function setCryo(v){S[cur].cryo=v;R()}
+
+function startEdit(idx){
+  const s=S[cur],e=s.axH[idx];
+  s.editIdx=idx;s.editTime=new Date(e.t);
+  s.v={sbp:String(e.sbp),dbp:String(e.dbp),hr:String(e.hr),rr:String(e.rr),spo2:String(e.spo2)};
+  s.pain=e.pain;s.temp=e.temp||"";
+  s.xAld=e.ald===10;s.abnAld=e.ald<10?e.ald:null;
+  s.xNV=e.nvOk;s.abnNV=e.abnNV;
+  s.xDress=e.dressOk;s.abnDress=e.abnDress||"";
+  s.xO2=e.o2==="RA";s.o2Method=e.o2;
+  s.xNaus=e.nausOk;s.nausea=e.nausea;
+  s.spinal=e.spinal;
+  R();
+}
+function cancelEdit(){
+  const s=S[cur];
+  s.editIdx=null;s.editTime=null;
+  s.v={sbp:"",dbp:"",hr:"",rr:"",spo2:""};s.pain=null;s.temp="";
+  s.xAld=true;s.xNV=true;s.xDress=true;s.xO2=true;s.xNaus=true;
+  s.abnAld=null;s.abnNV=null;s.abnDress="";s.o2Method="RA";s.nausea=null;s.spinal=null;
+  R();
+}
+function adjTime(min){const s=S[cur];if(s.editTime){s.editTime=new Date(s.editTime.getTime()+min*60000);R()}}
+
+function logAx(){
+  const s=S[cur],c=C[cur];
+  if(!parseInt(s.v.sbp)||s.pain===null)return;
+  let ald=10;
+  if(!s.xAld&&s.abnAld!==null)ald=s.abnAld;
+  const entry={t:s.editIdx!==null?s.editTime:N(),sbp:parseInt(s.v.sbp),dbp:parseInt(s.v.dbp)||0,hr:parseInt(s.v.hr)||0,rr:parseInt(s.v.rr)||0,spo2:parseInt(s.v.spo2)||0,temp:s.temp,ald,pain:s.pain,nvOk:s.xNV,abnNV:s.abnNV,dressOk:s.xDress,abnDress:s.abnDress,o2:s.o2Method,nausOk:s.xNaus,nausea:s.nausea,spinal:s.spinal,cryo:c.jt==="Knee"?s.cryo:null};
+  if(s.editIdx!==null){s.axH[s.editIdx]=entry;s.editIdx=null;s.editTime=null;}
+  else{s.axH.unshift(entry);s.lastAx=N();}
+  const latest=s.axH.reduce((a,b)=>a.t>b.t?a:b);
+  if(latest.ald>=9)s.ms_aldrete=s.ms_aldrete||N();else delete s.ms_aldrete;
+  if(latest.nvOk)s.ms_nv=s.ms_nv||N();
+  if(latest.dressOk)s.ms_dress=s.ms_dress||N();
+  s.v={sbp:"",dbp:"",hr:"",rr:"",spo2:""};s.pain=null;s.temp="";
+  s.xAld=true;s.xNV=true;s.xDress=true;s.xO2=true;s.xNaus=true;
+  s.abnAld=null;s.abnNV=null;s.abnDress="";s.o2Method="RA";s.nausea=null;s.spinal=null;
+  R();
+}
+
+function ackOrders(type){S[cur][type]=N();R()}
+function admOrder(id){
+  const m=ALL_MEDS.find(x=>x.id===id);
+  if(!m)return;
+  const chk=canAdmOrder(id,S[cur]);
+  if(!chk.ok)return;
+  S[cur].orderAdminH.unshift({t:N(),id,nm:m.nm,ds:m.ds,rt:m.rt});
+  R();
+}
+function togTimed(f){const s=S[cur];s[f]=s[f]?null:N();R()}
+function togManual(f){const s=S[cur];s[f]=!s[f];R()}
+function togEdu(id){const s=S[cur];s.edu[id]=s.edu[id]?null:N();R()}
+function togRide(){const s=S[cur];s.rideHere=!s.rideHere;R()}
+function discharge(){S[cur].discharged=N();R()}
+
+const MS_TOTAL=10;
+function msCnt(s,c){
+  let n=0;
+  if(s.toChair)n++;if(s.ambulated)n++;if(s.voided)n++;
+  if(s.ms_aldrete)n++;if(s.painPO)n++;if(s.ms_nv)n++;if(s.ms_dress)n++;
+  const ei=eduItems(c.jt);
+  if(ei.every(e=>s.edu[e.id]))n++;
+  if(s.rxConf)n++;if(s.rideHere)n++;
+  return n;
+}
+
+function dcBlockers(s,c){
+  const b=[];
+  if(s.axH.length<3)b.push(`Need ${3-s.axH.length} more assessment(s) (min 3)`);
+  if(s.axH.length>0){const latest=s.axH.reduce((a,x)=>a.t>x.t?a:x);const m=minSince(latest.t);if(m>30)b.push(`Last assessment ${m}m ago (max 30m)`);}
+  else b.push("No assessments logged");
+  if(!s.toChair)b.push("Not yet to chair");
+  if(!s.ambulated)b.push("Not yet ambulated");
+  if(!s.voided)b.push("Has not voided");
+  if(!s.ms_aldrete)b.push("Aldrete < 9");
+  if(!s.painPO)b.push("Pain not controlled on PO");
+  if(!s.ms_nv)b.push("Neurovascular not verified intact");
+  if(!s.ms_dress)b.push("Dressing not verified intact");
+  const ei=eduItems(c.jt);
+  if(!ei.every(e=>s.edu[e.id]))b.push("Education incomplete");
+  if(!s.rxConf)b.push("Prescriptions not confirmed");
+  if(!s.rideHere)b.push("Responsible adult not confirmed");
+  return b;
+}
+
+// ═══ RENDER ═══
+function R(){
+  const c=C[cur],s=S[cur];
+  const jc=c.jt==="Hip"?{a:"var(--hp)",bg:"rgba(168,85,247,.08)",bd:"rgba(168,85,247,.2)"}:{a:"var(--kn)",bg:"rgba(59,130,246,.08)",bd:"rgba(59,130,246,.2)"};
+  const isSp=c.anes.includes("Spinal");
+  const isKnee=c.jt==="Knee";
+
+  // Status pill
+  const st=getStatus(s);
+  const pill=document.getElementById('statusPill');
+  pill.textContent=st.lb;
+  pill.style.cssText=`color:${st.cl};background:${st.bg};border-color:${st.bd}`;
+
+  // Patient tabs
+  document.getElementById("ctabs").innerHTML=C.map((cs,i)=>{
+    const dc=S[i].discharged?"✓ ":"";
+    return`<div class="ctab${i===cur?" act":""}" onclick="selCase(${i})"><span class="jd" style="background:${cs.jt==="Hip"?"var(--hp)":"var(--kn)"}"></span>${dc}${cs.orOut} ${cs.ln}</div>`;
+  }).join("");
+
+  // Patient bar
+  const mc=msCnt(s,c),pct=Math.round(mc/MS_TOTAL*100);
+  const lAld=s.axH.length?s.axH[0].ald:null;
+  const lPain=s.axH.length?s.axH[0].pain:null;
+  const pc=pct>=90?"var(--gnS)":pct>=50?"var(--ywS)":"var(--blS)";
+  let pb=`<div class="pr1"><span class="pn">${c.ln}, ${c.fn}</span><span class="ptag" style="background:${jc.bg};color:${jc.a};border:1px solid ${jc.bd}">${c.proc}</span>`;
+  c.al.forEach(a=>pb+=`<span class="pal">⚠ ${a}</span>`);
+  pb+=`</div><div class="pr2">`;
+  pb+=`<div class="ps"><div class="psv">${s.arrived?fm(s.arrived):"—"}</div><div class="psl">IN</div></div>`;
+  pb+=`<div class="ps"><div class="psv"${lAld!==null?` style="color:${lAld>=9?"var(--gnS)":"var(--rdS)"}"`:``}>${lAld!==null?lAld:"—"}</div><div class="psl">ALD</div></div>`;
+  pb+=`<div class="ps"><div class="psv"${lPain!==null?` style="color:${lPain<=3?"var(--gnS)":lPain<=6?"var(--ywS)":"var(--rdS)"}"`:``}>${lPain!==null?lPain:"—"}</div><div class="psl">PAIN</div></div>`;
+  pb+=`<div class="mbar"><div class="mfill" style="width:${pct}%;background:${pc}"></div></div><span class="mlbl" style="color:${pc}">${mc}/${MS_TOTAL}</span>`;
+  pb+=`</div>`;
+  document.getElementById("pbar").innerHTML=pb;
+
+  const pe=document.getElementById("pacuEl");
+  if(s.arrived&&!s.discharged){pe.textContent="⏱ "+el(s.arrived,N());pe.style.color="var(--ywS)"}
+  else if(s.discharged){pe.textContent="✓ "+el(s.arrived,s.discharged);pe.style.color="var(--gnS)"}
+  else pe.textContent="";
+
+  // ═══ WORKLIST TAB ═══
+  const w=s.wl;
+  function togRow(label,field){
+    const v=w[field];
+    return`<div class="wl-row"><span class="wl-lbl">${label}</span><div class="tog-pair"><div class="tb${v?' y':''}" onclick="setWL('${field}',true)">YES</div><div class="tb${!v?' n':''}" onclick="setWL('${field}',false)">NO</div></div></div>`;
+  }
+  let wl='';
+  // HANDOFF
+  wl+=`<div class="sh">Handoff</div>`;
+  wl+=`<div class="wl-sel-lbl">Admitting PACU Nurse</div><select class="nurse-sel" onchange="setWL('admNurse',this.value)">`;
+  PACU_NURSES.forEach(n=>wl+=`<option${w.admNurse===n?' selected':''}>${n}</option>`);
+  wl+=`</select>`;
+  wl+=`<div class="wl-sel-lbl">OR Nurse</div><select class="nurse-sel" onchange="setWL('orNurse',this.value)">`;
+  OR_NURSES.forEach(n=>wl+=`<option${w.orNurse===n?' selected':''}>${n}</option>`);
+  wl+=`</select>`;
+  wl+=togRow('Patient & Procedure Confirmed','ptConfirmed');
+  wl+=`<div class="wl-row"><span class="wl-lbl">Siderails Up & Bed Locked</span><div class="tog-pair"><div class="tb${w.bedSafe?' y':''}" onclick="setWL('bedSafe',true)">YES</div><div class="tb${!w.bedSafe?' n':''}" onclick="setWL('bedSafe',false)">NO</div></div></div>`;
+
+  // AIRWAY
+  wl+=`<div class="sh">Airway</div>`;
+  wl+=togRow('Patent','airPatent');
+  wl+=togRow('Natural','airNatural');
+  wl+=togRow('Nasal','airNasal');
+  wl+=togRow('Oral','airOral');
+  wl+=togRow('ETT','airETT');
+  wl+=togRow('LMA','airLMA');
+
+  // ANESTHESIA
+  wl+=`<div class="sh">Anesthesia</div>`;
+  wl+=`<div class="wl-row"><span class="wl-lbl">Type</span><div class="tog-pair"><div class="tb${w.anesSpinal?' y':''}" onclick="setWL('anesSpinal',true)">SPINAL</div><div class="tb${!w.anesSpinal?' n':''}" onclick="setWL('anesSpinal',false)">GENERAL</div></div></div>`;
+  wl+=togRow('MAC','mac');
+  wl+=togRow('Nerve Block','nerveBlock');
+
+  // ICE PACK
+  wl+=`<div class="sh">Ice Pack</div>`;
+  wl+=togRow('Ice Pack Applied','icePack');
+
+  // DVT PREVENTION
+  wl+=`<div class="sh">DVT Prevention</div>`;
+  wl+=`<div class="wl-row"><span class="wl-lbl">DVT Prophylaxis</span><div class="tog-pair"><div class="tb${w.dvt==='N/A'?' mid':''}" onclick="setWL('dvt','N/A')">N/A</div><div class="tb${w.dvt==='No'?' n':''}" onclick="setWL('dvt','No')">NO</div><div class="tb${w.dvt==='Yes'?' y':''}" onclick="setWL('dvt','Yes')">YES</div></div></div>`;
+
+  // SURGICAL SITE
+  wl+=`<div class="sh">Surgical Site</div>`;
+  wl+=togRow('Dressing Present','ssDress');
+  wl+=togRow('Soft','ssSoft');
+  wl+=togRow('Dry & Intact','ssDryIntact');
+
+  // URINATION
+  wl+=`<div class="sh">Urination</div>`;
+  wl+=togRow('Voided','uriVoided');
+  wl+=togRow('I&O Catheter','uriCath');
+  wl+=togRow('Bladder Scan','bladderScan');
+  wl+=togRow('Urination Precautions Given','uriPrecautions');
+
+  document.getElementById('p-wl').innerHTML=wl;
+
+  // ═══ ASSESS TAB ═══
+  let ax="";
+  if(!s.arrived){
+    ax+=`<div class="logb arrive" onclick="arrive()">Patient Arrived in PACU</div>`;
+    ax+=`<div class="sh" style="margin-top:8px">OR Handoff</div><div class="ho-card">`;
+    [{k:"Procedure",v:`${c.proc} — ${c.sg}`},{k:"Anesthesia",v:`${c.anes} — ${c.anesP}`},{k:"EBL",v:`${c.ebl}mL`},{k:"Implants",v:c.implants},{k:"Counts",v:c.counts},{k:"Case",v:c.caseTime},{k:"Dressing",v:c.dress}].forEach(r=>ax+=`<div class="ir"><span class="irk">${r.k}</span><span class="irv">${r.v}</span></div>`);
+    if(c.tqTime)ax+=`<div class="ir"><span class="irk" style="color:var(--ywS)">TQ</span><span class="irv" style="color:var(--ywS)">${c.tqTime}</span></div>`;
+    if(c.orNotes)ax+=`<div class="ir"><span class="irk">Notes</span><span class="irv">${c.orNotes}</span></div>`;
+    ax+=`</div>`;
+  }else{
+    if(s.editIdx!==null){
+      ax+=`<div class="edit-banner"><div class="edit-time"><span>Editing:</span><div class="edit-adj" onclick="adjTime(-5)">−</div><span style="font-weight:700;font-size:13px">${fm(s.editTime)}</span><div class="edit-adj" onclick="adjTime(5)">+</div></div><div class="edit-cancel" onclick="cancelEdit()">Cancel</div></div>`;
+    }else if(s.lastAx){
+      const elapsed=minSince(s.lastAx),rem=s.axInt-elapsed;
+      const cls=rem>5?"due":rem>0?"soon":"over";
+      const txt=rem>0?`Next in ${rem}m`:`Overdue by ${Math.abs(rem)}m`;
+      ax+=`<div class="nxt ${cls}"><span>${txt}</span><div class="nxt-btns">`;
+      [5,15,30].forEach(v=>ax+=`<div class="nxt-b${s.axInt===v?" act":""}" onclick="setInt(${v})">Q${v}</div>`);
+      ax+=`</div></div>`;
+    }
+
+    ax+=`<div class="sh">Vitals</div>`;
+    // Pre-op baseline comparison
+    ax+=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:3px">`;
+    const preFields=[{f:"sbp",l:"SBP",pv:c.preV.sbp},{f:"dbp",l:"DBP",pv:c.preV.dbp},{f:"hr",l:"HR",pv:null},{f:"rr",l:"RR",pv:null},{f:"spo2",l:"SpO₂",pv:null}];
+    preFields.forEach(v=>{
+      if(v.pv){
+        const cur_val=parseInt(s.v[v.f]);
+        let color="#3a3a3a";
+        if(cur_val){
+          const diff=Math.abs(cur_val-v.pv);
+          if(v.f==="sbp"||v.f==="dbp") color=diff>20?"var(--ywS)":"var(--gnS)";
+        }
+        ax+=`<div style="text-align:center"><div style="font-size:8px;font-family:var(--m);color:${color};font-weight:600">${v.pv}</div><div style="font-size:6px;color:#2a2a2a;font-family:var(--m);text-transform:uppercase">pre-op</div></div>`;
+      }else{
+        ax+=`<div></div>`;
+      }
+    });
+    ax+=`</div>`;
+    ax+=`<div class="vi-row">`;
+    [{f:"sbp",l:"SBP"},{f:"dbp",l:"DBP"},{f:"hr",l:"HR"},{f:"rr",l:"RR"},{f:"spo2",l:"SpO₂"}].forEach(v=>{
+      ax+=`<div class="vi"><div class="vi-l">${v.l}</div><input class="vi-i" type="number" inputmode="numeric" value="${s.v[v.f]}" placeholder="—" oninput="setV('${v.f}',this.value)"></div>`;
+    });
+    ax+=`</div>`;
+
+    ax+=`<div class="sh"><span>Pain</span><span style="font-size:10px;font-weight:700;color:${s.pain!==null?(s.pain<=3?"var(--gnS)":s.pain<=6?"var(--ywS)":"var(--rdS)"):"#555"}">${s.pain!==null?s.pain+"/10":""}</span></div><div class="pain-grid">`;
+    for(let i=0;i<=10;i++){const sel=s.pain===i;const cls=sel?(i<=3?"g":i<=6?"y":"r"):"";ax+=`<div class="pb${sel?" sel "+cls:""}" onclick="setPain(${i})">${i}</div>`;}
+    ax+=`<div></div></div>`;
+
+    ax+=`<div class="sh">Status · tap exceptions only</div>`;
+    ax+=`<div class="exc${s.xAld?"":" off"}" onclick="togX('xAld')"><div class="exc-c">✓</div><span class="exc-n">Aldrete</span><span class="exc-v">${s.xAld?"10/10":s.abnAld!==null?s.abnAld+"/10":"?"}</span></div>`;
+    if(!s.xAld){ax+=`<div class="abn"><div class="abn-opts">`;[5,6,7,8,9].forEach(v=>{ax+=`<div class="ao${s.abnAld===v?(v>=8?" sel":" sel-r"):""}" onclick="event.stopPropagation();setAbnAld(${v})">${v}</div>`;});ax+=`</div></div>`;}
+
+    ax+=`<div class="exc${s.xNV?"":" off"}" onclick="togX('xNV')"><div class="exc-c">✓</div><span class="exc-n">NV · ${isKnee?"DP":"PT"} pulse</span><span class="exc-v">${s.xNV?"Intact":s.abnNV||"?"}</span></div>`;
+    if(!s.xNV){ax+=`<div class="abn"><div class="abn-opts">`;["↓ Pulse","∅ Pulse","↓ Sensation","∅ Sensation","↓ Motor","∅ Motor","Pale/Cool","Edema ↑"].forEach(v=>{ax+=`<div class="ao${s.abnNV===v?" sel-r":""}" onclick="event.stopPropagation();setAbnNV('${v}')">${v}</div>`;});ax+=`</div></div>`;}
+
+    ax+=`<div class="exc${s.xDress?"":" off"}" onclick="togX('xDress')"><div class="exc-c">✓</div><span class="exc-n">Dressing</span><span class="exc-v">${s.xDress?"Dry & intact":"Issue"}</span></div>`;
+    if(!s.xDress){ax+=`<div class="abn"><input class="abn-inp" placeholder="Sanguineous drainage, reinforced..." onclick="event.stopPropagation()" oninput="setAbnDress(this.value)" value="${s.abnDress}"></div>`;}
+
+    ax+=`<div class="exc${s.xO2?"":" off"}" onclick="togX('xO2')"><div class="exc-c">✓</div><span class="exc-n">O₂</span><span class="exc-v">${s.o2Method}</span></div>`;
+    if(!s.xO2){ax+=`<div class="abn"><div class="abn-opts">`;["NC 2L","NC 4L","NC 6L","FM 40%","NRB"].forEach(v=>{ax+=`<div class="ao${s.o2Method===v?" sel":""}" onclick="event.stopPropagation();setO2('${v}')">${v}</div>`;});ax+=`</div></div>`;}
+
+    ax+=`<div class="exc${s.xNaus?"":" off"}" onclick="togX('xNaus')"><div class="exc-c">✓</div><span class="exc-n">Nausea</span><span class="exc-v">${s.xNaus?"None":s.nausea||"?"}</span></div>`;
+    if(!s.xNaus){ax+=`<div class="abn"><div class="abn-opts">`;["Mild","Moderate","Severe","Vomiting"].forEach(v=>{ax+=`<div class="ao${s.nausea===v?(v==="Severe"||v==="Vomiting"?" sel-r":" sel"):""}" onclick="event.stopPropagation();setNaus('${v}')">${v}</div>`;});ax+=`</div></div>`;}
+
+    if(isSp){
+      ax+=`<div class="sh">Spinal</div><div class="cryo-row">`;
+      ["T10","T12","L2","L4","S1","Clear"].forEach(lv=>{ax+=`<div class="cryo-b${s.spinal===lv?" sel":""}" onclick="setSpinal('${lv}')">${lv}</div>`;});
+      ax+=`</div>`;
+    }
+    if(isKnee){
+      ax+=`<div class="sh">Cryo-cuff</div><div class="cryo-row">`;
+      ["Active","Repositioned","Off"].forEach(v=>{ax+=`<div class="cryo-b${s.cryo===v?" sel":""}" onclick="setCryo('${v}')">${v}</div>`;});
+      ax+=`</div>`;
+    }
+
+    ax+=`<div style="display:flex;align-items:center;gap:6px;margin:4px 0"><span style="font-size:9px;color:#555;font-family:var(--m)">Temp °F</span><input class="vi-i" type="number" inputmode="decimal" value="${s.temp}" placeholder="—" style="width:70px;font-size:14px;padding:5px" oninput="setTemp(this.value)"></div>`;
+
+    const canLog=s.v.sbp&&s.pain!==null,isEdit=s.editIdx!==null;
+    ax+=`<div class="logb${canLog?(isEdit?" blue":" ok"):""}" onclick="${canLog?"logAx()":""}">${isEdit?"Update Assessment":"Log Assessment"}${canLog?"":" · needs vitals + pain"}</div>`;
+
+    // I/O
+    ax+=`<div class="sh" style="margin-top:8px">I/O</div><div class="io-row io3"><div class="io-box"><div class="io-l">IV In (mL)</div><input class="io-v blue" type="number" inputmode="numeric" value="${s.ivIn||""}" placeholder="0" onchange="setIO('ivIn',this.value)"></div><div class="io-box"><div class="io-l">Urine Out (mL)</div><input class="io-v gold" type="number" inputmode="numeric" value="${s.uo||""}" placeholder="0" onchange="setIO('uo',this.value)"></div><div class="io-box"><div class="io-l">Drain (mL)</div><input class="io-v red" type="number" inputmode="numeric" value="${s.drainOut||""}" placeholder="0" onchange="setIO('drainOut',this.value)"></div></div>`;
+
+    if(s.axH.length){
+      ax+=`<div class="sh" style="margin-top:4px">History (${s.axH.length})</div>`;
+      s.axH.forEach((e,idx)=>{
+        const ac=e.ald>=9?"g":e.ald>=7?"y":"r";
+        const pc2=e.pain<=3?"g":e.pain<=6?"y":"r";
+        let ln=`<span class="t">${fm(e.t)}</span> ${e.sbp}/${e.dbp} HR${e.hr} RR${e.rr} O₂${e.spo2}`;
+        if(e.temp)ln+=` T${e.temp}`;
+        ln+=` · A<span class="${ac}">${e.ald}</span> P<span class="${pc2}">${e.pain}</span>`;
+        if(!e.nvOk)ln+=` · <span class="r">NV:${e.abnNV||"⚠"}</span>`;
+        if(!e.dressOk)ln+=` · <span class="y">Dress⚠</span>`;
+        if(e.o2!=="RA")ln+=` · ${e.o2}`;
+        if(!e.nausOk)ln+=` · <span class="y">N/V:${e.nausea}</span>`;
+        if(e.spinal)ln+=` · Sp:${e.spinal}`;
+        ax+=`<div class="axe" onclick="startEdit(${idx})"><div class="axe-body">${ln}</div><span class="axe-edit">✏</span></div>`;
+      });
+    }
+  }
+  document.getElementById("p-ax").innerHTML=ax;
+
+  // ═══ ORDERS TAB ═══
+  let ord="";
+  function medRtBadge(rt){return`<span class="med-rt ${rt.toLowerCase()}">${rt}</span>`;}
+  function orderMedRows(meds,s){
+    let h="";
+    meds.forEach(m=>{
+      const chk=canAdmOrder(m.id,s);
+      const hist=s.orderAdminH.filter(x=>x.id===m.id);
+      h+=`<div class="order-med-row"><div class="order-med-info"><div class="order-med-nm">${m.nm} ${medRtBadge(m.rt)} <span style="font-size:9px;font-family:var(--m);color:#555">${m.ds}</span></div><div class="order-med-detail">${m.detail}</div>`;
+      if(m.warn)h+=`<div class="order-med-warn">⚠ ${m.warn}</div>`;
+      hist.forEach(e=>h+=`<div class="order-adm-log"><span class="mt">${fm(e.t)}</span> — Given</div>`);
+      h+=`</div><div class="order-adm-btn${chk.ok?'':' dis'}" onclick="${chk.ok?`admOrder('${m.id}')`:''}">${chk.ok?'Give':chk.reason}</div></div>`;
+    });
+    return h;
+  }
+
+  // ANESTHESIA ORDERS
+  ord+=`<div class="sh">Anesthesia Orders</div>`;
+  if(s.anesAck){
+    ord+=`<div style="padding:6px 10px;border-radius:5px;background:var(--gnB);border:1px solid rgba(42,107,63,.15);font-family:var(--m);font-size:9px;color:var(--gnS);margin-bottom:4px">✓ Acknowledged by nurse · ${fm(s.anesAck)}</div>`;
+  }else{
+    ord+=`<div class="logb ok" style="font-size:11px;padding:9px;margin-bottom:6px" onclick="ackOrders('anesAck')">Acknowledge Anesthesia Orders</div>`;
+  }
+  ANES_STD.forEach(o=>ord+=`<div class="order-std"><b>${o.t}</b> · ${o.d}</div>`);
+  ord+=`<div class="sh" style="margin-top:4px">Anesthesia PRN Medications</div>`;
+  ord+=orderMedRows(ANES_MEDS,s);
+
+  // SURGEON ORDERS
+  ord+=`<div class="sh" style="margin-top:8px">Surgeon Post-Op Orders</div>`;
+  if(s.surgAck){
+    ord+=`<div style="padding:6px 10px;border-radius:5px;background:var(--gnB);border:1px solid rgba(42,107,63,.15);font-family:var(--m);font-size:9px;color:var(--gnS);margin-bottom:4px">✓ Acknowledged by nurse · ${fm(s.surgAck)}</div>`;
+  }else{
+    ord+=`<div class="logb ok" style="font-size:11px;padding:9px;margin-bottom:6px" onclick="ackOrders('surgAck')">Acknowledge Surgeon Orders</div>`;
+  }
+  SURG_STD.forEach(o=>ord+=`<div class="order-std"><b>${o.t}</b> · ${o.d}</div>`);
+  ord+=`<div class="sh" style="margin-top:4px">Surgeon PRN Medications</div>`;
+  ord+=orderMedRows(SURG_MEDS,s);
+
+  // DISCHARGE MEDICATIONS
+  ord+=`<div class="sh" style="margin-top:8px">Discharge Medications (Reference)</div>`;
+  DC_MEDS.forEach(m=>{
+    ord+=`<div class="dc-med-row"><div class="dc-med-nm">${m.nm}</div><div class="dc-med-ds">${m.ds}${m.dt?' · '+m.dt:''}</div></div>`;
+  });
+
+  // DISCHARGE ORDERS
+  ord+=`<div class="sh" style="margin-top:8px">Discharge Orders</div>`;
+  ["Discontinue IV at discharge","Remove scopolamine patch at discharge","May discharge home when criteria met"].forEach(txt=>ord+=`<div class="order-dc-note">${txt}</div>`);
+
+  // Med administration log
+  if(s.orderAdminH.length){
+    ord+=`<div class="sh" style="margin-top:8px">Administration Log (${s.orderAdminH.length})</div>`;
+    s.orderAdminH.forEach(e=>ord+=`<div class="med-log-entry"><span class="mt">${fm(e.t)}</span> ${e.nm} ${e.ds} ${e.rt}</div>`);
+  }
+  document.getElementById("p-orders").innerHTML=ord;
+
+  // ═══ DC TAB ═══
+  let dc="";
+  const blockers=dcBlockers(s,c);
+
+  dc+=`<div class="sh">Discharge Criteria</div>`;
+  dc+=`<div class="sel-all-btn" onclick="selectAllDC()">✓ Confirm All Normal</div>`;
+  const w2=s.wl;
+  function dcTogRow(label,field){const v=w2[field];return`<div class="wl-row"><span class="wl-lbl">${label}</span><div class="tog-pair"><div class="tb${v?' y':''}" onclick="setWL('${field}',true)">YES</div><div class="tb${!v?' n':''}" onclick="setWL('${field}',false)">NO</div></div></div>`;}
+  dc+=dcTogRow('Teaching & Understanding','dcTeaching');
+  dc+=dcTogRow('Swallow, Cough & Gag Reflex','dcSwallow');
+  dc+=dcTogRow('Nausea/Vomiting Minimal','dcNVMin');
+  dc+=dcTogRow('Pain Tolerable','dcPainTol');
+  dc+=dcTogRow('Skin Color WNL','dcSkinWNL');
+  dc+=dcTogRow('No Loss of Gross Motor Skill','dcMotor');
+  dc+=dcTogRow('Verbal & Written DC Instructions Given','dcInstructions');
+
+  dc+=`<div class="sh">Functional Progress</div>`;
+  [{f:"toChair",lb:"Up to Chair"},{f:"ambulated",lb:"Ambulated / Walk"},{f:"voided",lb:"Voided"},{f:"ptCleared",lb:"Cleared by PT"}].forEach(m=>{
+    const done=!!s[m.f];
+    dc+=`<div class="tm${done?" done":""}" onclick="togTimed('${m.f}')"><div class="tm-c${done?" done":""}">✓</div><span class="tm-n${done?" done":""}">${m.lb}</span>`;
+    if(done)dc+=`<span class="tm-t">${fm(s[m.f])}</span>`;
+    dc+=`</div>`;
+  });
+
+  dc+=`<div class="sh">Clinical Readiness</div>`;
+  const aldOk=!!s.ms_aldrete;
+  dc+=`<div class="tm${aldOk?" done":""}"><div class="tm-c${aldOk?" done":""}">✓</div><div style="flex:1"><span class="tm-n${aldOk?" done":""}">Aldrete ≥ 9</span>${aldOk?`<div class="tm-sub">Auto from assessment</div>`:""}</div>${aldOk?`<span class="tm-t">${fm(s.ms_aldrete)}</span>`:""}</div>`;
+  dc+=`<div class="tm${s.painPO?" done":""}" onclick="togManual('painPO')"><div class="tm-c${s.painPO?" done":""}">✓</div><span class="tm-n${s.painPO?" done":""}">Pain controlled on PO</span></div>`;
+  const nvOk=!!s.ms_nv;
+  dc+=`<div class="tm${nvOk?" done":""}"><div class="tm-c${nvOk?" done":""}">✓</div><div style="flex:1"><span class="tm-n${nvOk?" done":""}">NV intact</span>${nvOk?`<div class="tm-sub">Auto from assessment</div>`:""}</div>${nvOk?`<span class="tm-t">${fm(s.ms_nv)}</span>`:""}</div>`;
+  const drOk=!!s.ms_dress;
+  dc+=`<div class="tm${drOk?" done":""}"><div class="tm-c${drOk?" done":""}">✓</div><div style="flex:1"><span class="tm-n${drOk?" done":""}">Dressing intact</span>${drOk?`<div class="tm-sub">Auto from assessment</div>`:""}</div>${drOk?`<span class="tm-t">${fm(s.ms_dress)}</span>`:""}</div>`;
+
+  dc+=`<div class="sh">Patient & Family Education</div>`;
+  eduItems(c.jt).forEach(e=>{
+    const done=!!s.edu[e.id];
+    dc+=`<div class="edu${done?" done":""}" onclick="togEdu('${e.id}')"><div class="edu-c${done?" done":""}">✓</div><span class="edu-n${done?" done":""}">${e.lb}</span>`;
+    if(done)dc+=`<span class="edu-t">${fm(s.edu[e.id])}</span>`;
+    dc+=`</div>`;
+  });
+
+  dc+=`<div class="sh">Logistics</div>`;
+  dc+=`<div class="tm${s.rxConf?" done":""}" onclick="togManual('rxConf')"><div class="tm-c${s.rxConf?" done":""}">✓</div><span class="tm-n${s.rxConf?" done":""}">Prescriptions confirmed</span></div>`;
+  dc+=`<div class="tm${s.rideHere?" done":""}" onclick="togRide()"><div class="tm-c${s.rideHere?" done":""}">✓</div><span class="tm-n${s.rideHere?" done":""}">Responsible adult present</span></div>`;
+
+  if(s.discharged){
+    dc+=`<div class="dc-box"><div class="dc-t">✓ Discharged</div><div class="dc-s">${fm(s.discharged)} · PACU: ${el(s.arrived,s.discharged)}</div></div>`;
+  }else if(blockers.length===0){
+    dc+=`<div class="logb ok" style="margin-top:8px" onclick="discharge()">Discharge Patient</div>`;
+  }else{
+    dc+=`<div class="blocker" style="margin-top:8px"><div style="font-weight:700;margin-bottom:3px">Cannot discharge — ${blockers.length} blocker${blockers.length>1?"s":""}</div>`;
+    blockers.forEach(b=>dc+=`<div class="blocker-item">· ${b}</div>`);
+    dc+=`</div>`;
+  }
+  document.getElementById("p-dc").innerHTML=dc;
+
+  // ═══ SUPPLY TAB ═══
+  let sup="";
+  sup+=`<div class="sh">Supplies & Instruments</div>`;
+  sup+=`<div class="sup-hdr"><span>Item</span><span>Pulled</span><span>Used</span></div>`;
+  w.supplies.forEach((item,idx)=>{
+    sup+=`<div class="sup-row"><span class="sup-nm">${item.nm}</span><div class="sup-ctrl"><div class="sup-adj" onclick="adjSup(${idx},'pulled',-1)">−</div><span class="sup-val${item.pulled?' has':''}">${item.pulled}</span><div class="sup-adj" onclick="adjSup(${idx},'pulled',1)">+</div></div><div class="sup-ctrl"><div class="sup-adj" onclick="adjSup(${idx},'used',-1)">−</div><span class="sup-val${item.used?' has':''}">${item.used}</span><div class="sup-adj" onclick="adjSup(${idx},'used',1)">+</div></div></div>`;
+  });
+  document.getElementById("p-supply").innerHTML=sup;
+}
+
+function tick(){
+  document.getElementById("clk").textContent=N().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",second:"2-digit"});
+  const s=S[cur],c=C[cur];
+  const pe=document.getElementById("pacuEl");
+  if(s.arrived&&!s.discharged){pe.textContent="⏱ "+el(s.arrived,N());pe.style.color="var(--ywS)"}
+  const st=getStatus(s);
+  const pill=document.getElementById('statusPill');
+  if(pill){pill.textContent=st.lb;pill.style.cssText=`color:${st.cl};background:${st.bg};border-color:${st.bd}`;}
+  const nxtEl=document.querySelector('.nxt');
+  if(nxtEl&&s.lastAx&&s.editIdx===null){
+    const elapsed=minSince(s.lastAx),rem=s.axInt-elapsed;
+    const cls=rem>5?"due":rem>0?"soon":"over";
+    nxtEl.className="nxt "+cls;
+    nxtEl.children[0].textContent=rem>0?`Next in ${rem}m`:`Overdue by ${Math.abs(rem)}m`;
+  }
+}
+setInterval(tick,1000);tick();R();
+</script>
+</body>
+</html>
