@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TJR Hub · OR</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080808;--card:#0d0d0d;--bdr:#1e1e1e;
+  --tx:#e0e0e0;--tx2:#9a9a9a;--dm:#5a5a5a;
+  --gn:#2a6b3f;--gnB:rgba(42,107,63,0.12);--gnS:#3db870;--gnD:rgba(42,107,63,0.05);
+  --yw:#8a6d2b;--ywB:rgba(138,109,43,0.10);--ywS:#d4a843;
+  --rd:#8b2d2d;--rdB:rgba(139,45,45,0.12);--rdS:#e06060;--rdD:rgba(139,45,45,0.05);
+  --kn:#3b82f6;--hp:#a855f7;
+  --m:'DM Mono',monospace;--s:'IBM Plex Sans',sans-serif;
+}
+html{-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--tx);font-family:var(--s);height:100dvh;overflow:hidden;position:fixed;width:100%;display:flex;flex-direction:column}
+
+/* ── TOP BAR ── */
+.top{padding:7px 12px;border-bottom:1px solid #141414;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px}
+.top-brand{font-size:9px;font-weight:700;color:#282828;font-family:var(--m);letter-spacing:.12em;white-space:nowrap}
+.top-mid{display:flex;align-items:center;gap:6px;flex:1;justify-content:center;flex-wrap:wrap}
+/* OR room pills */
+.or-pill{height:34px;padding:0 12px;border-radius:7px;font-family:var(--m);font-size:11px;font-weight:700;cursor:pointer;border:1px solid #222;background:#111;color:#4a4a4a;-webkit-tap-highlight-color:transparent;transition:all .13s;white-space:nowrap}
+.or-pill:active{opacity:.7}
+.or-pill.act{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.4);color:#60a5fa}
+/* status button */
+.status-btn{height:34px;padding:0 12px;border-radius:7px;font-family:var(--m);font-size:11px;font-weight:700;cursor:pointer;border:1px solid;white-space:nowrap;-webkit-tap-highlight-color:transparent;transition:all .13s}
+.status-btn:active{transform:scale(.93)}
+.sb-out{border-color:#2a2a2a;background:#161616;color:#5a5a5a}
+.sb-in{border-color:rgba(42,107,63,.5);background:var(--gnB);color:var(--gnS)}
+/* delay */
+.delay-btn{height:28px;padding:0 10px;border-radius:6px;font-family:var(--m);font-size:10px;font-weight:700;cursor:pointer;border:1px solid rgba(138,109,43,.3);background:var(--ywB);color:var(--ywS);-webkit-tap-highlight-color:transparent;transition:all .13s}
+.delay-btn:active{opacity:.7}
+.top-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.case-timer{font-size:11px;font-family:var(--m);font-weight:700;color:var(--ywS);display:none}
+.top-clk{font-size:16px;font-weight:700;font-family:var(--m)}
+/* delay area */
+.delay-strip{padding:6px 12px;background:rgba(138,109,43,.06);border-bottom:1px solid rgba(138,109,43,.15);flex-shrink:0;display:none}
+.delay-strip.show{display:block}
+.delay-lbl{font-size:9px;font-family:var(--m);color:var(--ywS);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.delay-ta{width:100%;padding:8px 10px;background:#111;border:1px solid rgba(138,109,43,.2);border-radius:7px;color:var(--tx);font-size:13px;font-family:var(--s);outline:none;resize:none;min-height:52px;line-height:1.4}
+
+/* ── CASE TABS ── */
+.ctabs{display:flex;gap:4px;padding:6px 12px;border-bottom:1px solid #111;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ctab{display:flex;align-items:center;gap:6px;padding:0 12px;height:44px;border-radius:8px;font-size:12px;font-family:var(--m);font-weight:700;cursor:pointer;border:1px solid #1e1e1e;background:var(--card);color:var(--dm);white-space:nowrap;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:all .14s}
+.ctab:active{opacity:.7}
+.ctab.act{border-color:rgba(42,107,63,.45);background:var(--gnB);color:var(--gnS)}
+.ctab-dot{width:7px;height:7px;border-radius:2px;flex-shrink:0}
+
+/* ── PATIENT BAR ── */
+.pbar{padding:7px 12px;background:#0a0a0a;border-bottom:1px solid #141414;flex-shrink:0;display:flex;align-items:center;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.pbar-name{font-size:14px;font-weight:700;white-space:nowrap;letter-spacing:-.2px}
+.pbar-proc{font-size:10px;padding:3px 8px;border-radius:5px;font-family:var(--m);font-weight:700;white-space:nowrap}
+.pbar-al{font-size:9px;padding:3px 7px;border-radius:4px;background:var(--rdB);color:var(--rdS);font-family:var(--m);font-weight:700;border:1px solid rgba(139,45,45,.25);white-space:nowrap}
+.pbar-stats{display:flex;gap:10px;margin-left:auto;flex-shrink:0}
+.ps{text-align:center;min-width:32px}
+.psv{font-size:12px;font-weight:700;font-family:var(--m);line-height:1.1}
+.psl{font-size:7px;color:var(--dm);font-family:var(--m);text-transform:uppercase;margin-top:1px}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow:hidden;position:relative}
+.pane{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px 120px;display:none}
+.pane.act{display:block}
+
+/* ── BOTTOM NAV — 5 tabs ── */
+.bnav{display:flex;border-top:1px solid #1a1a1a;background:#0a0a0a;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0)}
+.bn{flex:1;min-height:54px;padding:7px 1px 5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}
+.bn:active{background:rgba(255,255,255,.03)}
+.bn.act::after{content:"";position:absolute;top:0;left:15%;right:15%;height:2px;background:var(--gnS);border-radius:0 0 2px 2px}
+.bn-i{font-size:17px;line-height:1}
+.bn-l{font-size:7px;font-family:var(--m);font-weight:700;color:#3a3a3a;letter-spacing:.04em;text-transform:uppercase}
+.bn.act .bn-l{color:var(--gnS)}
+
+/* ── SHARED ── */
+.sec-lbl{font-size:10px;font-weight:700;color:var(--dm);font-family:var(--m);letter-spacing:.09em;text-transform:uppercase;margin-bottom:10px}
+.divider{height:1px;background:#141414;margin:12px 0}
+.alrt{padding:10px 13px;border-radius:9px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:12px;font-family:var(--m);font-weight:700;min-height:44px}
+.alrt.w{background:var(--ywB);border:1px solid rgba(138,109,43,.3);color:var(--ywS)}
+.alrt.c{background:var(--rdB);border:1px solid rgba(139,45,45,.35);color:var(--rdS);animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.55}}
+.alrt-val{margin-left:auto;font-size:15px;font-weight:700}
+/* shared form controls */
+.f-sel,.f-inp{width:100%;height:46px;padding:0 12px;background:#111;border:1px solid #1e1e1e;border-radius:8px;color:var(--tx);font-size:14px;font-family:var(--m);outline:none;appearance:none;-webkit-appearance:none}
+.f-sel:focus,.f-inp:focus{border-color:#3a5a8a}
+.f-sel option{background:#1a1a1a}
+.f-ta{width:100%;padding:10px 12px;background:#111;border:1px solid #1e1e1e;border-radius:8px;color:var(--tx);font-size:13px;font-family:var(--s);outline:none;resize:none;min-height:64px;line-height:1.5}
+.f-ta:focus{border-color:#3a5a8a}
+.f-row{display:flex;gap:8px;margin-bottom:8px}
+.f-col{flex:1;display:flex;flex-direction:column;gap:5px}
+.f-lbl{font-size:10px;color:var(--dm);font-family:var(--m);letter-spacing:.04em;text-transform:uppercase}
+/* Yes/No buttons — 52×46px */
+.yn-grp{display:flex;gap:5px}
+.ynb{width:52px;height:46px;border-radius:7px;font-size:11px;font-weight:700;font-family:var(--m);border:1px solid #252525;background:#161616;color:#4a4a4a;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .12s;display:flex;align-items:center;justify-content:center}
+.ynb:active{transform:scale(.9)}
+.ynb.yes.sel{background:var(--gnB);color:var(--gnS);border-color:rgba(42,107,63,.5)}
+.ynb.no.sel{background:var(--rdB);color:var(--rdS);border-color:rgba(139,45,45,.5)}
+/* option pills (multi-choice) — compact for right-side placement */
+.opt-row{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.opt-pill{height:34px;padding:0 10px;border-radius:16px;font-size:11px;font-weight:700;font-family:var(--m);border:1px solid #252525;background:#161616;color:#5a5a5a;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .12s;display:flex;align-items:center;white-space:nowrap}
+.opt-pill:active{transform:scale(.93)}
+.opt-pill.sel{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.45);color:#60a5fa}
+.opt-pill.sel-gn{background:var(--gnB);border-color:rgba(42,107,63,.45);color:var(--gnS)}
+/* check items */
+.chk-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--card);border:1px solid var(--bdr);border-radius:8px;margin-bottom:4px;min-height:48px}
+.chk-lbl{font-size:14px;font-weight:500;flex:1}
+.chk-box{width:32px;height:32px;border-radius:6px;border:2px solid #2a2a2a;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--gnS);flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:all .12s}
+.chk-box.on{background:var(--gnB);border-color:rgba(42,107,63,.5)}
+.chk-box:active{transform:scale(.9)}
+
+/* ── TIMELINE ── */
+.tl-ph{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-family:var(--m);color:#3a3a3a;padding:10px 0 4px}
+.ev{display:flex;align-items:stretch;margin-bottom:1px}
+.ev-rail{width:28px;flex-shrink:0;display:flex;flex-direction:column;align-items:center}
+.ev-dot{width:11px;height:11px;border-radius:50%;border:2px solid #2a2a2a;background:var(--bg);z-index:1;flex-shrink:0;margin-top:16px;transition:all .2s}
+.ev-dot.done{border-color:var(--gnS);background:var(--gn)}
+.ev-wire{width:2px;flex:1;background:#181818;margin:1px 0}
+.ev-wire.done{background:rgba(42,107,63,.18)}
+.ev-card{flex:1;padding:11px 12px;border-radius:9px;border:1px solid transparent;min-height:52px;display:flex;flex-direction:column;justify-content:center;transition:all .14s;margin:1px 0}
+.ev-card.pend{border-color:#1e1e1e;background:rgba(255,255,255,.01);cursor:pointer}
+.ev-card.pend:active{background:rgba(255,255,255,.04);transform:scale(.98)}
+.ev-card.done{border-color:rgba(42,107,63,.14);background:var(--gnD);cursor:pointer}
+.ev-card.done:active{background:rgba(42,107,63,.08)}
+.ev-row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.ev-title{font-size:14px;font-weight:600;letter-spacing:-.1px}
+.ev-title.dn{color:#5a5a5a;font-weight:500}
+.ev-stamp{font-size:12px;font-family:var(--m);font-weight:700;color:var(--gnS);flex-shrink:0}
+.ev-sub{font-size:10px;color:#3a3a3a;font-family:var(--m);margin-top:2px;line-height:1.4}
+.ev-sub.fl{color:#666}
+.ev-edit{display:flex;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid #1e1e1e}
+.te-inp{flex:1;padding:0 10px;height:44px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:7px;color:var(--tx);font-size:14px;font-family:var(--m);outline:none}
+.te-inp:focus{border-color:#3a5a8a}
+.ebtn{height:44px;padding:0 14px;border-radius:7px;font-family:var(--m);font-size:12px;font-weight:700;cursor:pointer;border:1px solid #2a2a2a;background:#1a1a1a;color:#888;display:flex;align-items:center;justify-content:center;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.ebtn:active{background:#252525}
+.ebtn.dng{border-color:rgba(139,45,45,.3);color:var(--rdS)}
+.ebtn.dng:active{background:var(--rdB)}
+.spec-row{display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid #1e1e1e}
+.spec-inp{flex:1;height:44px;padding:0 10px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:7px;color:var(--tx);font-size:14px;font-family:var(--m);outline:none}
+.spec-inp:focus{border-color:#3a5a8a}
+.spec-btn{height:44px;padding:0 14px;border-radius:7px;font-family:var(--m);font-size:12px;font-weight:700;cursor:pointer;border:1px solid;display:flex;align-items:center;justify-content:center;white-space:nowrap;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+
+/* ── COUNTS ── */
+/* compact table: all 5 items visible at once */
+.cnt-table{width:100%;border-collapse:collapse;margin-bottom:6px}
+.cnt-table th{font-size:9px;font-weight:700;color:var(--dm);font-family:var(--m);letter-spacing:.07em;text-transform:uppercase;padding:5px 6px;border-bottom:1px solid #1e1e1e;text-align:center}
+.cnt-table th.lh{text-align:left}
+.cnt-table td{padding:3px 4px;border-bottom:1px solid #141414;vertical-align:middle}
+.cnt-table tr:last-child td{border-bottom:none}
+.cnt-item-name{font-size:12px;font-weight:600;color:#c8c8c8;white-space:nowrap;padding-left:2px}
+/* compact number cell */
+.cnt-cell{display:flex;align-items:center;gap:3px;justify-content:center}
+.cnt-inp{width:46px;height:40px;background:#111;border:1px solid #2a2a2a;border-radius:7px;color:var(--tx);font-size:18px;font-weight:700;font-family:var(--m);text-align:center;outline:none;padding:0}
+.cnt-inp:focus{border-color:#3a5a8a}
+.cnt-inp.ok{color:var(--gnS);border-color:rgba(42,107,63,.4)}
+.cnt-inp.bad{color:var(--rdS);border-color:rgba(139,45,45,.4)}
+.cnt-add{width:32px;height:40px;border-radius:7px;border:1px solid #252525;background:#1a1a1a;color:#aaa;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.cnt-add:active{background:#252525;transform:scale(.93)}
+/* match badge in table */
+.cnt-match{font-size:9px;padding:2px 6px;border-radius:5px;font-family:var(--m);font-weight:700;white-space:nowrap}
+.cnt-match.ok{background:var(--gnB);color:var(--gnS);border:1px solid rgba(42,107,63,.3)}
+.cnt-match.bad{background:var(--rdB);color:var(--rdS);border:1px solid rgba(139,45,45,.3)}
+.cnt-match.pend{background:#1a1a1a;color:#3a3a3a;border:1px solid #222}
+/* global signature block */
+.cnt-sig-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}
+.cnt-sig-box{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:10px}
+.cnt-sig-hdr{font-size:9px;font-weight:700;color:var(--dm);font-family:var(--m);letter-spacing:.07em;text-transform:uppercase;margin-bottom:7px}
+.cnt-sig-sel{width:100%;height:40px;padding:0 10px;background:#111;border:1px solid #1e1e1e;border-radius:7px;color:var(--tx);font-size:11px;font-family:var(--m);outline:none;appearance:none;-webkit-appearance:none}
+.cnt-sig-sel option{background:#1a1a1a}
+.cnt-sig-done{display:flex;flex-direction:column;gap:2px;padding:7px 10px;background:var(--gnB);border:1px solid rgba(42,107,63,.25);border-radius:7px;min-height:40px;justify-content:center}
+.cnt-sig-name{font-size:11px;font-weight:700;color:var(--gnS);font-family:var(--m)}
+.cnt-sig-time{font-size:9px;color:#5a8a6a;font-family:var(--m)}
+.cnt-sig-chg{font-size:9px;color:#4a4a4a;cursor:pointer;text-decoration:underline;-webkit-tap-highlight-color:transparent;margin-top:2px;display:inline-block}
+/* EBL/IRR */
+.ebl-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.ebl-box{padding:12px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;text-align:center}
+.ebl-lbl{font-size:9px;color:var(--dm);font-family:var(--m);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.ebl-inp{width:100%;text-align:center;background:transparent;border:none;color:var(--tx);font-size:28px;font-weight:700;font-family:var(--m);outline:none;height:44px}
+.ebl-inp.red{color:var(--rdS)}
+.ebl-inp.blu{color:#5a9abf}
+.big-btn{width:100%;height:52px;border-radius:12px;font-family:var(--m);font-size:14px;font-weight:700;border:1px solid #2a2a2a;background:#1a1a1a;color:#3a3a3a;display:flex;align-items:center;justify-content:center;margin-top:10px;-webkit-tap-highlight-color:transparent}
+.big-btn.ok{background:var(--gn);color:#fff;border-color:var(--gnS);cursor:pointer}
+.big-btn.ok:active{transform:scale(.97);opacity:.85}
+.done-banner{padding:11px 14px;background:var(--gnB);border:1px solid rgba(42,107,63,.25);border-radius:9px;text-align:center;font-family:var(--m);font-size:12px;color:var(--gnS);font-weight:700;margin-top:10px}
+
+/* ── IMPLANTS ── */
+.imp-card{display:flex;gap:12px;padding:12px;background:var(--card);border:1px solid var(--bdr);border-radius:12px;align-items:flex-start;margin-bottom:8px}
+.imp-cam{width:72px;height:72px;border-radius:9px;border:1px dashed #2a2a2a;background:#111;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;color:#3a3a3a;overflow:hidden;-webkit-tap-highlight-color:transparent}
+.imp-cam:active{background:#1a1a1a;transform:scale(.93)}
+.imp-cam.has{border:1px solid rgba(42,107,63,.35);padding:0}
+.imp-cam.has img{width:100%;height:100%;object-fit:cover}
+.imp-cam-lbl{font-size:7px;font-family:var(--m);color:#3a3a3a;margin-top:2px;letter-spacing:.04em}
+.imp-body{flex:1;min-width:0}
+.imp-nm{font-size:10px;font-weight:700;color:#5a5a5a;font-family:var(--m);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.imp-reading{font-size:11px;color:var(--ywS);font-family:var(--m);font-style:italic;margin-top:2px}
+.imp-data{font-size:11px;color:#7a7a7a;font-family:var(--m);line-height:1.7}
+.imp-data .v{color:var(--tx);font-weight:600}
+.imp-err{font-size:11px;color:var(--rdS);font-family:var(--m)}
+.imp-fi{width:100%;height:40px;padding:0 10px;background:#1a1a1a;border:1px solid #1e1e1e;border-radius:6px;color:var(--tx);font-size:12px;font-family:var(--m);outline:none;margin-top:4px}
+.imp-fi:focus{border-color:#3a5a8a}
+.imp-add{width:100%;height:48px;border-radius:9px;border:1px dashed #252525;background:transparent;color:#3a3a3a;font-size:12px;font-family:var(--m);cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;margin-top:4px}
+.imp-add:active{background:rgba(255,255,255,.02)}
+.cam-input{display:none}
+
+/* ── WORKLIST ── */
+.wl-sec{margin-bottom:14px}
+.wl-hdr{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;font-family:var(--m);color:#3a3a3a;padding:7px 0 5px;border-bottom:1px solid #161616;margin-bottom:8px}
+.wl-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #121212;min-height:48px}
+.wl-row:last-child{border-bottom:none}
+.wl-row.tint-y{background:var(--gnD);margin:0 -12px;padding:9px 12px}
+.wl-row.tint-n{background:var(--rdD);margin:0 -12px;padding:9px 12px}
+.wl-lbl{font-size:14px;font-weight:500;color:#d0d0d0;flex:1;line-height:1.3}
+.wl-sub{font-size:10px;color:var(--dm);font-family:var(--m);margin-top:2px}
+.wl-ctrl{flex-shrink:0;max-width:55%;display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.wl-note{margin-top:6px;padding-top:6px;border-top:1px solid #1a1a1a}
+/* full-width control rows — text inputs, selects only */
+.wl-full{padding:6px 0 10px;border-bottom:1px solid #121212}
+.wl-full:last-child{border-bottom:none}
+.wl-full-lbl{font-size:13px;font-weight:500;color:#c0c0c0;margin-bottom:6px}
+
+/* ── INFO ── */
+.isec{margin-bottom:14px}
+.ihdr{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;font-family:var(--m);color:#3a3a3a;padding:6px 0;border-bottom:1px solid #161616;margin-bottom:6px}
+.irow{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:11px;font-family:var(--m)}
+.ik{color:#4a4a4a}
+.iv2{color:#8a8a8a;text-align:right;max-width:60%}
+.nta{width:100%;padding:12px;background:#111;border:1px solid var(--bdr);border-radius:9px;color:var(--tx);font-size:13px;font-family:var(--s);outline:none;resize:vertical;min-height:80px;line-height:1.5}
+.nta:focus{border-color:#2a2a2a}
+.staff-row{display:flex;align-items:center;gap:8px;padding:3px 0;min-height:44px}
+.staff-role{font-size:10px;color:#4a4a4a;font-family:var(--m);width:68px;flex-shrink:0}
+.staff-sel{flex:1;height:38px;padding:0 10px;background:#111;border:1px solid #1a1a1a;border-radius:6px;color:var(--tx);font-size:12px;font-family:var(--m);outline:none;appearance:none;-webkit-appearance:none}
+.staff-sel:focus{border-color:#2a2a2a}
+.staff-sel option{background:#1a1a1a}
+.ho{padding:14px;background:var(--gnB);border:1px solid rgba(42,107,63,.28);border-radius:12px;margin-top:12px}
+.ho-title{font-size:10px;font-weight:700;color:var(--gn);font-family:var(--m);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.ho-row{display:flex;justify-content:space-between;padding:4px 0;font-size:11px;font-family:var(--m);border-bottom:1px solid rgba(42,107,63,.08)}
+.ho-row:last-child{border-bottom:none}
+.ho-k{color:rgba(61,184,112,.6)}
+.ho-v{color:#8a8a8a;text-align:right;max-width:60%;line-height:1.4}
+.ho-note{font-size:10px;color:#5a5a5a;font-family:var(--m);font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid rgba(42,107,63,.12)}
+
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#1a1a1a;border-radius:2px}
+input[type=time]{color-scheme:dark}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+select option{background:#1a1a1a}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <span class="top-brand">TJR HUB · OR</span>
+  <div class="top-mid" id="topMid"></div>
+  <div class="top-right">
+    <span class="case-timer" id="caseTimer"></span>
+    <span class="top-clk" id="clk"></span>
+  </div>
+</div>
+<div class="delay-strip" id="delayStrip">
+  <div class="delay-lbl">⚠ Delay Reason</div>
+  <textarea class="delay-ta" id="delayTa" placeholder="Document delay reason..." oninput="setDelayText(this.value)" rows="2"></textarea>
+</div>
+<div class="ctabs" id="ctabs"></div>
+<div class="pbar" id="pbar"></div>
+
+<div class="content">
+  <div class="pane act" id="p-tl"></div>
+  <div class="pane" id="p-cnt"></div>
+  <div class="pane" id="p-imp"></div>
+  <div class="pane" id="p-wl"></div>
+  <div class="pane" id="p-info"></div>
+</div>
+
+<div class="bnav">
+  <div class="bn act" data-t="tl"   onclick="sw('tl')">  <div class="bn-i">⏱</div><div class="bn-l">Timeline</div></div>
+  <div class="bn"     data-t="cnt"  onclick="sw('cnt')"> <div class="bn-i">🔢</div><div class="bn-l">Counts</div></div>
+  <div class="bn"     data-t="imp"  onclick="sw('imp')"> <div class="bn-i">📷</div><div class="bn-l">Implants</div></div>
+  <div class="bn"     data-t="wl"   onclick="sw('wl')">  <div class="bn-i">✓</div><div class="bn-l">Worklist</div></div>
+  <div class="bn"     data-t="info" onclick="sw('info')"><div class="bn-i">📋</div><div class="bn-l">Info</div></div>
+</div>
+
+<script>
+// ════ CONSTANTS ════
+const BOVIE_SERIALS = {'OR1':'', 'OR2':'F6H49182A'};
+const STAFF_LIST = [
+  "Jennifer Adams, RN","Sarah Mitchell, RN","Maria Gonzalez, RN",
+  "David Park, RN","Amanda Torres, RN","T. Nguyen, CST",
+  "M. Davis, CST","K. Brown, CST","J. Martinez, RN","L. Patel, RN"
+];
+const NURSE_OPTS = STAFF_LIST.map(n=>`<option value="${n}">${n}</option>`).join('');
+
+// ════ GLOBAL STATE — persists for the day (resets on page reload = new day) ════
+const GSTAFF = {sg:'',ast:'',anesP:'',scrub:'',circ:''};
+let orRoom = 'OR1';
+
+// ════ CASE DATA ════
+const C=[
+  {id:1,fn:"Margaret",ln:"Thompson",age:68,sex:"F",mrn:"TJR-20241",dob:"03/15/1957",jt:"Knee",lat:"Right",proc:"Right TKA",sg:"Dr. Henderson",ast:"Dr. Kim (PA)",or:"07:30",rm:"OR-1",wt:82,al:["Penicillin","Sulfa"],asa:"III",anes:"Spinal",anesP:"Dr. Walsh",scrub:"T. Nguyen",circ:"J. Martinez",abx:"Ancef 2g",imp:"S+N LEGION",pos:"Supine",tq:true,tqS:"R thigh",tqP:"250",prep:"ChloraPrep",vte:"TED+SCD",preV:"120/80 · 72 · 98%",cem:"Cemented tibial"},
+  {id:2,fn:"James",ln:"Rodriguez",age:72,sex:"M",mrn:"TJR-20242",dob:"11/08/1953",jt:"Hip",lat:"Left",proc:"Left THA",sg:"Dr. Patel",ast:"Dr. Brooks (PA)",or:"09:00",rm:"OR-2",wt:95,al:[],asa:"II",anes:"Spinal",anesP:"Dr. Chen",scrub:"M. Davis",circ:"J. Martinez",abx:"Ancef 2g",imp:"Stryker Mako",pos:"Lateral decub",tq:false,tqS:"",tqP:"",prep:"ChloraPrep",vte:"TED+SCD",preV:"138/82 · 68 · 97%",cem:"Uncemented"},
+  {id:3,fn:"Dorothy",ln:"Chen",age:65,sex:"F",mrn:"TJR-20243",dob:"07/22/1960",jt:"Knee",lat:"Left",proc:"Left TKA",sg:"Dr. Henderson",ast:"Dr. Kim (PA)",or:"11:00",rm:"OR-1",wt:88,al:["Latex ⚠"],asa:"III",anes:"General",anesP:"Dr. Walsh",scrub:"T. Nguyen",circ:"K. Brown",abx:"Ancef 2g",imp:"S+N LEGION",pos:"Supine",tq:true,tqS:"L thigh",tqP:"250",prep:"ChloraPrep",vte:"TED+SCD",preV:"142/88 · 78 · 98%",cem:"Cemented tibial"},
+  {id:4,fn:"William",ln:"Foster",age:58,sex:"M",mrn:"TJR-20244",dob:"09/03/1967",jt:"Hip",lat:"Right",proc:"Right THA",sg:"Dr. Patel",ast:"Dr. Brooks (PA)",or:"13:00",rm:"OR-2",wt:78,al:["Codeine"],asa:"I",anes:"Spinal",anesP:"Dr. Chen",scrub:"M. Davis",circ:"K. Brown",abx:"Ancef 2g",imp:"Stryker Mako",pos:"Lateral decub",tq:false,tqS:"",tqP:"",prep:"ChloraPrep",vte:"TED+SCD",preV:"118/76 · 66 · 99%",cem:"Uncemented"}
+];
+
+function mkEvs(c){
+  const k=c.jt==="Knee";
+  return[
+    {id:"enter",    ph:"SETUP",     lb:"Patient in OR",             sb:`${c.rm} · monitors on`},
+    {id:"position", ph:"SETUP",     lb:"Positioned",                sb:c.pos},
+    {id:"ground",   ph:"SETUP",     lb:"Grounding Pad",             sb:""},
+    {id:"warming",  ph:"SETUP",     lb:"Warming Device",            sb:"Bair Hugger"},
+    ...(k?[{id:"tq_on",ph:"SETUP", lb:"Tourniquet Applied",        sb:`${c.tqS} · ${c.tqP} mmHg`}]:[]),
+    {id:"timeout",  ph:"TIME-OUT",  lb:"Time-Out Verified",         sb:`${c.fn} ${c.ln} · ${c.proc} · ${c.lat} · ${c.sg} · ${c.al.length?c.al.join(", "):"NKDA"} · ${c.abx}`},
+    {id:"abx",      ph:"TIME-OUT",  lb:"Antibiotic Given",          sb:c.abx},
+    {id:"prep",     ph:"PROCEDURE", lb:"Skin Prep",                 sb:c.prep},
+    {id:"drape",    ph:"PROCEDURE", lb:"Draped",                    sb:""},
+    {id:"timeout2", ph:"PROCEDURE", lb:"Time-Out Performed",        sb:"Surgeon · Anesthesia · Nursing confirmed"},
+    {id:"incision", ph:"PROCEDURE", lb:"Incision",                  sb:c.sg},
+    ...(k?[{id:"tq_up",ph:"PROCEDURE",lb:"Tourniquet Up",          sb:c.tqP+" mmHg"}]:[]),
+    {id:"txa",      ph:"PROCEDURE", lb:"TXA Given",                 sb:"1g IV"},
+    ...(c.cem!=="Uncemented"?[{id:"cement",ph:"PROCEDURE",lb:"Cement Mixed",sb:c.cem}]:[]),
+    {id:"implant",  ph:"PROCEDURE", lb:"Implants Placed",           sb:"Log in Implants tab",nav:"imp"},
+    ...(!k?[{id:"fluoro",ph:"PROCEDURE",lb:"Intraop Imaging",      sb:"Fluoroscopy"}]:[]),
+    {id:"cocktail", ph:"PROCEDURE", lb:"Periarticular Injection",   sb:""},
+    {id:"specimen", ph:"PROCEDURE", lb:"Specimens",                 sb:"",spec:true},
+    ...(k?[{id:"tq_down",ph:"CLOSURE",lb:"Tourniquet Down",        sb:""}]:[]),
+    {id:"closing",  ph:"CLOSURE",   lb:"Closing",                   sb:""},
+    {id:"counts",   ph:"CLOSURE",   lb:"Counts Verified",           sb:"Verify in Counts tab",nav:"cnt"},
+    {id:"dressing", ph:"CLOSURE",   lb:"Dressing Applied",          sb:k?"ACE wrap + Cryo cuff":"ABD pad + Tegaderm"},
+    {id:"close",    ph:"CLOSURE",   lb:"Procedure End",             sb:""},
+    {id:"out",      ph:"TRANSFER",  lb:"Patient Out → PACU",        sb:""},
+  ];
+}
+
+function defaultWL(c){
+  const k=c.jt==="Knee",lat=c.lat;
+  return{
+    preOpDx:`${lat} ${c.jt} Osteoarthritis`,
+    postOpDx:`${lat} Total ${k?"Knee":"Hip"} Arthroplasty`,
+    procedure:c.proc,
+    anesType:c.anes,
+    identityConfirmed:'yes',
+    skinIntact:'yes', skinNote:'',
+    siteMarking:'yes',
+    patientAgreesSite:'yes',
+    woundClass:'1',
+    psychosocial:'calm',
+    posBody:'supine',
+    posLA:'straight',
+    posRA:'straight',
+    safetyStrap:'yes',
+    safetyArmStrap:'yes',
+    prepType:'alcohol_chloroprep',
+    prepStaff:'',
+    bovieSerial: BOVIE_SERIALS[orRoom]||'',
+    bovieMode:'monopolar',
+    bovieCoag:'65',
+    bovieCut:'65',
+    bovieGrndPad:'yes',
+    bovieSkinSite:'clean_dry',
+    boviePlacedBy:'',
+    bovieSiteRL:'right',
+    bovieSiteLoc:'abdomen',
+    bovieLot:'',
+    bovieExp:'',
+    boviePostSkin:'yes',
+    equipBovie:true, equipHipPad:true, equipVelocity:true, equipNeptune:true, equipExtra:'',
+    irrigYN:'yes',
+    irrigType:'sterile_water',
+    irrigTotal:'500ml',
+    closingSite:'surgical_site',
+    closingBy:'',
+    closureDermabond:true, closureSuture:true,
+    dressingType: k?'mepilex':'tegaderm',
+    skinPost:'yes',
+    bodyTemp:'normal',
+    warmingUnit:'yes',
+  };
+}
+
+function defaultCnt(){
+  return{
+    suture:     {pre:0,final:0},
+    laps:       {pre:0,final:0},
+    spinal:     {pre:0,final:0},
+    blades:     {pre:0,final:0},
+    bovietips:  {pre:0,final:0},
+    preSig: null,
+    finalSig: null,
+  };
+}
+
+// ════ STATE ════
+let cur=0, tab="tl";
+const S={};
+C.forEach((_,i)=>{
+  const c=C[i],k=c.jt==="Knee";
+  S[i]={
+    ev:{},editing:null,
+    roomStatus:'out',
+    delay:{active:false,text:''},
+    cnt: defaultCnt(),
+    cntDone: false,
+    ebl:0, irr:0,
+    imps:k?[{nm:"Femoral"},{nm:"Tibial Baseplate"},{nm:"Poly Insert"},{nm:"Patellar Button"}]
+           :[{nm:"Acetabular Shell"},{nm:"Liner"},{nm:"Femoral Stem"},{nm:"Femoral Head"}],
+    impPhotos:{},impData:{},
+    notes:'',
+    wl: defaultWL(c),
+  };
+});
+
+// ════ UTILS ════
+const N=()=>new Date();
+const fm=d=>d?d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}):"—";
+const fmShort=name=>{const p=name.split(' ');return p.length>=2?p[0][0]+'. '+p[1]:name};
+function el(a,b){if(!a||!b)return"";const s=Math.floor((b-a)/1000),m=Math.floor(s/60),h=Math.floor(m/60);return h?`${h}h ${m%60}m`:`${m}m`}
+function elS(a,b){if(!a||!b)return"";const t=Math.floor((b-a)/1000),m=Math.floor(t/60),h=Math.floor(m/60);return h?`${h}h ${m%60}m ${t%60}s`:`${m}m ${t%60}s`}
+const now=()=>new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+
+// ════ ACTIONS ════
+function selCase(i){cur=i;R()}
+function sw(t){
+  tab=t;
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('act'));
+  document.getElementById('p-'+t).classList.add('act');
+  document.querySelectorAll('.bn').forEach(b=>b.classList.toggle('act',b.dataset.t===t));
+  R();
+}
+function setOR(room){
+  orRoom=room;
+  // update bovie serials for all cases
+  C.forEach((_,i)=>{if(!S[i].wl._bovieManual)S[i].wl.bovieSerial=BOVIE_SERIALS[room]||'';});
+  R();
+}
+function toggleStatus(idx){
+  const s=S[idx];
+  s.roomStatus=s.roomStatus==='in'?'out':'in';
+  if(s.roomStatus==='out'){s.delay.active=false;}
+  R();
+}
+function toggleDelay(idx){
+  S[idx].delay.active=!S[idx].delay.active;
+  R();
+  if(S[idx].delay.active)setTimeout(()=>{const el=document.getElementById('delayTa');if(el)el.focus();},50);
+}
+function setDelayText(v){S[cur].delay.text=v;}
+// Timeline
+function tapEv(eid){const s=S[cur];if(s.ev[eid]){s.editing=s.editing===eid?null:eid;R();return;}s.ev[eid]={t:N()};s.editing=null;R();}
+function undoEv(eid){delete S[cur].ev[eid];S[cur].editing=null;R();}
+function saveTime(eid){const inp=document.getElementById('te-'+eid);if(!inp?.value)return;const p=inp.value.split(':'),d=new Date(S[cur].ev[eid].t);d.setHours(+p[0],+p[1],p[2]?+p[2]:0);S[cur].ev[eid].t=d;S[cur].editing=null;R();}
+function navEv(eid,t){if(S[cur].ev[eid]){S[cur].editing=S[cur].editing===eid?null:eid;R();return;}sw(t);}
+function specNone(){S[cur].ev.specimen={t:N(),d:"None"};R();}
+function specLog(){const i=document.getElementById('sp-i');if(!i?.value?.trim())return;S[cur].ev.specimen={t:N(),d:i.value.trim()};R();}
+// Counts
+function setCntVal(cat,type,v){S[cur].cnt[cat][type]=Math.max(0,parseInt(v)||0);R();}
+function addCnt(cat,type){S[cur].cnt[cat][type]++;R();}
+function signCnt(type,val){if(!val)return;S[cur].cnt[type+'Sig']={name:val,t:now()};R();}
+function unsignCnt(type){S[cur].cnt[type+'Sig']=null;R();}
+function confirmCounts(){S[cur].ev.counts={t:N(),d:"All counts verified"};sw('tl');}
+function setEbl(v){S[cur].ebl=parseInt(v)||0;}
+function setIrr(v){S[cur].irr=parseInt(v)||0;}
+// Implants
+function capPhoto(i){document.getElementById('cam-'+i).click();}
+function onPhoto(i,input){
+  if(!input.files?.[0])return;
+  const r=new FileReader();
+  r.onload=e=>{S[cur].impPhotos[i]=e.target.result;S[cur].impData[i]={st:"reading"};R();readSticker(i,e.target.result);};
+  r.readAsDataURL(input.files[0]);
+}
+async function readSticker(idx,dataUrl){
+  const s=S[cur],c=C[cur],comp=s.imps[idx]?.nm||"component";
+  try{
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:300,
+        messages:[{role:"user",content:[
+          {type:"image",source:{type:"base64",media_type:"image/jpeg",data:dataUrl.split(",")[1]}},
+          {type:"text",text:`Orthopedic implant sticker for ${comp} (${c.proc}). Return ONLY JSON:\n{"manufacturer":"","product":"","size":"","lot":"","ref":""}\nEmpty string if not visible. No markdown.`}
+        ]}]})
+    });
+    const data=await resp.json();
+    const txt=data.content?.find(b=>b.type==="text")?.text||"";
+    s.impData[idx]={st:"done",...JSON.parse(txt.replace(/```json|```/g,"").trim())};
+  }catch(e){s.impData[idx]={st:"error"};}
+  R();
+}
+function setImpF(i,f,v){if(!S[cur].impData[i])S[cur].impData[i]={st:"manual"};S[cur].impData[i][f]=v;}
+function addImpSlot(){S[cur].imps.push({nm:"Additional"});R();}
+function confirmImps(){
+  const s=S[cur];
+  s.ev.implant={t:N(),d:s.imps.map((imp,i)=>{const d=s.impData[i]||{};return`${imp.nm}: ${d.size||"?"} L:${d.lot||"?"}`}).join(" · ")};R();
+}
+// Worklist
+function setWL(f,v){S[cur].wl[f]=v;if(f==='bovieSerial')S[cur].wl._bovieManual=true;R();}
+function setWLtxt(f,v){S[cur].wl[f]=v;}
+function togEquip(f){S[cur].wl[f]=!S[cur].wl[f];R();}
+function togClosure(f){S[cur].wl[f]=!S[cur].wl[f];R();}
+// Staff (global)
+function setStaff(role,v){GSTAFF[role]=v;}
+function setNotes(v){S[cur].notes=v;}
+
+// ════ RENDER — HELPERS ════
+function globalSigBlock(type){
+  const sig=S[cur].cnt[type+'Sig'];
+  const lbl=type==='pre'?'Sign Pre-Op Count…':'Sign Final Count…';
+  if(sig)return`<div class="cnt-sig-done"><span class="cnt-sig-name">✓ ${sig.name}</span><span class="cnt-sig-time">${sig.t}</span><span class="cnt-sig-chg" onclick="unsignCnt('${type}')">change</span></div>`;
+  return`<select class="cnt-sig-sel" onchange="signCnt('${type}',this.value)"><option value="">${lbl}</option>${NURSE_OPTS}</select>`;
+}
+function cntRow(cat,label){
+  const ct=S[cur].cnt[cat];
+  const hasPre=ct.pre>0, hasFinal=ct.final>0;
+  const match=hasPre&&hasFinal&&ct.pre===ct.final?'ok':hasPre&&hasFinal&&ct.pre!==ct.final?'bad':'pend';
+  const pCls=hasPre?'ok':'';
+  const fCls=hasFinal?(ct.final===ct.pre?'ok':'bad'):'';
+  return`<tr>
+    <td><span class="cnt-item-name">${label}</span></td>
+    <td><div class="cnt-cell">
+      <input class="cnt-inp ${pCls}" type="number" inputmode="numeric" value="${ct.pre}" onchange="setCntVal('${cat}','pre',this.value)" onclick="this.select()">
+      <div class="cnt-add" onclick="addCnt('${cat}','pre')">+</div>
+    </div></td>
+    <td><div class="cnt-cell">
+      <input class="cnt-inp ${fCls}" type="number" inputmode="numeric" value="${ct.final}" onchange="setCntVal('${cat}','final',this.value)" onclick="this.select()">
+      <div class="cnt-add" onclick="addCnt('${cat}','final')">+</div>
+    </div></td>
+    <td style="text-align:center">${match!=='pend'?`<span class="cnt-match ${match}">${match==='ok'?'✓':'✕'}</span>`:''}</td>
+  </tr>`;
+}
+function ynRow(f,val,label,sub='',noteField=''){
+  const wl=S[cur].wl;
+  const rowCls=val==='yes'?' tint-y':val==='no'?' tint-n':'';
+  let h=`<div class="wl-row${rowCls}">
+    <div class="wl-lbl">${label}${sub?`<div class="wl-sub">${sub}</div>`:''}
+    </div>
+    <div class="wl-ctrl">
+      <div class="yn-grp">
+        <button class="ynb yes${val==='yes'?' sel':''}" onclick="setWL('${f}','yes')">YES</button>
+        <button class="ynb no${val==='no'?' sel':''}" onclick="setWL('${f}','no')">NO</button>
+      </div>
+    </div>
+  </div>`;
+  if(noteField&&val==='no')h+=`<div class="wl-note"><textarea class="f-ta" style="min-height:48px" placeholder="Add note..." oninput="setWLtxt('${noteField}',this.value)">${wl[noteField]||''}</textarea></div>`;
+  return h;
+}
+function optRow(f,val,opts,label){
+  const pills=opts.map(o=>`<span class="opt-pill${val===o.v?' sel':''}" onclick="setWL('${f}','${o.v}')">${o.l}</span>`).join('');
+  return`<div class="wl-row">
+    <div class="wl-lbl">${label}</div>
+    <div class="wl-ctrl"><div class="opt-row" style="justify-content:flex-end">${pills}</div></div>
+  </div>`;
+}
+function selRow(f,val,opts,label){
+  const oStr=opts.map(o=>`<option value="${o.v}"${val===o.v?' selected':''}>${o.l}</option>`).join('');
+  return`<div class="wl-full"><div class="wl-full-lbl">${label}</div><select class="f-sel" onchange="setWL('${f}',this.value)">${oStr}</select></div>`;
+}
+
+// ════ MAIN RENDER ════
+function R(){
+  const c=C[cur],s=S[cur],events=mkEvs(c);
+  const isHip=c.jt==="Hip",k=!isHip;
+  const jClr=isHip?"var(--hp)":"var(--kn)";
+  const jBg=isHip?"rgba(168,85,247,.09)":"rgba(59,130,246,.09)";
+  const jBd=isHip?"rgba(168,85,247,.25)":"rgba(59,130,246,.25)";
+
+  // ── TOP MID: OR pills + status + delay ──
+  const inRoom=s.roomStatus==='in';
+  document.getElementById("topMid").innerHTML=`
+    <button class="or-pill${orRoom==='OR1'?' act':''}" onclick="setOR('OR1')">OR 1</button>
+    <button class="or-pill${orRoom==='OR2'?' act':''}" onclick="setOR('OR2')">OR 2</button>
+    <button class="status-btn ${inRoom?'sb-in':'sb-out'}" onclick="toggleStatus(${cur})">${inRoom?'■ IN ROOM':'○ OUT OF ROOM'}</button>
+    ${inRoom?`<button class="delay-btn" onclick="toggleDelay(${cur})">${s.delay.active?'▲ Hide Delay':'⏸ Delay'}</button>`:''}`;
+
+  const ds=document.getElementById("delayStrip");
+  ds.classList.toggle('show', inRoom && s.delay.active);
+  if(inRoom&&s.delay.active){
+    const ta=document.getElementById("delayTa");
+    if(ta)ta.value=s.delay.text;
+  }
+
+  // ── Case tabs ──
+  document.getElementById("ctabs").innerHTML=C.map((cs,i)=>
+    `<div class="ctab${i===cur?' act':''}" onclick="selCase(${i})">
+      <span class="ctab-dot" style="background:${cs.jt==='Hip'?'var(--hp)':'var(--kn)'}"></span>
+      ${cs.or} ${cs.ln}
+    </div>`).join('');
+
+  // ── Patient bar ──
+  const eT=s.ev.enter?.t,iT=s.ev.incision?.t,oT=s.ev.out?.t;
+  let pb=`<span class="pbar-name">${c.ln}, ${c.fn}</span>
+    <span class="pbar-proc" style="background:${jBg};color:${jClr};border:1px solid ${jBd}">${c.proc}</span>`;
+  c.al.forEach(a=>pb+=`<span class="pbar-al">⚠ ${a}</span>`);
+  pb+=`<div class="pbar-stats">
+    <div class="ps"><div class="psv">${fm(eT)}</div><div class="psl">IN</div></div>
+    <div class="ps"><div class="psv">${fm(iT)}</div><div class="psl">CUT</div></div>
+    <div class="ps"><div class="psv" style="color:${s.ebl>500?'var(--rdS)':'inherit'}">${s.ebl||'—'}</div><div class="psl">EBL</div></div>
+    <div class="ps"><div class="psv">${fm(oT)}</div><div class="psl">OUT</div></div>
+  </div>`;
+  document.getElementById("pbar").innerHTML=pb;
+
+  // ══ TIMELINE ══
+  let tl="";
+  if(s.ev.abx?.t&&!oT){
+    const r=240-Math.floor((N()-s.ev.abx.t)/60000);
+    if(r<=30&&r>0)tl+=`<div class="alrt w">⏰ Ancef redose in<span class="alrt-val">${r}m</span></div>`;
+    else if(r<=0)tl+=`<div class="alrt c">⚠ Ancef REDOSE NOW<span class="alrt-val">${Math.abs(r)}m over</span></div>`;
+  }
+  if(c.tq&&s.ev.tq_up?.t&&!s.ev.tq_down?.t){
+    const m=Math.floor((N()-s.ev.tq_up.t)/60000);
+    tl+=`<div class="alrt${m>=90?' c':' w'}">🔒 Tourniquet<span class="alrt-val" id="tqL">${elS(s.ev.tq_up.t,N())}</span></div>`;
+  }
+  let ph="";
+  events.forEach((ev,idx)=>{
+    const done=!!s.ev[ev.id],isEd=s.editing===ev.id,comp=s.ev[ev.id];
+    if(ev.ph!==ph){ph=ev.ph;tl+=`<div class="tl-ph">${ph}</div>`;}
+    let oc=ev.nav&&!done?`onclick="navEv('${ev.id}','${ev.nav}')"`:(ev.spec&&!done)?"":`onclick="tapEv('${ev.id}')"`;
+    tl+=`<div class="ev"><div class="ev-rail"><div class="ev-dot${done?' done':''}"></div>${idx<events.length-1?`<div class="ev-wire${done?' done':''}"></div>`:''}</div>
+      <div class="ev-card${done?' done':' pend'}" ${oc}>
+        <div class="ev-row"><span class="ev-title${done?' dn':''}">${ev.lb}</span>${done?`<span class="ev-stamp">${fm(comp.t)}</span>`:''}</div>
+        ${done&&comp.d?`<div class="ev-sub fl">${comp.d}</div>`:''}
+        ${!done&&ev.sb?`<div class="ev-sub">${ev.sb}</div>`:''}
+        ${ev.id==='tq_down'&&done&&s.ev.tq_up?.t?`<div class="ev-sub fl" style="color:var(--ywS)">TQ total: ${el(s.ev.tq_up.t,comp.t)}</div>`:''}
+        ${isEd&&done?(()=>{const t=comp.t,tv=`${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}:${String(t.getSeconds()).padStart(2,'0')}`;
+          return`<div class="ev-edit" onclick="event.stopPropagation()"><input type="time" step="1" value="${tv}" id="te-${ev.id}" class="te-inp"><div class="ebtn" onclick="saveTime('${ev.id}')">Save</div><div class="ebtn dng" onclick="undoEv('${ev.id}')">Undo</div></div>`;})():''}
+        ${ev.spec&&!done?`<div class="spec-row" onclick="event.stopPropagation()"><input class="spec-inp" id="sp-i" placeholder="e.g. Femoral head"><div class="spec-btn" style="background:var(--gn);color:#fff;border-color:var(--gnS)" onclick="specLog()">Log</div><div class="spec-btn" style="border-color:#2a2a2a;color:#888;background:#1a1a1a" onclick="specNone()">None</div></div>`:''}
+      </div></div>`;
+  });
+  document.getElementById("p-tl").innerHTML=tl;
+
+  // ══ COUNTS ══
+  let cn='';
+  cn+=`<div class="cnt-wrap">
+    <table class="cnt-table">
+      <thead><tr>
+        <th class="lh" style="width:35%">Item</th>
+        <th>Pre-Op</th>
+        <th>Final</th>
+        <th>Match</th>
+      </tr></thead>
+      <tbody>
+        ${cntRow('suture','Suture')}
+        ${cntRow('laps','Laps')}
+        ${cntRow('spinal','Spinal Needles')}
+        ${cntRow('blades','Blades')}
+        ${cntRow('bovietips','Bovie Tips')}
+      </tbody>
+    </table>
+    <div class="cnt-sig-row">
+      <div class="cnt-sig-box">
+        <div class="cnt-sig-hdr">Pre-Op Signature</div>
+        ${globalSigBlock('pre')}
+      </div>
+      <div class="cnt-sig-box">
+        <div class="cnt-sig-hdr">Final Signature</div>
+        ${globalSigBlock('final')}
+      </div>
+    </div>
+  </div>`;
+
+  // check all counts matched and both sigs present
+  const cats=['suture','laps','spinal','blades','bovietips'];
+  const allMatch=cats.every(cat=>{const ct=S[cur].cnt[cat];return ct.pre===ct.final;});
+  const allSigned=s.cnt.preSig&&s.cnt.finalSig;
+  if(allMatch&&allSigned&&!s.ev.counts)cn+=`<div class="big-btn ok" onclick="confirmCounts()">✓ All Counts Verified → Timeline</div>`;
+  else if(s.ev.counts)cn+=`<div class="done-banner">✓ Counts confirmed at ${fm(s.ev.counts.t)}</div>`;
+
+  cn+=`<div class="ebl-row">
+    <div class="ebl-box"><div class="ebl-lbl">EBL (mL)</div><input class="ebl-inp${s.ebl>500?' red':''}" type="number" inputmode="numeric" value="${s.ebl||''}" placeholder="0" onchange="setEbl(this.value)"></div>
+    <div class="ebl-box"><div class="ebl-lbl">Irrigation (mL)</div><input class="ebl-inp blu" type="number" inputmode="numeric" value="${s.irr||''}" placeholder="0" onchange="setIrr(this.value)"></div>
+  </div>`;
+  document.getElementById("p-cnt").innerHTML=cn;
+
+  // ══ IMPLANTS ══
+  let im='';
+  s.imps.forEach((imp,i)=>{
+    const photo=s.impPhotos[i],d=s.impData[i]||{};
+    im+=`<div class="imp-card"><input type="file" accept="image/*" capture="environment" class="cam-input" id="cam-${i}" onchange="onPhoto(${i},this)">
+      ${photo?`<div class="imp-cam has" onclick="capPhoto(${i})"><img src="${photo}"></div>`:`<div class="imp-cam" onclick="capPhoto(${i})">📷<div class="imp-cam-lbl">SCAN</div></div>`}
+      <div class="imp-body">
+        <div class="imp-nm">${imp.nm}</div>
+        ${d.st==='reading'?`<div class="imp-reading">⏳ Reading sticker…</div>`:''}
+        ${d.st==='done'?`<div class="imp-data">${d.manufacturer?`<span class="v">${d.manufacturer}</span> `:''}${d.product||''}<br>Size: <span class="v">${d.size||'—'}</span> · Lot: <span class="v">${d.lot||'—'}</span>${d.ref?` · Ref: ${d.ref}`:''}</div>
+          <input class="imp-fi" placeholder="Edit size" value="${d.size||''}" oninput="setImpF(${i},'size',this.value)">
+          <input class="imp-fi" placeholder="Edit lot" value="${d.lot||''}" oninput="setImpF(${i},'lot',this.value)">`:''}
+        ${d.st==='error'?`<div class="imp-err">Could not read — enter manually</div><input class="imp-fi" placeholder="Size" oninput="setImpF(${i},'size',this.value)"><input class="imp-fi" placeholder="Lot #" oninput="setImpF(${i},'lot',this.value)">`:''}
+        ${!d.st?`<div class="imp-data" style="color:#333">← Tap to scan sticker</div>`:''}
+      </div></div>`;
+  });
+  im+=`<div class="imp-add" onclick="addImpSlot()">+ Add Component</div>`;
+  const hasAny=s.imps.some((_,i)=>s.impPhotos[i]||s.impData[i]?.size);
+  im+=s.ev.implant?`<div class="done-banner">✓ Implants confirmed at ${fm(s.ev.implant.t)}</div>`:`<div class="big-btn${hasAny?' ok':''}" onclick="${hasAny?'confirmImps()':''}">Confirm Implants</div>`;
+  document.getElementById("p-imp").innerHTML=im;
+
+  // ══ WORKLIST ══
+  const wl=s.wl;
+  let wlh='';
+
+  // CASE INFORMATION
+  wlh+=`<div class="wl-sec"><div class="wl-hdr">Case Information</div>`;
+  wlh+=`<div class="wl-full"><div class="wl-full-lbl">Pre-Op Diagnosis</div><input class="f-inp" value="${wl.preOpDx}" oninput="setWLtxt('preOpDx',this.value)"></div>`;
+  wlh+=`<div class="wl-full"><div class="wl-full-lbl">Post-Op Diagnosis</div><input class="f-inp" value="${wl.postOpDx}" oninput="setWLtxt('postOpDx',this.value)"></div>`;
+  wlh+=`<div class="wl-full"><div class="wl-full-lbl">Procedure</div><input class="f-inp" value="${wl.procedure}" oninput="setWLtxt('procedure',this.value)"></div>`;
+  wlh+=optRow('anesType',wl.anesType,[{v:'Spinal',l:'Spinal'},{v:'General',l:'General'},{v:'Adductor Block',l:'Adductor Block'}],'Anesthesia Type');
+  wlh+=`</div>`;
+
+  // PATIENT VERIFICATION
+  wlh+=`<div class="wl-sec"><div class="wl-hdr">Patient Verification</div>`;
+  wlh+=ynRow('identityConfirmed',wl.identityConfirmed,'Identity, side, procedure, allergies & consent confirmed');
+  wlh+=ynRow('skinIntact',wl.skinIntact,'Skin at surgical site is clean, dry, intact','','skinNote');
+  wlh+=ynRow('siteMarking',wl.siteMarking,'Site marking confirmed');
+  wlh+=ynRow('patientAgreesSite',wl.patientAgreesSite,'Patient agrees to site');
+  wlh+=`</div>`;
+
+  // ASSESSMENT
+  wlh+=`<div class="wl-sec"><div class="wl-hdr">Assessment</div>`;
+  wlh+=optRow('woundClass',wl.woundClass,[{v:'1',l:'Class 1'},{v:'2',l:'Class 2'},{v:'3',l:'Class 3'},{v:'4',l:'Class 4'}],'Wound Class');
+  wlh+=optRow('psychosocial',wl.psychosocial,[{v:'calm',l:'Calm'},{v:'crying',l:'Crying'},{v:'anxious',l:'Anxious'}],'Psychosocial Status');
+  wlh+=`</div>`;
+
+  // POSITIONING
+  wlh+=`<div class="wl-sec"><div class="wl-hdr">Positioning</div>`;
+  wlh+=optRow('posBody',wl.posBody,[{v:'supine',l:'Supine'},{v:'lateral',l:'Lateral Decub'},{v:'prone',l:'Prone'}],'Body Position');
+  wlh+=optRow('posLA',wl.posLA,[{v:'straight',l:'Straight'},{v:'crossed',l:'Crossed'}],'Left Arm');
+  wlh+=optRow('posRA',wl.posRA,[{v:'straight',l:'Straight'},{v:'crossed',l:'Crossed'}],'Right Arm');
+  wlh+=ynRow('safetyStrap',wl.safetyStrap,'Safety Strap — Body');
+  wlh+=ynRow('safetyArmStrap',wl.safetyArmStrap,'Safety Strap — Arms');
+  wlh+=`</div>`;
+
+  // PREP
+  wlh+=`<div class="wl-sec"><div class="wl-hdr">Prep</div>`;
+  wlh+=`<div class="wl-row"><div class="wl-lbl">Preparation Type</div><div class="wl-ctrl"><div class="opt-row">
+    ${[{v:'alcohol_chloroprep',l:'Alcohol + ChloraPrep'},{v:'betadine',l:'Betadine'},{v:'duraprep',l:'DuraPrep'}].map(o=>`<span class="opt-pill${wl.prepType===o.v?' sel':''}" onclick="setWL('prepType','${o.v}')">${o.l}</span>`).join('')}
+  </div></div></div>`;
+  wlh+=`<div class="wl-full"><div class="wl-full-lbl">Prep Staff</div><select class="f-sel" onchange="setWL('prepStaff',this.value)"><option value="">Select...</option>${NURSE_OPTS.replace('value=""','value="" selected')}</select></div>`;
+  wlh+=`</div>`;
+
+  // BOVIE / ELECTROSURGERY
+  wlh+=`<div class="wl-sec"><div class="wl-hdr">Bovie / Electrosurgery</div>`;
+  wlh+=`<div class="wl-full"><div class="wl-full-lbl">Serial Number (${orRoom})</div><input class="f-inp" value="${wl.bovieSerial}" placeholder="Serial #" oninput="setWL('bovieSerial',this.value)"></div>`;
+  wlh+=optRow('bovieMode',wl.bovieMode,[{v:'monopolar',l:'Monopolar'},{v:'bipolar',l:'Bipolar'}],'Mode');
+  wlh+=`<div class="f-row"><div class="f-col"><div class="f-lbl">Coag Setting</div><input class="f-inp" type="number" inputmode="numeric" value="${wl.bovieCoag}" onchange="setWL('bovieCoag',this.value)"></div><div class="f-col"><div class="f-lbl">Cut Setting</div><input class="f-inp" type="number" inputmode="numeric" value="${wl.bovieCut}" onchange="setWL('bovieCut',this.value)"></div></div>`;
+  wlh+=ynRow('bovieGrndPad',wl.bovieGrndPad,'Grounding Pad Applied');
+  wlh+=optRow('bovieSkinSite',wl.bovieSkinSite,[{v:'clean_dry',l:'Clean, Dry'},{v:'moist',l:'Moist'},{v:'oily',l:'Oily'}],'Skin Site Before Pad');
+  wlh+=`<div class="wl-full"><div class="wl-full-lbl">Placed By</div><select class="f-sel" onchange="setWL('boviePlacedBy',this.value)"><option value="">Select...</option>${NURSE_OPTS}</select></div>`;
+  wlh+=`<div class="f-row"><div class="f-col"><div class="f-lbl">Site — Side</div>
+    <select class="f-sel" onchange="setWL('bovieSiteRL',this.value)">
+      <option value="right"${wl.bovieSiteRL==='right'?' selected':''}>Right</option>
+      <option value="left"${wl.bovieSiteRL==='left'?' selected':''}>Left</option>
+    </select></div>
+    <div class="f-col"><div class="f-lbl">Site — Location</div>
+    <select class="f-sel" onchange="setWL('bovieSiteLoc',this.value)">
+      <option value="abdomen"${wl.bovieSiteLoc==='abdomen'?' selected':''}>Abdomen</option>
+      <option value="flank"${wl.bovieSiteLoc==='flank'?' selected':''}>Flank</option>
+    </select></div></div>`;
+  wlh+=`<div class="f-row"><div class="f-col"><div class="f-lbl">Lot #</div><input class="f-inp" placeholder="Lot #" value="${wl.bovieLot||''}" oninput="setWLtxt('bovieLot',this.value)"></div><div class="f-col"><div class="f-lbl">Exp Date</div><input class="f-inp" placeholder="MM/YYYY" value="${wl.bovieExp||''}" oninput="setWLtxt('bovieExp',this.value)"></div></div>`;
+  wlh+=ynRow('boviePostSkin',wl.boviePostSkin,'Post-Op Skin Intact at Pad Site','Clean, dry, intact');
+  wlh+=`</div>`;
+
+  // EQUIPMENT
+  wlh+=`<div class="wl-sec"><div class="wl-hdr">Equipment</div>`;
+  [{f:'equipBovie',l:'Bovie'},{f:'equipHipPad',l:'Hip Pad'},{f:'equipVelocity',l:'Velocity Bump'},{f:'equipNeptune',l:'Neptune Suction'}].forEach(eq=>{
+    wlh+=`<div class="chk-row"><span class="chk-lbl">${eq.l}</span><div class="chk-box${wl[eq.f]?' on':''}" onclick="togEquip('${eq.f}')">${wl[eq.f]?'✓':''}</div></div>`;
+  });
+  wlh+=`<div class="wl-full" style="padding-top:8px"><div class="f-lbl" style="margin-bottom:5px">Additional Equipment</div><input class="f-inp" placeholder="e.g. C-arm, special retractor…" value="${wl.equipExtra||''}" oninput="setWLtxt('equipExtra',this.value)"></div>`;
+  wlh+=`</div>`;
+
+  // MEDICATIONS
+  wlh+=`<div class="wl-sec"><div class="wl-hdr">Medications / Irrigation</div>`;
+  wlh+=ynRow('irrigYN',wl.irrigYN,'Irrigation Used');
+  if(wl.irrigYN==='yes'){
+    wlh+=`<div class="f-row"><div class="f-col"><div class="f-lbl">Type</div>
+      <select class="f-sel" onchange="setWL('irrigType',this.value)">
+        <option value="sterile_water"${wl.irrigType==='sterile_water'?' selected':''}>Sterile Water</option>
+        <option value="saline"${wl.irrigType==='saline'?' selected':''}>Normal Saline</option>
+        <option value="abx_saline"${wl.irrigType==='abx_saline'?' selected':''}>Antibiotic Saline</option>
+      </select></div>
+      <div class="f-col"><div class="f-lbl">Total Used</div>
+      <select class="f-sel" onchange="setWL('irrigTotal',this.value)">
+        <option value="500ml"${wl.irrigTotal==='500ml'?' selected':''}>500 mL</option>
+        <option value="1000ml"${wl.irrigTotal==='1000ml'?' selected':''}>1000 mL</option>
+        <option value="2000ml"${wl.irrigTotal==='2000ml'?' selected':''}>2000 mL</option>
+        <option value="3000ml"${wl.irrigTotal==='3000ml'?' selected':''}>3000 mL</option>
+      </select></div></div>`;
+  }
+  wlh+=`</div>`;
+
+  // CLOSING
+  wlh+=`<div class="wl-sec"><div class="wl-hdr">Closing</div>`;
+  wlh+=`<div class="wl-full"><div class="wl-full-lbl">Site</div><input class="f-inp" value="${wl.closingSite}" oninput="setWLtxt('closingSite',this.value)"></div>`;
+  wlh+=`<div class="wl-full"><div class="wl-full-lbl">Applied By</div><select class="f-sel" onchange="setWL('closingBy',this.value)"><option value="">Select...</option>${NURSE_OPTS}</select></div>`;
+  wlh+=`<div class="wl-row"><div class="wl-lbl">Closure</div><div class="wl-ctrl"><div class="opt-row">
+    <span class="opt-pill${wl.closureDermabond?' sel-gn':''}" onclick="togClosure('closureDermabond')">Dermabond</span>
+    <span class="opt-pill${wl.closureSuture?' sel-gn':''}" onclick="togClosure('closureSuture')">Suture</span>
+    <span class="opt-pill${wl.closureStaples?' sel-gn':''}" onclick="togClosure('closureStaples')">Staples</span>
+  </div></div></div>`;
+  wlh+=`<div class="wl-row"><div class="wl-lbl">Dressing</div><div class="wl-ctrl"><div class="opt-row">
+    <span class="opt-pill${wl.dressingType==='mepilex'?' sel':''}" onclick="setWL('dressingType','mepilex')">Mepilex</span>
+    <span class="opt-pill${wl.dressingType==='tegaderm'?' sel':''}" onclick="setWL('dressingType','tegaderm')">Tegaderm</span>
+    <span class="opt-pill${wl.dressingType==='ace'?' sel':''}" onclick="setWL('dressingType','ace')">ACE Wrap</span>
+  </div></div></div>`;
+  wlh+=ynRow('skinPost',wl.skinPost,'Skin Post-Surgery: Clean, Dry, Intact');
+  wlh+=`</div>`;
+
+  // BODY TEMP / WARMING
+  wlh+=`<div class="wl-sec"><div class="wl-hdr">Temperature</div>`;
+  wlh+=optRow('bodyTemp',wl.bodyTemp,[{v:'normal',l:'Normal Throughout'},{v:'hypothermic',l:'Hypothermic'},{v:'hyperthermic',l:'Hyperthermic'}],'Body Temperature');
+  wlh+=ynRow('warmingUnit',wl.warmingUnit,'Warming Unit Used (Bair Hugger)');
+  wlh+=`</div>`;
+
+  document.getElementById("p-wl").innerHTML=wlh;
+
+  // ══ INFO ══
+  let inf='';
+  inf+=`<div class="isec"><div class="ihdr">Circulator Notes</div><textarea class="nta" placeholder="Complications, events, deviations from plan…" oninput="setNotes(this.value)">${s.notes}</textarea></div>`;
+
+  inf+=`<div class="isec"><div class="ihdr">Staff in Room <span style="font-size:9px;color:#3a3a3a;font-weight:400;text-transform:none">(shared across all cases today)</span></div>`;
+  [{role:'sg',lb:'Surgeon'},{role:'ast',lb:'Assist'},{role:'anesP',lb:'Anesthesia'},{role:'scrub',lb:'Scrub'},{role:'circ',lb:'Circulator'}].forEach(r=>{
+    inf+=`<div class="staff-row"><span class="staff-role">${r.lb}</span>
+      <select class="staff-sel" onchange="setStaff('${r.role}',this.value)">
+        <option value="">—</option>
+        ${STAFF_LIST.map(n=>`<option value="${n}"${GSTAFF[r.role]===n?' selected':''}>${n}</option>`).join('')}
+      </select></div>`;
+  });
+  inf+=`</div>`;
+
+  inf+=`<div class="isec"><div class="ihdr">Reference</div>`;
+  [{k:'MRN',v:c.mrn},{k:'DOB',v:c.dob},{k:'Weight',v:c.wt+'kg'},{k:'ASA',v:c.asa},{k:'Anesthesia',v:c.anes},{k:'Pre-op VS',v:c.preV}]
+    .forEach(r=>inf+=`<div class="irow"><span class="ik">${r.k}</span><span class="iv2">${r.v}</span></div>`);
+  if(c.tq){const u=s.ev.tq_up?.t,d=s.ev.tq_down?.t;inf+=`<div class="irow"><span class="ik" style="color:var(--ywS)">TQ Time</span><span class="iv2" style="color:var(--ywS)">${u?(d?el(u,d):'Running'):'—'}</span></div>`;}
+  inf+=`</div>`;
+
+  if(oT){
+    inf+=`<div class="ho"><div class="ho-title">● PACU Handoff — Surgical Nursing</div>`;
+    const rows=[
+      {k:'Patient',   v:`${c.ln}, ${c.fn} · ${c.age}${c.sex} · ${c.wt}kg`},
+      {k:'Procedure', v:`${c.proc} — ${GSTAFF.sg||c.sg}`},
+      {k:'Allergies', v:c.al.length?c.al.join(', '):'NKDA'},
+      {k:'EBL',       v:`${s.ebl} mL`},
+      {k:'Implants',  v:s.ev.implant?.d||'—'},
+    ];
+    if(c.tq&&s.ev.tq_up?.t&&s.ev.tq_down?.t)rows.push({k:'TQ Time',v:el(s.ev.tq_up.t,s.ev.tq_down.t)});
+    rows.push({k:'Counts',   v:s.ev.counts?.d||'—'});
+    rows.push({k:'Dressing', v:wl.dressingType==='mepilex'?'Mepilex':wl.dressingType==='tegaderm'?'Tegaderm':'ACE Wrap'});
+    rows.push({k:'Drain',    v:'None'});
+    rows.push({k:'Case Time',v:el(eT,oT)});
+    rows.forEach(r=>inf+=`<div class="ho-row"><span class="ho-k">${r.k}</span><span class="ho-v">${r.v}</span></div>`);
+    if(s.notes)inf+=`<div class="ho-note">${s.notes}</div>`;
+    inf+=`</div>`;
+  }
+  document.getElementById("p-info").innerHTML=inf;
+}
+
+// ════ CLOCK / TIMERS ════
+function tick(){
+  const n=N();
+  document.getElementById("clk").textContent=n.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",second:"2-digit"});
+  const s=S[cur],eT=s.ev.enter?.t,oT=s.ev.out?.t,ct=document.getElementById("caseTimer");
+  if(eT&&!oT){ct.textContent="⏱ "+el(eT,n);ct.style.display="";}
+  else if(eT&&oT){ct.textContent="✓ "+el(eT,oT);ct.style.color="var(--gnS)";ct.style.display="";}
+  else{ct.style.display="none";}
+  const tq=document.getElementById("tqL");
+  if(tq&&s.ev.tq_up?.t&&!s.ev.tq_down?.t)tq.textContent=elS(s.ev.tq_up.t,n);
+}
+setInterval(tick,1000);
+tick();
+R();
+</script>
+</body>
+</html>
