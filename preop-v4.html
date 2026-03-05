@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TJR Hub · Pre-Op</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080808;--card:#0d0d0d;--bdr:#1e1e1e;
+  --tx:#e0e0e0;--tx2:#9a9a9a;--dm:#5a5a5a;
+  --gn:#2a6b3f;--gnB:rgba(42,107,63,0.12);--gnS:#3db870;--gnD:rgba(42,107,63,0.06);
+  --yw:#8a6d2b;--ywB:rgba(138,109,43,0.10);--ywS:#d4a843;
+  --rd:#8b2d2d;--rdB:rgba(139,45,45,0.12);--rdS:#e06060;--rdD:rgba(139,45,45,0.06);
+  --kn:#3b82f6;--hp:#a855f7;
+  --m:'DM Mono',monospace;--s:'IBM Plex Sans',sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-family:var(--s);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── VIEWS ── */
+#listView,#detailView{position:absolute;inset:0;display:flex;flex-direction:column;transition:transform .28s cubic-bezier(.4,0,.2,1)}
+#listView{transform:translateX(0)}
+#detailView{transform:translateX(100%);z-index:10;background:var(--bg)}
+.slide-in #listView{transform:translateX(-28%)}
+.slide-in #detailView{transform:translateX(0)}
+
+/* ── LIST HEADER ── */
+.lh{padding:16px 16px 10px;border-bottom:1px solid #141414;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.lh-title{font-size:20px;font-weight:700;letter-spacing:-.3px}
+.lh-sub{font-size:10px;color:var(--dm);font-family:var(--m);margin-top:3px}
+.lh-ct{font-size:26px;font-weight:700;font-family:var(--m);line-height:1}
+.lh-cl{font-size:9px;color:var(--dm);font-family:var(--m);text-align:right}
+.card-scroll{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+
+/* ── PATIENT CARDS ── */
+.ptcard{background:var(--card);border-radius:14px;border:1px solid #1e1e1e;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent;active:none}
+.ptcard:active{opacity:.8;transform:scale(.99)}
+.ptcard.st-waiting{border-color:#222}
+.ptcard.st-preop{border-color:rgba(59,130,246,0.3)}
+.ptcard.st-anes{border-color:rgba(138,109,43,0.35)}
+.ptcard.st-orready{border-color:rgba(42,107,63,0.45)}
+.ptcard-top{display:flex;align-items:center;gap:10px;padding:13px 12px}
+.ptcard-jbar{width:4px;border-radius:2px;align-self:stretch;flex-shrink:0}
+.ptcard-time{font-size:19px;font-weight:700;font-family:var(--m);min-width:50px;text-align:center;line-height:1}
+.ptcard-timesub{font-size:9px;color:var(--dm);font-family:var(--m);text-align:center;margin-top:3px}
+.ptcard-info{flex:1;min-width:0}
+.ptcard-name{font-size:16px;font-weight:700;letter-spacing:-.2px}
+.ptcard-detail{font-size:11px;color:var(--tx2);font-family:var(--m);margin-top:2px}
+.ptcard-badges{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap;align-items:center}
+.badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;font-family:var(--m)}
+.badge.knee{background:rgba(59,130,246,0.1);color:var(--kn);border:1px solid rgba(59,130,246,0.2)}
+.badge.hip{background:rgba(168,85,247,0.1);color:var(--hp);border:1px solid rgba(168,85,247,0.2)}
+.badge.allergy{background:var(--rdB);color:var(--rdS);border:1px solid rgba(139,45,45,0.25)}
+.badge.bay{background:rgba(59,130,246,0.08);color:#60a5fa;border:1px solid rgba(59,130,246,0.18);font-size:9px}
+.ptcard-foot{padding:7px 12px 9px;border-top:1px solid #161616;display:flex;align-items:center;justify-content:space-between}
+.sp{font-size:10px;font-weight:700;padding:4px 11px;border-radius:10px;font-family:var(--m);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.sp-waiting{background:#1a1a1a;color:#5a5a5a;border:1px solid #2a2a2a}
+.sp-preop{background:rgba(59,130,246,0.1);color:#60a5fa;border:1px solid rgba(59,130,246,0.25)}
+.sp-anes{background:var(--ywB);color:var(--ywS);border:1px solid rgba(138,109,43,0.3)}
+.sp-orready{background:var(--gnB);color:var(--gnS);border:1px solid rgba(42,107,63,0.3)}
+.vmini{font-size:10px;color:#4a4a4a;font-family:var(--m)}
+.vmini b{color:#7a7a7a;font-weight:500}
+
+/* ── DETAIL HEADER ── */
+.dh{padding:10px 12px;border-bottom:1px solid #141414;flex-shrink:0;display:flex;align-items:flex-start;gap:10px}
+/* 44×44 back button */
+.back-btn{width:44px;height:44px;border-radius:10px;background:#1a1a1a;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.back-btn:active{background:#252525}
+.dh-center{flex:1;min-width:0;padding-top:2px}
+.dh-name{font-size:15px;font-weight:700;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dh-meta{font-size:10px;color:#6a6a6a;font-family:var(--m);margin-top:2px}
+.dh-allergy{font-size:10px;color:var(--rdS);font-family:var(--m);font-weight:700;margin-top:2px}
+.dh-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;min-width:108px}
+/* status button — 44px height */
+.scb{width:100%;min-height:44px;padding:8px 10px;border-radius:9px;font-family:var(--m);font-size:11px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;border:1px solid #2a2a2a;transition:all .14s;line-height:1.2;text-align:center}
+.scb:active{transform:scale(.93)}
+.scb-waiting{background:#1a1a1a;color:#5a5a5a;border-color:#2a2a2a}
+.scb-preop{background:rgba(59,130,246,0.13);color:#60a5fa;border-color:rgba(59,130,246,0.4)}
+.scb-anes{background:var(--ywB);color:var(--ywS);border-color:rgba(138,109,43,0.35)}
+.scb-orready{background:var(--gnB);color:var(--gnS);border-color:rgba(42,107,63,0.42)}
+.scb-done{background:var(--gnD);color:#3db870aa;border-color:rgba(42,107,63,0.2);cursor:default}
+.st-times{font-size:9px;color:#4a4a4a;font-family:var(--m);text-align:right;line-height:1.6}
+
+/* ── TAB BAR — 62px tall ── */
+.tab-bar{display:flex;border-top:1px solid #141414;flex-shrink:0;background:var(--card);padding-bottom:env(safe-area-inset-bottom,0)}
+.tab-btn{flex:1;padding:10px 2px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;-webkit-tap-highlight-color:transparent;border:none;background:none;min-height:52px}
+.tab-btn:active{background:rgba(255,255,255,0.03)}
+.tab-icon{font-size:19px;line-height:1}
+.tab-label{font-size:9px;font-family:var(--m);font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#5a5a5a}
+.tab-btn.active .tab-icon{filter:brightness(1.4)}
+.tab-btn.active .tab-label{color:var(--kn)}
+.tab-dot{width:5px;height:5px;border-radius:50%;background:transparent;margin-top:1px}
+.tab-btn.issues .tab-dot{background:var(--rdS)}
+.tab-btn.done .tab-dot{background:var(--gnS)}
+
+/* ── CONTENT ── */
+.content-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative}
+.section{padding:14px 14px 100px}
+.sec-lbl{font-size:10px;font-weight:700;color:var(--dm);font-family:var(--m);letter-spacing:.09em;text-transform:uppercase;margin-bottom:10px}
+.divider{height:1px;background:#141414;margin:12px 0}
+
+/* ── BAY ── */
+.bay-sel{width:100%;padding:13px 14px;background:#111;border:1px solid #1e1e1e;border-radius:10px;color:var(--tx);font-size:15px;font-family:var(--m);outline:none;appearance:none;-webkit-appearance:none;cursor:pointer;margin-bottom:2px}
+.bay-sel:focus{border-color:#3a5a8a}
+.bay-sel option{background:#1a1a1a}
+
+/* ── WORKLIST ── */
+.wl-item{padding:11px 0;border-bottom:1px solid #141414;transition:background .1s}
+.wl-item:last-child{border-bottom:none}
+.wl-item.sel-yes{background:var(--gnD);margin:0 -14px;padding:11px 14px;border-radius:0}
+.wl-item.sel-no{background:var(--rdD);margin:0 -14px;padding:11px 14px;border-radius:0}
+.wl-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.wl-lbl{font-size:14px;color:#d8d8d8;line-height:1.3;font-weight:500;flex:1}
+.wl-sub{font-size:10px;color:#5a5a5a;font-family:var(--m);margin-top:2px}
+.wl-wit{font-size:10px;color:var(--gnS);font-family:var(--m);margin-top:3px}
+/* bigger YES/NO/NA — 52×48px */
+.wl-btns{display:flex;gap:5px;flex-shrink:0;margin-top:0}
+.wlb{width:52px;height:48px;border-radius:8px;font-size:11px;font-weight:700;font-family:var(--m);border:1px solid #252525;background:#161616;color:#4a4a4a;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .12s;display:flex;align-items:center;justify-content:center}
+.wlb:active{transform:scale(.9)}
+.wlb.yes.sel{background:var(--gnB);color:var(--gnS);border-color:rgba(42,107,63,0.5);box-shadow:0 0 0 1px rgba(42,107,63,0.15)}
+.wlb.no.sel{background:var(--rdB);color:var(--rdS);border-color:rgba(139,45,45,0.5);box-shadow:0 0 0 1px rgba(139,45,45,0.15)}
+.wlb.na.sel{background:#1e1e1e;color:#7a7a7a;border-color:#3a3a3a}
+
+/* ── CONSENTS ── */
+.consent-block{background:#111;border:1px solid #1e1e1e;border-radius:10px;overflow:hidden;margin-top:8px}
+.consent-row{display:flex;align-items:center;gap:10px;padding:13px 12px;border-bottom:1px solid #141414;min-height:60px}
+.consent-row:last-child{border-bottom:none}
+.consent-info{flex:1;min-width:0}
+.consent-name{font-size:13px;font-weight:600;color:#d0d0d0}
+.consent-detail{font-size:10px;color:#5a5a5a;font-family:var(--m);margin-top:2px}
+/* 44px+ witness button */
+.wit-btn{height:44px;padding:0 18px;border-radius:8px;font-family:var(--m);font-size:12px;font-weight:700;border:1px solid rgba(42,107,63,0.4);background:var(--gnB);color:var(--gnS);cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.wit-btn:active{opacity:.7;transform:scale(.94)}
+.wit-badge{height:44px;padding:0 12px;border-radius:8px;font-family:var(--m);font-size:10px;font-weight:700;background:rgba(42,107,63,0.07);color:var(--gnS);border:1px solid rgba(42,107,63,0.2);white-space:nowrap;flex-shrink:0;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.3;gap:4px}
+
+/* ── VITALS ── */
+.nex-bar{display:flex;align-items:center;gap:8px;padding:11px 13px;background:#111;border:1px solid #1e1e1e;border-radius:10px;margin-bottom:10px}
+.nex-dot{width:9px;height:9px;border-radius:50%;background:#2a2a2a;flex-shrink:0}
+.nex-dot.live{background:var(--gnS);box-shadow:0 0 7px var(--gnS);animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.nex-lbl{font-size:11px;font-family:var(--m);font-weight:700;flex:1}
+.nex-time{font-size:10px;color:var(--dm);font-family:var(--m)}
+/* 44px connect button */
+.conn-btn{height:44px;padding:0 14px;border-radius:8px;font-family:var(--m);font-size:12px;font-weight:700;border:1px solid rgba(42,107,63,0.4);background:var(--gnB);color:var(--gnS);cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.conn-btn.on{border-color:rgba(139,45,45,0.3);background:var(--rdB);color:var(--rdS)}
+.conn-btn:active{opacity:.7}
+.vitals-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.vt-cell{background:#111;border:1px solid #1e1e1e;border-radius:10px;padding:10px 6px;text-align:center}
+.vt-lbl{font-size:9px;color:var(--dm);font-family:var(--m);letter-spacing:.05em;text-transform:uppercase}
+.vt-val{font-size:21px;font-weight:700;font-family:var(--m);line-height:1.2;margin-top:2px}
+.vt-unit{font-size:9px;color:var(--dm);font-family:var(--m)}
+.ok{color:#e8e8e8}.warn{color:var(--ywS)}.bad{color:var(--rdS)}.mt{color:#2a2a2a;font-size:16px}
+.manual-form{background:#111;border:1px solid #1e1e1e;border-radius:10px;padding:14px;margin-bottom:10px}
+.mf-head{font-size:10px;font-weight:700;color:#6a6a6a;font-family:var(--m);letter-spacing:.07em;text-transform:uppercase;margin-bottom:12px}
+.mf-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.mf-item label{font-size:9px;color:var(--dm);font-family:var(--m);display:block;margin-bottom:4px}
+/* large number inputs */
+.mf-inp{width:100%;padding:10px 6px;background:#1a1a1a;border:1px solid #252525;border-radius:7px;color:var(--tx);font-size:18px;font-family:var(--m);outline:none;text-align:center}
+.mf-inp:focus{border-color:#3a5a8a}
+/* 48px record button */
+.mf-btn{width:100%;height:48px;border-radius:9px;background:var(--gnB);border:1px solid rgba(42,107,63,0.4);color:var(--gnS);font-family:var(--m);font-size:14px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.mf-btn:active{opacity:.7}
+.vh-wrap{margin-top:6px}
+.vh-head{font-size:10px;font-weight:700;color:var(--dm);font-family:var(--m);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px}
+.vh-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #141414;font-family:var(--m);font-size:11px}
+.vh-time{color:var(--dm);min-width:50px}
+.vh-vals{flex:1;color:#8a8a8a;line-height:1.5}
+.vh-src{font-size:9px;padding:2px 6px;border-radius:4px;background:#181818;color:var(--dm);border:1px solid #252525;flex-shrink:0}
+.vh-src.live{background:rgba(42,107,63,0.1);color:var(--gnS);border-color:rgba(42,107,63,0.2)}
+
+/* ── ORDERS ── */
+.orders-grp{margin-bottom:14px}
+.grp-head{font-size:10px;font-weight:700;color:var(--dm);font-family:var(--m);letter-spacing:.07em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.grp-line{flex:1;height:1px;background:#1c1c1c}
+.ord-item{display:flex;align-items:flex-start;gap:10px;padding:13px 12px;background:#0f0f0f;border-radius:9px;border:1px solid #181818;cursor:pointer;-webkit-tap-highlight-color:transparent;margin-bottom:3px;min-height:52px;transition:all .12s}
+.ord-item:last-child{margin-bottom:0}
+.ord-item.auto{border-left:3px solid rgba(42,107,63,0.35)}
+.ord-item.chk{background:rgba(42,107,63,0.07);border-color:rgba(42,107,63,0.28)}
+.ord-item.given{background:rgba(42,107,63,0.05);border-color:rgba(42,107,63,0.2);cursor:default}
+.ord-item:active:not(.given){opacity:.78}
+/* 26px checkbox */
+.ord-chk{width:26px;height:26px;border-radius:6px;border:2px solid #2a2a2a;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;margin-top:1px;transition:all .12s}
+.ord-item.chk .ord-chk,.ord-item.given .ord-chk{background:var(--gn);border-color:var(--gn);color:#fff}
+.ord-body{flex:1;min-width:0}
+.ord-name{font-size:14px;font-weight:600;line-height:1.3}
+.ord-detail{font-size:11px;color:var(--tx2);font-family:var(--m);margin-top:2px;line-height:1.4}
+.ord-note{font-size:10px;color:#8a6a30;font-family:var(--m);margin-top:4px;padding:4px 8px;background:rgba(138,109,43,0.08);border-radius:4px;border-left:2px solid rgba(138,109,43,0.35)}
+.ord-given{font-size:10px;color:var(--gnS);font-family:var(--m);margin-top:3px}
+.ord-route{font-size:10px;padding:3px 8px;border-radius:4px;font-family:var(--m);font-weight:700;background:#181818;color:#6a6a6a;border:1px solid #222;flex-shrink:0;margin-top:3px}
+.ord-item.chk .ord-route,.ord-item.given .ord-route{background:rgba(42,107,63,0.1);color:var(--gnS);border-color:rgba(42,107,63,0.22)}
+
+/* STICKY ADMINISTER FLOAT */
+.adm-float{position:fixed;bottom:0;left:0;right:0;z-index:50;padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0));background:linear-gradient(transparent,var(--bg) 28%);pointer-events:none;display:none}
+.adm-float.show{display:block}
+.adm-float-inner{pointer-events:all}
+.adm-btn{width:100%;height:56px;border-radius:14px;font-family:var(--m);font-size:15px;font-weight:700;letter-spacing:.04em;cursor:pointer;border:1px solid rgba(42,107,63,0.5);background:var(--gnB);color:var(--gnS);-webkit-tap-highlight-color:transparent;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;backdrop-filter:blur(10px)}
+.adm-btn:active{transform:scale(.97)}
+
+/* ── IV ── */
+.iv-saved-banner{padding:12px 13px;background:var(--gnB);border:1px solid rgba(42,107,63,0.3);border-radius:10px;margin-bottom:12px;line-height:1.6}
+.iv-ban-hdr{font-weight:700;font-size:13px;color:var(--gnS);margin-bottom:3px;display:flex;justify-content:space-between;align-items:center;font-family:var(--m)}
+.iv-edit{font-size:10px;color:var(--dm);cursor:pointer;text-decoration:underline}
+.iv-ban-body{font-size:11px;font-family:var(--m);color:#8a8a8a}
+.iv-form{display:flex;flex-direction:column;gap:10px}
+.iv-row{display:flex;gap:8px}
+.iv-field{flex:1;display:flex;flex-direction:column;gap:5px}
+.iv-lbl{font-size:10px;color:var(--dm);font-family:var(--m);letter-spacing:.05em;text-transform:uppercase}
+/* 48px selects & inputs */
+.iv-sel,.iv-inp{width:100%;height:48px;padding:0 13px;background:#111;border:1px solid #1e1e1e;border-radius:9px;color:var(--tx);font-size:14px;font-family:var(--m);outline:none;appearance:none;-webkit-appearance:none}
+.iv-sel:focus,.iv-inp:focus{border-color:#3a5a8a}
+.iv-sel option{background:#1a1a1a}
+.time-row{display:flex;gap:6px}
+.time-row .iv-inp{flex:1}
+/* 48px Now button */
+.now-btn{height:48px;padding:0 14px;border-radius:9px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);color:#60a5fa;font-family:var(--m);font-size:12px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap;flex-shrink:0}
+.now-btn:active{opacity:.7}
+.iv-assess{background:#111;border:1px solid #1e1e1e;border-radius:10px;padding:13px}
+.iv-as-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.iv-as-title{font-size:11px;font-weight:700;color:#7a7a7a;font-family:var(--m);letter-spacing:.05em;text-transform:uppercase}
+/* 40px All Normal button */
+.norm-btn{height:40px;padding:0 14px;border-radius:7px;background:var(--gnB);border:1px solid rgba(42,107,63,0.4);color:var(--gnS);font-family:var(--m);font-size:11px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.norm-btn:active{opacity:.7}
+.as-item{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #141414;min-height:48px}
+.as-item:last-child{border-bottom:none}
+.as-name{font-size:13px;color:#c0c0c0;flex:1}
+.yn-btns{display:flex;gap:5px}
+/* 48px YES/NO */
+.yn{height:48px;width:60px;border-radius:7px;font-family:var(--m);font-size:12px;font-weight:700;border:1px solid #252525;background:#161616;color:#4a4a4a;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .12s;display:flex;align-items:center;justify-content:center}
+.yn:active{transform:scale(.9)}
+.yn.yes.sel{background:var(--gnB);color:var(--gnS);border-color:rgba(42,107,63,0.5)}
+.yn.no.sel{background:var(--rdB);color:var(--rdS);border-color:rgba(139,45,45,0.5)}
+/* 52px save button */
+.save-iv-btn{width:100%;height:52px;border-radius:12px;background:var(--gnB);border:1px solid rgba(42,107,63,0.45);color:var(--gnS);font-family:var(--m);font-size:14px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .14s;margin-top:2px}
+.save-iv-btn:active{transform:scale(.97)}
+
+/* misc */
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#1a1a1a;border-radius:2px}
+input[type=time]{color-scheme:dark}
+</style>
+</head>
+<body>
+
+<!-- LIST -->
+<div id="listView">
+  <div class="lh">
+    <div><div class="lh-title">Pre-Op</div><div class="lh-sub" id="lhDate"></div></div>
+    <div><div class="lh-ct">4</div><div class="lh-cl">CASES TODAY</div></div>
+  </div>
+  <div class="card-scroll" id="ptList"></div>
+</div>
+
+<!-- DETAIL -->
+<div id="detailView">
+  <div class="dh" id="dh"></div>
+  <div class="content-area" id="ca"></div>
+  <div class="tab-bar" id="tabs"></div>
+</div>
+
+<!-- Floating administer bar -->
+<div class="adm-float" id="admFloat">
+  <div class="adm-float-inner">
+    <button class="adm-btn" id="admBtn" onclick="administerSelected()"></button>
+  </div>
+</div>
+
+<script>
+// ════ DATA ════
+const PTS=[
+  {id:1,fn:"Margaret",ln:"Thompson",age:68,sex:"F",mrn:"TJR-20241",dob:"03/15/1957",joint:"Knee",lat:"Right",proc:"Right TKA",surgeon:"Dr. Henderson",or:"07:30",wt:82,allergies:["Penicillin (rash)","Sulfa"],pcn:true,mrsa:false,
+   consents:[{id:"surg",name:"Surgical Consent",detail:"Right TKA · Dr. Henderson · Signed 02/25/2026"},{id:"anes",name:"Anesthesia Consent",detail:"Regional/General · Signed 02/25/2026"},{id:"blood",name:"Blood / Transfusion",detail:"Signed 02/25/2026"}]},
+  {id:2,fn:"James",ln:"Rodriguez",age:72,sex:"M",mrn:"TJR-20242",dob:"11/08/1953",joint:"Hip",lat:"Left",proc:"Left THA",surgeon:"Dr. Patel",or:"09:00",wt:95,allergies:[],pcn:false,mrsa:false,
+   consents:[{id:"surg",name:"Surgical Consent",detail:"Left THA · Dr. Patel · Signed 02/26/2026"},{id:"anes",name:"Anesthesia Consent",detail:"Spinal · Signed 02/26/2026"}]},
+  {id:3,fn:"Dorothy",ln:"Chen",age:65,sex:"F",mrn:"TJR-20243",dob:"07/22/1960",joint:"Knee",lat:"Left",proc:"Left TKA",surgeon:"Dr. Henderson",or:"11:00",wt:88,allergies:["Latex (ANAPHYLAXIS)"],pcn:false,mrsa:false,
+   consents:[{id:"surg",name:"Surgical Consent",detail:"Left TKA · Dr. Henderson · Signed 02/24/2026"},{id:"anes",name:"Anesthesia Consent",detail:"Regional/General · Signed 02/24/2026"}]},
+  {id:4,fn:"William",ln:"Foster",age:58,sex:"M",mrn:"TJR-20244",dob:"09/03/1967",joint:"Hip",lat:"Right",proc:"Right THA",surgeon:"Dr. Patel",or:"13:00",wt:78,allergies:["Codeine (nausea)"],pcn:false,mrsa:false,
+   consents:[{id:"surg",name:"Surgical Consent",detail:"Right THA · Dr. Patel · Signed 02/27/2026"},{id:"anes",name:"Anesthesia Consent",detail:"Spinal · Signed 02/27/2026"}]}
+];
+
+// ── BUILD ORDER LIST ──
+function buildOrders(pt){
+  const vancoStr = pt.wt<=85
+    ? "Vancomycin 1g IV over 90 min — within 120 min of incision"
+    : "Vancomycin 1.5g IV over 90 min — within 120 min of incision";
+  return [
+    // GROUP: Pre-Op Medications
+    {g:"Pre-Op Medications",id:"famot",  name:"Famotidine",             detail:"20mg PO",                       route:"PO", auto:false},
+    {g:"Pre-Op Medications",id:"lyrica", name:"Lyrica (Pregabalin)",    detail:"75mg PO",                       route:"PO", auto:false},
+    {g:"Pre-Op Medications",id:"robaxin",name:"Robaxin (Methocarbamol)",detail:"750mg PO",                      route:"PO", auto:false},
+    {g:"Pre-Op Medications",id:"apap",   name:"Acetaminophen",          detail:"500mg × 2 (1g total) PO",       route:"PO", auto:false},
+    {g:"Pre-Op Medications",id:"silod",  name:"Silodosin",              detail:"8mg PO",                        route:"PO", auto:false},
+    {g:"Pre-Op Medications",id:"emend",  name:"Emend (Aprepitant)",     detail:"40mg PO",                       route:"PO", auto:false},
+    {g:"Pre-Op Medications",id:"lr",     name:"LR 1000ml",              detail:"IV at KVO rate",                route:"IV", auto:false},
+    // GROUP: Antibiotic Prophylaxis
+    {g:"Antibiotic Prophylaxis",id:"mrsa",  name:"H/O MRSA",            detail:"If positive — give Ancef AND Vancomycin",   route:"",   auto:false},
+    {g:"Antibiotic Prophylaxis",id:"ancef", name:"Cefazolin (Ancef) 2g IV × 1",detail:"Begin within 60 min of incision",  route:"IV", auto:true,
+      note: pt.pcn ? "PCN allergy on file — give test dose first" : null},
+    {g:"Antibiotic Prophylaxis",id:"vanco", name:"Vancomycin — Weight Based",  detail:`${vancoStr} (${pt.wt}kg)`,        route:"IV", auto:true},
+    // GROUP: VTE Prophylaxis
+    {g:"VTE Prophylaxis",id:"ted", name:"TED Compression Stockings",    detail:"Per VTE Prophylaxis Guideline",route:"",  auto:false},
+    {g:"VTE Prophylaxis",id:"scd", name:"Sequential Compression Device",detail:"Per VTE Prophylaxis Guideline",route:"",  auto:false},
+    // GROUP: Surgical Skin Prep
+    {g:"Surgical Skin Prep",id:"hair2",name:"Hair Removal by Clippers", detail:"Standard hip or knee prep site",route:"",       auto:true},
+    {g:"Surgical Skin Prep",id:"sage", name:"SAGE 2% CHG Cloth",        detail:"Full body cleanse as directed", route:"Topical",auto:true},
+    {g:"Surgical Skin Prep",id:"pvp",  name:"Intranasal Providone/Iodine",detail:"Unless allergic",            route:"Intranasal",auto:true},
+    // GROUP: Anesthesia
+    {g:"Anesthesia",id:"nblock",name:"Regional Nerve Block Consult",    detail:"Consult anesthesia per protocol",route:"",  auto:true},
+    // GROUP: Tranexamic Acid
+    {g:"TXA",id:"txa",name:"TXA (Tranexamic Acid) 1g IV × 1",          detail:"Administer pre-operatively",   route:"IV", auto:true}
+  ];
+}
+
+const ASSESS=[
+  {id:"patent",   name:"IV Patent",                   nY:true},
+  {id:"infusing", name:"Infusing Without Difficulty",  nY:true},
+  {id:"swelling", name:"Swelling",                    nY:false},
+  {id:"redness",  name:"Redness",                     nY:false},
+  {id:"intact",   name:"Catheter Intact",              nY:true},
+  {id:"infiltrated",name:"Infiltrated",                nY:false}
+];
+const SITES=["Left AC","Left Foot","Left Forearm","Left Hand","Left Upper Arm","Right AC","Right Foot","Right Forearm","Right Hand","Right Upper Arm"];
+const GAUGES=["14g","16g","18g","20g","22g","24g"];
+const BAG_TYPES=["LR","NS","Albumin 5%","Cefepime","Azactam","Vancomycin","D5W","D5LR"];
+const BAG_SIZES=["1000ml","500ml","250ml"];
+const NURSES=["Jennifer Adams, RN","Sarah Mitchell, BSN RN","Maria Gonzalez, RN","David Park, BSN RN","Amanda Torres, RN"];
+const WL=[
+  {id:"npo",     label:"NPO Status Confirmed",              sub:"Last solids & clears reviewed"},
+  {id:"paq",     label:"Pre-Admission Questions Reviewed",  sub:"Interval changes, symptoms, exposures"},
+  {id:"id",      label:"Identity Verified",                 sub:"Name · DOB · Procedure confirmed"},
+  {id:"allergy", label:"Allergies Verified",                sub:"Patient verbalized all allergies"},
+  {id:"consent", label:"Consents Signed & Witnessed",       sub:"Tap Witness for each consent below"},
+  {id:"hp",      label:"H&P Complete & On File"},
+  {id:"contacts",label:"Contacts / Glasses Removed"},
+  {id:"hair",    label:"Surgical Site Hair Removed"}
+];
+const SC=["waiting","preop","anes","orready"];
+const SL={waiting:"Waiting",preop:"In Pre-Op",anes:"Anes Ready",orready:"OR Ready"};
+const SN={waiting:"Admit to Pre-Op",preop:"→ Anes Ready",anes:"→ OR Ready",orready:"✓ OR Ready"};
+const SCLS={waiting:"scb-waiting",preop:"scb-preop",anes:"scb-anes",orready:"scb-orready"};
+const SPCLS={waiting:"sp-waiting",preop:"sp-preop",anes:"sp-anes",orready:"sp-orready"};
+
+// ════ STATE ════
+const S={};
+PTS.forEach(p=>{
+  S[p.id]={status:'waiting',bay:null,stTimes:{},wl:{},cw:{},
+    vitals:{on:false,timer:null,hist:[],last:null},
+    ord:{},
+    iv:{as:{},saved:false,nurse:'',time:'',site:'',gauge:'',bagSize:'',bagStart:'',bagType:''}};
+  WL.forEach(w=>S[p.id].wl[w.id]='yes');
+  p.consents.forEach(c=>S[p.id].cw[c.id]=null);
+  // auto orders pre-checked
+  buildOrders(p).forEach(o=>{if(o.auto)S[p.id].ord[o.id]='chk';});
+});
+
+let oPt=null,tab='checklist';
+
+const now=()=>new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+const nowT=()=>{const n=new Date();return`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;};
+const wlDone=pid=>WL.every(w=>S[pid].wl[w.id]==='yes'||S[pid].wl[w.id]==='na');
+const cwDone=pid=>PTS.find(p=>p.id===pid).consents.every(c=>S[pid].cw[c.id]);
+const vCls=(k,v)=>{
+  if(k==="sbp")return v>160||v<90?"bad":v>140||v<100?"warn":"ok";
+  if(k==="dbp")return v>100||v<50?"bad":v>90?"warn":"ok";
+  if(k==="hr")return v>120||v<50?"bad":v>100||v<55?"warn":"ok";
+  if(k==="spo2")return v<92?"bad":v<95?"warn":"ok";
+  if(k==="temp")return v>101||v<96?"bad":v>100?"warn":"ok";
+  return"ok";
+};
+const rV=(b,r)=>+(b+(Math.random()-.5)*r*2).toFixed(1);
+const genV=()=>({sbp:rV(122,8),dbp:rV(76,6),hr:rV(74,8),temp:rV(98.4,0.4),spo2:Math.round(rV(98,1)),rr:Math.round(rV(16,2))});
+
+function startNex(pid){
+  const v=S[pid].vitals;if(v.timer)return;
+  const tick=()=>{const d=genV();v.last=d;v.hist.unshift({t:now(),d,src:'nex'});if(v.hist.length>10)v.hist.pop();if(oPt===pid&&tab==='vitals')rc();else rl();};
+  tick();v.timer=setInterval(tick,5000);
+}
+function stopNex(pid){const v=S[pid].vitals;if(v.timer){clearInterval(v.timer);v.timer=null;}v.on=false;if(oPt===pid)rc();}
+function connNex(pid){const v=S[pid].vitals;if(v.on){stopNex(pid);return;}v.on='conn';rc();setTimeout(()=>{S[pid].vitals.on=true;startNex(pid);},1500);}
+
+// ════ LIST ════
+function rl(){
+  document.getElementById("lhDate").textContent=new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})+" \xB7 Total Joint Specialists";
+  let h="";
+  PTS.forEach(pt=>{
+    const s=S[pt.id];const vl=s.vitals.last;
+    h+=`<div class="ptcard st-${s.status}" onclick="od(${pt.id})">
+      <div class="ptcard-top">
+        <div class="ptcard-jbar" style="background:${pt.joint==="Hip"?"var(--hp)":"var(--kn)"}"></div>
+        <div style="text-align:center;flex-shrink:0;min-width:50px">
+          <div class="ptcard-time">${pt.or}</div>
+          <div class="ptcard-timesub">${s.bay?`Bay ${s.bay}`:"—"}</div>
+        </div>
+        <div class="ptcard-info">
+          <div class="ptcard-name">${pt.ln}, ${pt.fn}</div>
+          <div class="ptcard-detail">${pt.surgeon} \xB7 ${pt.proc} \xB7 ${pt.age}${pt.sex} \xB7 ${pt.wt}kg</div>
+          <div class="ptcard-badges">
+            <span class="badge ${pt.joint==="Hip"?"hip":"knee"}">${pt.lat} ${pt.joint}</span>
+            ${s.bay?`<span class="badge bay">Bay ${s.bay}</span>`:''}
+            ${pt.allergies.length?`<span class="badge allergy">&#9888; ALLERGY</span>`:''}
+          </div>
+        </div>
+      </div>
+      <div class="ptcard-foot">
+        <span class="sp ${SPCLS[s.status]}">${SL[s.status]}</span>
+        <span class="vmini">${vl?`<b>BP</b> ${vl.sbp}/${vl.dbp} &nbsp;<b>HR</b> ${vl.hr}`:""}</span>
+      </div>
+    </div>`;
+  });
+  document.getElementById("ptList").innerHTML=h;
+}
+
+// ════ STATUS ════
+function cycleStatus(pid){
+  const s=S[pid];const idx=SC.indexOf(s.status);
+  if(idx>=SC.length-1)return;
+  const nxt=SC[idx+1];s.status=nxt;s.stTimes[nxt]=now();
+  renderDH();rl();
+}
+
+// ════ DETAIL HEADER ════
+function renderDH(){
+  const pid=oPt;if(!pid)return;
+  const pt=PTS.find(p=>p.id===pid);const s=S[pid];
+  const done=s.status==='orready';
+  const btnLbl=done?"✓ OR Ready":SN[s.status];
+  const btnCls=done?"scb-done":SCLS[SC[SC.indexOf(s.status)+1]||s.status];
+  let tLines='';
+  SC.slice(1).forEach(sv=>{if(s.stTimes[sv])tLines+=`${SL[sv]}: ${s.stTimes[sv]}<br>`;});
+  document.getElementById("dh").innerHTML=`
+    <div class="back-btn" onclick="cd()">&#8592;</div>
+    <div class="dh-center">
+      <div class="dh-name">${pt.ln}, ${pt.fn}</div>
+      <div class="dh-meta">DOB ${pt.dob} &nbsp;&#xB7;&nbsp; ${pt.proc} &nbsp;&#xB7;&nbsp; ${pt.mrn}</div>
+      ${pt.allergies.length?`<div class="dh-allergy">&#9888; ${pt.allergies.join(" \xB7 ")}</div>`:''}
+    </div>
+    <div class="dh-right">
+      <button class="scb ${btnCls}" onclick="${done?'':('cycleStatus('+pid+')')}">${btnLbl}</button>
+      ${tLines?`<div class="st-times">${tLines}</div>`:''}
+    </div>`;
+}
+
+function od(pid){oPt=pid;tab='checklist';document.body.classList.add("slide-in");renderDH();rt();rc();}
+function cd(){document.body.classList.remove("slide-in");oPt=null;updateAdmFloat();rl();}
+
+// ════ TABS ════
+function rt(){
+  const pid=oPt;const s=S[pid];const pt=PTS.find(p=>p.id===pid);
+  const ords=buildOrders(pt);
+  const ordDone=ords.some(o=>s.ord[o.id]&&typeof s.ord[o.id]==='object');
+  const tabs=[
+    {id:"checklist",icon:"✓",  label:"Checklist", cls:wlDone(pid)?"done":"issues"},
+    {id:"vitals",   icon:"♥",  label:"Vitals",    cls:s.vitals.last?"done":""},
+    {id:"orders",   icon:"Rx", label:"Orders",    cls:ordDone?"done":""},
+    {id:"iv",       icon:"IV", label:"IV",        cls:s.iv.saved?"done":""}
+  ];
+  document.getElementById("tabs").innerHTML=tabs.map(t=>`
+    <button class="tab-btn${tab===t.id?" active":""}${t.cls?" "+t.cls:""}" onclick="st('${t.id}')">
+      <span class="tab-icon">${t.icon}</span>
+      <span class="tab-label">${t.label}</span>
+      <span class="tab-dot"></span>
+    </button>`).join("");
+}
+function st(t){tab=t;rt();rc();}
+
+// ════ CONTENT ════
+function rc(){
+  const pid=oPt;if(!pid)return;
+  const pt=PTS.find(p=>p.id===pid);const s=S[pid];
+  let h='';
+  if(tab==='checklist')h=rChecklist(pt,s);
+  else if(tab==='vitals')h=rVitals(pt,s);
+  else if(tab==='orders')h=rOrders(pt,s);
+  else if(tab==='iv')h=rIV(pt,s);
+  document.getElementById("ca").innerHTML=`<div class="section">${h}</div>`;
+  if(tab==='iv')restoreIV(pid);
+  updateAdmFloat();
+}
+
+// ════ CHECKLIST ════
+function rChecklist(pt,s){
+  let h=`<div class="sec-lbl">Bay Assignment</div>
+    <select class="bay-sel" onchange="setBay(${pt.id},this.value)">
+      <option value="">Select Bay...</option>
+      ${Array.from({length:10},(_,i)=>`<option value="${i+1}"${s.bay==i+1?' selected':''}>Bay ${i+1}</option>`).join('')}
+    </select>
+    <div class="divider"></div>
+    <div class="sec-lbl">Worklist</div>`;
+  WL.forEach(w=>{
+    const val=s.wl[w.id];
+    const isCon=w.id==='consent';
+    const aw=isCon&&cwDone(pt.id);
+    const rowCls=val==='yes'?' sel-yes':val==='no'?' sel-no':'';
+    h+=`<div class="wl-item${rowCls}">
+      <div class="wl-top">
+        <div class="wl-lbl">${w.label}${w.sub?`<div class="wl-sub">${w.sub}</div>`:''}${aw?`<div class="wl-wit">&#10003; All consents witnessed</div>`:''}</div>
+        <div class="wl-btns">
+          <button class="wlb yes${val==='yes'?' sel':''}" onclick="setWL(${pt.id},'${w.id}','yes')">YES</button>
+          <button class="wlb no${val==='no'?' sel':''}" onclick="setWL(${pt.id},'${w.id}','no')">NO</button>
+          <button class="wlb na${val==='na'?' sel':''}" onclick="setWL(${pt.id},'${w.id}','na')">N/A</button>
+        </div>
+      </div>
+      ${isCon&&val==='yes'?rConsents(pt,s):''}
+    </div>`;
+  });
+  if(wlDone(pt.id))h+=`<div style="margin-top:10px;padding:13px;background:var(--gnB);border:1px solid rgba(42,107,63,0.3);border-radius:10px;font-family:var(--m);font-size:12px;color:var(--gnS);text-align:center;font-weight:700">&#10003; Checklist Complete</div>`;
+  return h;
+}
+function setBay(pid,v){S[pid].bay=v?parseInt(v):null;rl();}
+function setWL(pid,id,v){S[pid].wl[id]=v;rc();rt();}
+
+function rConsents(pt,s){
+  let h=`<div class="consent-block" style="margin-top:8px">`;
+  pt.consents.forEach(c=>{
+    const w=s.cw[c.id];
+    h+=`<div class="consent-row">
+      <div class="consent-info">
+        <div class="consent-name">${c.name}</div>
+        <div class="consent-detail">${c.detail}</div>
+      </div>
+      ${w
+        ?`<div class="wit-badge">&#10003;<br>${w}</div>`
+        :`<button class="wit-btn" onclick="witness(${pt.id},'${c.id}')">Witness</button>`}
+    </div>`;
+  });
+  return h+`</div>`;
+}
+function witness(pid,cid){S[pid].cw[cid]=now();rc();rt();}
+
+// ════ VITALS ════
+function rVitals(pt,s){
+  const v=s.vitals;const lv=v.last;
+  const live=v.on===true;const conn=v.on==='conn';
+  let h=`<div class="sec-lbl">Vital Signs</div>
+    <div class="nex-bar">
+      <div class="nex-dot${live?' live':''}"></div>
+      <span class="nex-lbl" style="color:${live?"var(--gnS)":conn?"var(--ywS)":"#5a5a5a"}">${live?"NEXIMATIC LIVE":conn?"Connecting...":"Neximatic Offline"}</span>
+      ${lv?`<span class="nex-time">${v.hist[0]?.t||''}</span>`:''}
+      <button class="conn-btn${live?' on':''}" onclick="connNex(${pt.id})">${live?"Disconnect":conn?"...":"Connect"}</button>
+    </div>
+    <div class="vitals-grid">`;
+  const bpCls=lv?vCls("sbp",lv.sbp):"mt";
+  h+=`<div class="vt-cell" style="grid-column:span 2"><div class="vt-lbl">Blood Pressure</div><div class="vt-val ${bpCls}">${lv?`${lv.sbp}/${lv.dbp}`:"—"}</div><div class="vt-unit">mmHg</div></div>`;
+  [{k:"hr",l:"HR",u:"bpm"},{k:"spo2",l:"SpO2",u:"%"},{k:"temp",l:"Temp",u:"°F"},{k:"rr",l:"RR",u:"/min"}].forEach(f=>{
+    h+=`<div class="vt-cell"><div class="vt-lbl">${f.l}</div><div class="vt-val ${lv?vCls(f.k,lv[f.k]):"mt"}">${lv?String(lv[f.k]):"—"}</div><div class="vt-unit">${f.u}</div></div>`;
+  });
+  h+=`</div>
+    <div class="manual-form">
+      <div class="mf-head">Manual Entry</div>
+      <div class="mf-grid">
+        <div class="mf-item"><label>SBP</label><input class="mf-inp" type="number" inputmode="numeric" id="v_sbp_${pt.id}" placeholder="120"></div>
+        <div class="mf-item"><label>DBP</label><input class="mf-inp" type="number" inputmode="numeric" id="v_dbp_${pt.id}" placeholder="80"></div>
+        <div class="mf-item"><label>HR</label><input class="mf-inp" type="number" inputmode="numeric" id="v_hr_${pt.id}" placeholder="72"></div>
+        <div class="mf-item"><label>Temp °F</label><input class="mf-inp" type="number" inputmode="decimal" id="v_temp_${pt.id}" placeholder="98.6" step="0.1"></div>
+        <div class="mf-item"><label>SpO2 %</label><input class="mf-inp" type="number" inputmode="numeric" id="v_spo2_${pt.id}" placeholder="98"></div>
+        <div class="mf-item"><label>RR</label><input class="mf-inp" type="number" inputmode="numeric" id="v_rr_${pt.id}" placeholder="16"></div>
+      </div>
+      <button class="mf-btn" onclick="saveVitals(${pt.id})">Record Vitals</button>
+    </div>`;
+  if(v.hist.length>0){
+    h+=`<div class="vh-wrap"><div class="vh-head">History</div>`;
+    v.hist.forEach(e=>{const d=e.d;h+=`<div class="vh-row"><span class="vh-time">${e.t}</span><span class="vh-vals">BP ${d.sbp}/${d.dbp} &nbsp;HR ${d.hr} &nbsp;SpO2 ${d.spo2}% &nbsp;T ${d.temp}</span><span class="vh-src${e.src==='nex'?' live':''}">${e.src==='nex'?'NEXI':'Manual'}</span></div>`;});
+    h+=`</div>`;
+  }
+  return h;
+}
+function saveVitals(pid){
+  const g=k=>{const el=document.getElementById(`v_${k}_${pid}`);return el?parseFloat(el.value)||null:null};
+  const sbp=g("sbp"),dbp=g("dbp"),hr=g("hr");if(!sbp||!dbp||!hr)return;
+  const d={sbp,dbp,hr,temp:g("temp")||98.6,spo2:g("spo2")||98,rr:g("rr")||16};
+  const v=S[pid].vitals;v.last=d;v.hist.unshift({t:now(),d,src:'manual'});
+  if(v.hist.length>10)v.hist.pop();rc();rl();rt();
+}
+
+// ════ ORDERS ════
+function rOrders(pt,s){
+  const ords=buildOrders(pt);
+  const groups=[...new Set(ords.map(o=>o.g))];
+  let h=`<div class="sec-lbl">Pre-Op Orders</div>`;
+  groups.forEach(g=>{
+    h+=`<div class="orders-grp"><div class="grp-head">${g}<div class="grp-line"></div></div>`;
+    ords.filter(o=>o.g===g).forEach(o=>{
+      const st=s.ord[o.id];
+      const isGiven=st&&typeof st==='object';
+      const isChk=st==='chk';
+      h+=`<div class="ord-item${o.auto?' auto':''}${isChk?' chk':''}${isGiven?' given':''}" onclick="${isGiven?'':'togOrd('+pt.id+',\''+o.id+'\')'}">
+        <div class="ord-chk">${isChk||isGiven?"✓":""}</div>
+        <div class="ord-body">
+          <div class="ord-name">${o.name}</div>
+          <div class="ord-detail">${o.detail}</div>
+          ${o.note?`<div class="ord-note">⚠ ${o.note}</div>`:''}
+          ${isGiven?`<div class="ord-given">✓ Given ${st.t}</div>`:''}
+        </div>
+        ${o.route?`<span class="ord-route">${o.route}</span>`:''}
+      </div>`;
+    });
+    h+=`</div>`;
+  });
+  // spacer so sticky button doesn't cover last item
+  h+=`<div style="height:20px"></div>`;
+  return h;
+}
+function togOrd(pid,oid){
+  const cur=S[pid].ord[oid];
+  S[pid].ord[oid]=cur==='chk'?false:'chk';
+  rc();rt();updateAdmFloat();
+}
+function administerSelected(){
+  if(!oPt)return;
+  const pt=PTS.find(p=>p.id===oPt);const ords=buildOrders(pt);const s=S[oPt].ord;
+  const t=now();
+  ords.forEach(o=>{if(s[o.id]==='chk')s[o.id]={t};});
+  rc();rt();updateAdmFloat();
+}
+function updateAdmFloat(){
+  const f=document.getElementById("admFloat");
+  const btn=document.getElementById("admBtn");
+  if(!oPt||tab!=='orders'){f.classList.remove("show");return;}
+  const pt=PTS.find(p=>p.id===oPt);const ords=buildOrders(pt);const s=S[oPt].ord;
+  const checked=ords.filter(o=>s[o.id]==='chk');
+  if(checked.length>0){
+    f.classList.add("show");
+    btn.textContent=`Administer ${checked.length} Selected`;
+  }else{
+    f.classList.remove("show");
+  }
+}
+
+// ════ IV ════
+function rIV(pt,s){
+  const iv=s.iv;
+  let h=`<div class="sec-lbl">IV Access</div>`;
+  if(iv.saved){
+    h+=`<div class="iv-saved-banner">
+      <div class="iv-ban-hdr"><span>✓ IV Documented</span><span class="iv-edit" onclick="clearIV(${pt.id})">Clear & Re-enter</span></div>
+      <div class="iv-ban-body">${iv.nurse} · ${iv.time||"—"}<br>${iv.gauge} · ${iv.site}<br>Bag: ${iv.bagType||"—"} ${iv.bagSize||""} ${iv.bagStart?"· started "+iv.bagStart:""}</div>
+    </div>`;
+  }
+  h+=`<div class="iv-form">
+  <div class="iv-row">
+    <div class="iv-field" style="flex:2">
+      <div class="iv-lbl">Nurse Who Placed IV</div>
+      <select class="iv-sel" id="ivN_${pt.id}"><option value="">Select nurse...</option>${NURSES.map(n=>`<option value="${n}">${n}</option>`).join("")}</select>
+    </div>
+    <div class="iv-field">
+      <div class="iv-lbl">Time Placed</div>
+      <div class="time-row"><input class="iv-inp" type="time" id="ivT_${pt.id}"><button class="now-btn" onclick="setNow('ivT_${pt.id}')">Now</button></div>
+    </div>
+  </div>
+  <div class="iv-row">
+    <div class="iv-field" style="flex:2">
+      <div class="iv-lbl">Site</div>
+      <select class="iv-sel" id="ivS_${pt.id}"><option value="">Select site...</option>${SITES.map(s=>`<option value="${s}">${s}</option>`).join("")}</select>
+    </div>
+    <div class="iv-field">
+      <div class="iv-lbl">Gauge</div>
+      <select class="iv-sel" id="ivG_${pt.id}"><option value="">G</option>${GAUGES.map(g=>`<option value="${g}">${g}</option>`).join("")}</select>
+    </div>
+  </div>
+  <div class="iv-assess">
+    <div class="iv-as-hdr">
+      <div class="iv-as-title">Site Assessment</div>
+      <button class="norm-btn" onclick="allNorm(${pt.id})">All Normal</button>
+    </div>
+    ${ASSESS.map(a=>{const c=s.iv.as[a.id];return`<div class="as-item">
+      <span class="as-name">${a.name}</span>
+      <div class="yn-btns">
+        <button class="yn yes${c==='yes'?' sel':''}" onclick="setAs(${pt.id},'${a.id}','yes')">YES</button>
+        <button class="yn no${c==='no'?' sel':''}" onclick="setAs(${pt.id},'${a.id}','no')">NO</button>
+      </div>
+    </div>`;}).join("")}
+  </div>
+  <div class="iv-row">
+    <div class="iv-field">
+      <div class="iv-lbl">Bag Type</div>
+      <select class="iv-sel" id="ivBT_${pt.id}"><option value="">Type...</option>${BAG_TYPES.map(b=>`<option value="${b}">${b}</option>`).join("")}</select>
+    </div>
+    <div class="iv-field">
+      <div class="iv-lbl">Size</div>
+      <select class="iv-sel" id="ivBS_${pt.id}"><option value="">mL</option>${BAG_SIZES.map(b=>`<option value="${b}">${b}</option>`).join("")}</select>
+    </div>
+    <div class="iv-field">
+      <div class="iv-lbl">Bag Start</div>
+      <div class="time-row"><input class="iv-inp" type="time" id="ivBSt_${pt.id}"><button class="now-btn" onclick="setNow('ivBSt_${pt.id}')">Now</button></div>
+    </div>
+  </div>
+  <button class="save-iv-btn" onclick="saveIV(${pt.id})">Save IV Documentation</button>
+  </div>`;
+  return h;
+}
+function setNow(fid){const el=document.getElementById(fid);if(el)el.value=nowT();}
+function setAs(pid,id,v){S[pid].iv.as[id]=v;rc();}
+function allNorm(pid){ASSESS.forEach(a=>{S[pid].iv.as[a.id]=a.nY?'yes':'no';});rc();}
+function clearIV(pid){S[pid].iv.saved=false;rc();}
+function restoreIV(pid){
+  const iv=S[pid].iv;
+  const gs=(id,v)=>{const el=document.getElementById(id);if(el&&v)el.value=v;};
+  gs(`ivN_${pid}`,iv.nurse);gs(`ivS_${pid}`,iv.site);gs(`ivG_${pid}`,iv.gauge);
+  gs(`ivBT_${pid}`,iv.bagType);gs(`ivBS_${pid}`,iv.bagSize);
+  gs(`ivT_${pid}`,iv.time);gs(`ivBSt_${pid}`,iv.bagStart);
+}
+function saveIV(pid){
+  const g=id=>(document.getElementById(id)||{}).value||'';
+  const nurse=g(`ivN_${pid}`),site=g(`ivS_${pid}`),gauge=g(`ivG_${pid}`);
+  if(!nurse||!site||!gauge){alert("Nurse, site, and gauge required.");return;}
+  if(!ASSESS.every(a=>S[pid].iv.as[a.id])){alert("Complete all site assessment fields.");return;}
+  const iv=S[pid].iv;
+  iv.nurse=nurse;iv.site=site;iv.gauge=gauge;
+  iv.time=g(`ivT_${pid}`)||nowT();
+  iv.bagType=g(`ivBT_${pid}`);iv.bagSize=g(`ivBS_${pid}`);iv.bagStart=g(`ivBSt_${pid}`);
+  iv.saved=true;rc();rt();
+}
+
+// ════ INIT ════
+rl();
+</script>
+</body>
+</html>
