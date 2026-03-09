@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TJR Hub · Billing</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0b0e17; --surface:#131825; --card:#1a2035; --card2:#1e2540;
+  --border:#252e45; --border2:#2e3a56;
+  --amber:#f5a623; --amber-dim:rgba(245,166,35,.15);
+  --green:#22c55e; --green-dim:rgba(34,197,94,.15);
+  --red:#ef4444; --red-dim:rgba(239,68,68,.15);
+  --blue:#3b82f6; --blue-dim:rgba(59,130,246,.15);
+  --cyan:#06b6d4; --cyan-dim:rgba(6,182,212,.15);
+  --purple:#a855f7; --purple-dim:rgba(168,85,247,.15);
+  --orange:#f97316; --orange-dim:rgba(249,115,22,.15);
+  --text:#e8eaf0; --muted:#7a8499; --faint:#3a4460;
+  --mono:'IBM Plex Mono',monospace; --sans:'DM Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;font-size:13px}
+
+/* SIDEBAR */
+#sidebar{width:214px;min-width:214px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.sb-logo{padding:16px 16px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sb-logo .hub{font-size:10px;font-weight:700;letter-spacing:3px;color:var(--amber);text-transform:uppercase}
+.sb-logo .mod{font-size:20px;font-weight:700;color:var(--text);line-height:1.1}
+.sb-logo .ver{font-size:10px;color:var(--muted);margin-top:2px}
+.sb-section{padding:14px 14px 5px;font-size:9px;font-weight:700;letter-spacing:2px;color:var(--faint);text-transform:uppercase}
+.sb-item{display:flex;align-items:center;gap:9px;padding:8px 16px;cursor:pointer;color:var(--muted);font-size:12px;font-weight:500;border-left:3px solid transparent;transition:all .12s;user-select:none;white-space:nowrap}
+.sb-item:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.sb-item.active{color:var(--amber);border-left-color:var(--amber);background:rgba(245,166,35,.06)}
+.sb-item .ico{font-size:14px;min-width:16px;text-align:center}
+.sb-badge{margin-left:auto;font-size:9px;font-weight:700;border-radius:10px;padding:2px 6px}
+.sb-badge.amber{background:var(--amber);color:#000}
+.sb-badge.red{background:var(--red);color:#fff}
+.sb-badge.blue{background:var(--blue);color:#fff}
+.sb-badge.green{background:var(--green);color:#000}
+.sb-badge.gray{background:var(--faint);color:var(--muted)}
+.sb-footer{margin-top:auto;padding:12px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);flex-shrink:0}
+.sb-footer strong{color:var(--text);display:block;font-size:12px;margin-bottom:1px}
+
+/* MAIN */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:50px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 22px;gap:12px;flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:700;flex:1}
+.topbar-title span{color:var(--amber)}
+.topbar-sub{font-size:11px;color:var(--muted);margin-left:4px}
+#content{flex:1;overflow-y:auto;padding:20px 24px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);transition:all .12s;white-space:nowrap}
+.btn-primary{background:var(--amber);color:#000}.btn-primary:hover{background:#e09820}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}.btn-ghost:hover{color:var(--text);border-color:var(--muted)}
+.btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{background:#2563eb}
+.btn-green{background:var(--green);color:#000}.btn-green:hover{background:#16a34a}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:#dc2626}
+.btn-orange{background:var(--orange);color:#fff}.btn-orange:hover{background:#ea6c0a}
+.btn-purple{background:var(--purple);color:#fff}.btn-purple:hover{background:#9333ea}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-xs{padding:3px 8px;font-size:10px}
+
+/* FORMS */
+select,input[type=text],input[type=number],input[type=date],textarea{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 10px;font-size:12px;font-family:var(--sans);outline:none;width:100%}
+select:focus,input:focus,textarea:focus{border-color:var(--amber)}
+option{background:var(--surface)}
+textarea{resize:vertical;min-height:80px;line-height:1.5}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.form-row{display:grid;gap:12px}
+.form-row.c2{grid-template-columns:1fr 1fr}
+.form-row.c3{grid-template-columns:1fr 1fr 1fr}
+.form-row.c4{grid-template-columns:1fr 1fr 1fr 1fr}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px}
+.card-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.card-header h3{font-size:13px;font-weight:700;flex:1}
+.card-body{padding:18px}
+
+/* METRICS */
+.metrics-grid{display:grid;gap:12px;margin-bottom:18px}
+.mg-5{grid-template-columns:repeat(5,1fr)}
+.mg-4{grid-template-columns:repeat(4,1fr)}
+.mg-3{grid-template-columns:repeat(3,1fr)}
+.metric{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.metric-label{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.metric-value{font-size:22px;font-weight:700;font-family:var(--mono);line-height:1}
+.metric-sub{font-size:10px;color:var(--muted);margin-top:3px}
+.c-green{color:var(--green)}.c-amber{color:var(--amber)}.c-red{color:var(--red)}.c-blue{color:var(--blue)}.c-cyan{color:var(--cyan)}.c-purple{color:var(--purple)}.c-orange{color:var(--orange)}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{padding:8px 13px;text-align:left;font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);white-space:nowrap}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.03);transition:background .1s}
+tbody tr:hover{background:rgba(255,255,255,.03);cursor:pointer}
+tbody td{padding:10px 13px;font-size:12px;vertical-align:middle}
+.row-sel{background:rgba(245,166,35,.05)!important}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;letter-spacing:.4px;padding:2px 7px;border-radius:20px;white-space:nowrap}
+.b-amber{background:var(--amber-dim);color:var(--amber)}
+.b-green{background:var(--green-dim);color:var(--green)}
+.b-red{background:var(--red-dim);color:var(--red)}
+.b-blue{background:var(--blue-dim);color:var(--blue)}
+.b-purple{background:var(--purple-dim);color:var(--purple)}
+.b-gray{background:rgba(255,255,255,.07);color:var(--muted)}
+.b-cyan{background:var(--cyan-dim);color:var(--cyan)}
+.b-orange{background:var(--orange-dim);color:var(--orange)}
+
+/* CODE CHIPS */
+.chip{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;margin:1px}
+.chip-cpt{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(59,130,246,.2)}
+.chip-icd{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(168,85,247,.2)}
+.chip-mod{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,166,35,.2)}
+.chip-fac{background:var(--cyan-dim);color:var(--cyan);border:1px solid rgba(6,182,212,.2)}
+
+/* LAYOUT HELPERS */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.flex-row{display:flex;align-items:center;gap:10px}
+.flex-col{display:flex;flex-direction:column;gap:10px}
+.spacer{flex:1}
+.hidden{display:none!important}
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}
+.mb8{margin-bottom:8px}.mb12{margin-bottom:12px}.mb14{margin-bottom:14px}.mb18{margin-bottom:18px}
+.sep{height:1px;background:var(--border);margin:12px 0}
+
+/* SECTION BLOCKS */
+.sec{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:14px}
+.sec-head{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700}
+.sec-body{padding:14px 16px}
+
+/* CODE ROW */
+.code-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;margin-bottom:3px;background:rgba(255,255,255,.02)}
+.code-row:last-child{margin-bottom:0}
+.cr-cpt{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--blue);min-width:56px}
+.cr-icd{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--purple);min-width:86px}
+.cr-desc{flex:1;font-size:12px}
+.cr-fee{font-family:var(--mono);font-size:11px;color:var(--green);min-width:68px;text-align:right}
+.cr-allow{font-family:var(--mono);font-size:11px;color:var(--cyan);min-width:68px;text-align:right}
+.rmv{color:var(--muted);cursor:pointer;font-size:13px;padding:2px 5px;border-radius:4px;border:none;background:none}
+.rmv:hover{color:var(--red);background:var(--red-dim)}
+
+/* MODIFIERS */
+.mod-grid{display:flex;gap:7px;flex-wrap:wrap}
+.mod-btn{font-family:var(--mono);font-size:11px;font-weight:600;padding:5px 11px;border-radius:5px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:all .12s}
+.mod-btn.on{background:var(--amber-dim);color:var(--amber);border-color:var(--amber)}
+.mod-btn:hover:not(.on){border-color:var(--muted);color:var(--text)}
+
+/* SCRUBBER */
+.scrub-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:8px;margin-bottom:6px}
+.scrub-item.error{background:var(--red-dim);border:1px solid rgba(239,68,68,.2)}
+.scrub-item.warn{background:var(--amber-dim);border:1px solid rgba(245,166,35,.2)}
+.scrub-item.ok{background:var(--green-dim);border:1px solid rgba(34,197,94,.2)}
+.scrub-icon{font-size:16px;margin-top:1px;flex-shrink:0}
+.scrub-text{flex:1;font-size:12px;line-height:1.4}
+.scrub-text strong{display:block;font-weight:700;margin-bottom:2px}
+
+/* AGING BARS */
+.aging-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.aging-bucket{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.aging-bar{height:3px;border-radius:2px;margin:8px 0}
+.aging-val{font-size:19px;font-weight:700;font-family:var(--mono)}
+.aging-cnt{font-size:10px;color:var(--muted);margin-top:3px}
+
+/* ERA */
+.era-match{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;margin-bottom:6px;border:1px solid var(--border);background:rgba(255,255,255,.02)}
+.era-match.matched{border-color:rgba(34,197,94,.25);background:var(--green-dim)}
+.era-match.unmatched{border-color:rgba(239,68,68,.25);background:var(--red-dim)}
+.era-match.partial{border-color:rgba(245,166,35,.25);background:var(--amber-dim)}
+
+/* P2P TRACKER */
+.p2p-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04)}
+.p2p-head{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+
+/* PATIENT BALANCE */
+.pt-balance-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:10px}
+.pb-name{font-size:15px;font-weight:700;margin-bottom:4px}
+.pb-detail{font-size:11px;color:var(--muted)}
+.pb-amounts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+.pb-amt{text-align:center;padding:10px;background:rgba(255,255,255,.03);border-radius:8px}
+.pb-amt-val{font-family:var(--mono);font-size:16px;font-weight:700}
+.pb-amt-lbl{font-size:9px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:1px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:1000}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:12px;width:600px;max-width:96vw;max-height:88vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+.modal-lg{width:780px}
+.modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center}
+.modal-head h3{flex:1;font-size:14px;font-weight:700}
+.modal-body{padding:20px}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+
+/* TABS */
+.tabs{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px;width:fit-content;margin-bottom:16px}
+.tab{padding:6px 14px;border-radius:5px;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);transition:all .12s}
+.tab.on{background:var(--card);color:var(--text)}
+.tab:hover:not(.on){color:var(--text)}
+
+/* REPORT CARDS */
+.report-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.report-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;cursor:pointer;transition:border-color .15s}
+.report-card:hover{border-color:var(--amber)}
+.report-card .ri{font-size:22px;margin-bottom:8px}
+.report-card h4{font-size:12px;font-weight:700;margin-bottom:3px}
+.report-card p{font-size:11px;color:var(--muted);line-height:1.5}
+
+/* EXPORT PAYLOAD */
+.payload-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-top:12px;max-height:300px;overflow-y:auto}
+.payload-box pre{font-family:var(--mono);font-size:11px;color:var(--cyan);white-space:pre-wrap;line-height:1.6}
+
+/* ALERT BOX */
+.alert{padding:11px 14px;border-radius:8px;font-size:12px;margin-bottom:10px;line-height:1.4}
+.alert-success{background:var(--green-dim);border:1px solid rgba(34,197,94,.2);color:var(--green)}
+.alert-warn{background:var(--amber-dim);border:1px solid rgba(245,166,35,.2);color:var(--amber)}
+.alert-error{background:var(--red-dim);border:1px solid rgba(239,68,68,.2);color:var(--red)}
+.alert-info{background:var(--blue-dim);border:1px solid rgba(59,130,246,.2);color:var(--blue)}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* PULSE */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+.pulse{animation:pulse 2s infinite}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.fade-in{animation:fadeIn .2s ease}
+
+/* CLAIM TYPE BADGE */
+.claim-type{font-size:9px;font-weight:700;letter-spacing:.8px;padding:2px 6px;border-radius:4px;text-transform:uppercase}
+.ct-facility{background:var(--cyan-dim);color:var(--cyan)}
+.ct-prof{background:var(--purple-dim);color:var(--purple)}
+
+/* ELIGIBILITY CARD */
+.elig-card{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden}
+.elig-header{padding:14px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
+.elig-header:hover{background:rgba(255,255,255,.02)}
+.elig-name{font-size:14px;font-weight:700;flex:1}
+.elig-body{padding:14px 18px;border-top:1px solid var(--border)}
+.elig-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.elig-item{background:rgba(255,255,255,.03);padding:10px 12px;border-radius:8px}
+.elig-item-lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.elig-item-val{font-size:13px;font-weight:600}
+
+/* APPEAL LETTER */
+.letter-preview{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px;font-size:12px;line-height:1.7;color:var(--text);white-space:pre-wrap;font-family:var(--sans);max-height:400px;overflow-y:auto}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="sb-logo">
+    <div class="hub">TJR Hub</div>
+    <div class="mod">Billing</div>
+    <div class="ver">Complete System · v2.0</div>
+  </div>
+
+  <div class="sb-section">Pre-Visit</div>
+  <div class="sb-item" onclick="nav('eligibility')" id="nav-eligibility"><span class="ico">✅</span>Eligibility<span class="sb-badge amber" id="bdg-eligibility">4</span></div>
+  <div class="sb-item" onclick="nav('auth')" id="nav-auth"><span class="ico">🔐</span>Prior Auth<span class="sb-badge red" id="bdg-auth">2</span></div>
+
+  <div class="sb-section">Charge</div>
+  <div class="sb-item" onclick="nav('worklist')" id="nav-worklist"><span class="ico">📋</span>Worklist<span class="sb-badge amber" id="bdg-worklist">6</span></div>
+  <div class="sb-item" onclick="nav('charge')" id="nav-charge"><span class="ico">✏️</span>Charge Entry</div>
+
+  <div class="sb-section">Claims</div>
+  <div class="sb-item" onclick="nav('claims')" id="nav-claims"><span class="ico">📤</span>Claims Queue<span class="sb-badge blue" id="bdg-claims">14</span></div>
+  <div class="sb-item" onclick="nav('secondary')" id="nav-secondary"><span class="ico">🔄</span>Secondary Billing<span class="sb-badge gray" id="bdg-secondary">5</span></div>
+
+  <div class="sb-section">Denials</div>
+  <div class="sb-item" onclick="nav('denials')" id="nav-denials"><span class="ico">🚫</span>Rework Queue<span class="sb-badge red" id="bdg-denials">3</span></div>
+  <div class="sb-item" onclick="nav('appeals')" id="nav-appeals"><span class="ico">📝</span>Appeal Letters</div>
+  <div class="sb-item" onclick="nav('p2p')" id="nav-p2p"><span class="ico">📞</span>Peer-to-Peer</div>
+  <div class="sb-item" onclick="nav('writeoffs')" id="nav-writeoffs"><span class="ico">🗑️</span>Write-offs / Adj</div>
+
+  <div class="sb-section">Payments</div>
+  <div class="sb-item" onclick="nav('era')" id="nav-era"><span class="ico">⚡</span>ERA Auto-Post</div>
+  <div class="sb-item" onclick="nav('payments')" id="nav-payments"><span class="ico">💳</span>Manual Posting</div>
+
+  <div class="sb-section">Patient</div>
+  <div class="sb-item" onclick="nav('ptbalance')" id="nav-ptbalance"><span class="ico">👤</span>Pt Responsibility<span class="sb-badge blue" id="bdg-ptbalance">8</span></div>
+
+  <div class="sb-section">Finance</div>
+  <div class="sb-item" onclick="nav('ar')" id="nav-ar"><span class="ico">📊</span>AR Tracker</div>
+  <div class="sb-item" onclick="nav('reports')" id="nav-reports"><span class="ico">📈</span>Reports</div>
+
+  <div class="sb-footer">
+    <strong>Sarah Mitchell</strong>
+    Lead Coder · AHIMA CPC
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Coding <span>Worklist</span></div>
+    <button class="btn btn-ghost btn-sm" onclick="showExportModal('sis')">⬆ SIS</button>
+    <button class="btn btn-ghost btn-sm" onclick="showExportModal('cerner')">⬆ Cerner</button>
+    <button class="btn btn-primary btn-sm" id="topbar-action" onclick="topbarAction()">+ New Charge</button>
+  </div>
+
+  <div id="content">
+
+<!-- ═══════════════════════════════════════════
+     MODULE 1A · ELIGIBILITY VERIFICATION
+═══════════════════════════════════════════ -->
+<div id="view-eligibility" class="hidden fade-in">
+  <div class="metrics-grid mg-4 mb18">
+    <div class="metric"><div class="metric-label">Pending Verification</div><div class="metric-value c-amber">4</div><div class="metric-sub">Next 3 DOS days</div></div>
+    <div class="metric"><div class="metric-label">Verified Today</div><div class="metric-value c-green">11</div><div class="metric-sub">All clear</div></div>
+    <div class="metric"><div class="metric-label">Issues Found</div><div class="metric-value c-red">2</div><div class="metric-sub">Require action</div></div>
+    <div class="metric"><div class="metric-label">Avg Deductible Remaining</div><div class="metric-value">$1,240</div><div class="metric-sub">This cohort</div></div>
+  </div>
+
+  <div class="card mb14">
+    <div class="card-header">
+      <h3>Upcoming Cases — Eligibility Queue</h3>
+      <button class="btn btn-blue btn-sm" onclick="verifyAll()">⚡ Verify All</button>
+      <button class="btn btn-primary btn-sm" onclick="openEligModal()">+ Manual Check</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Patient</th><th>DOS</th><th>Payer</th><th>Plan Type</th><th>Deductible</th><th>Deduct Met</th><th>OOP Remaining</th><th>Copay/Coins</th><th>Auth Req?</th><th>Status</th><th></th></tr></thead>
+        <tbody id="elig-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="elig-expanded"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE 1B · PRIOR AUTH TRACKER
+═══════════════════════════════════════════ -->
+<div id="view-auth" class="hidden fade-in">
+  <div class="metrics-grid mg-4 mb18">
+    <div class="metric"><div class="metric-label">Approved</div><div class="metric-value c-green">18</div><div class="metric-sub">Active authorizations</div></div>
+    <div class="metric"><div class="metric-label">Pending</div><div class="metric-value c-amber">5</div><div class="metric-sub">Awaiting payer decision</div></div>
+    <div class="metric"><div class="metric-label">Expiring Soon</div><div class="metric-value c-orange">3</div><div class="metric-sub">Within 14 days</div></div>
+    <div class="metric"><div class="metric-label">Denied</div><div class="metric-value c-red">2</div><div class="metric-sub">Require appeal</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3>Authorization Tracker</h3>
+      <select style="width:auto" id="auth-filter" onchange="renderAuthTable()">
+        <option value="">All Statuses</option>
+        <option>Approved</option><option>Pending</option><option>Expiring</option><option>Denied</option>
+      </select>
+      <button class="btn btn-primary btn-sm" onclick="openAuthModal()">+ New Auth Request</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Patient</th><th>DOS</th><th>Procedure</th><th>Payer</th><th>Auth #</th><th>Submitted</th><th>Expires</th><th>Units Auth'd</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="auth-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE 2A · WORKLIST
+═══════════════════════════════════════════ -->
+<div id="view-worklist" class="fade-in">
+  <div class="metrics-grid mg-5 mb18">
+    <div class="metric"><div class="metric-label">Ready to Code</div><div class="metric-value c-amber">6</div><div class="metric-sub">From OR today</div></div>
+    <div class="metric"><div class="metric-label">Coded Today</div><div class="metric-value c-green">8</div><div class="metric-sub">Avg 4.1 min/case</div></div>
+    <div class="metric"><div class="metric-label">Pending Review</div><div class="metric-value c-blue">2</div><div class="metric-sub">Flagged</div></div>
+    <div class="metric"><div class="metric-label">Clean Claim Rate</div><div class="metric-value c-green">94.2%</div><div class="metric-sub">MTD</div></div>
+    <div class="metric"><div class="metric-label">MTD Charges</div><div class="metric-value">$284k</div><div class="metric-sub">16 cases</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <h3>Cases Awaiting Charge Entry</h3>
+      <select style="width:auto" onchange=""><option value="">All Surgeons</option><option>Dr. Harrington</option><option>Dr. Patel</option><option>Dr. Kim</option></select>
+      <select style="width:auto"><option>All Procedures</option><option>TKA</option><option>THA</option><option>Revision</option></select>
+      <button class="btn btn-primary btn-sm" onclick="nav('charge')">+ New Charge</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Patient</th><th>DOS</th><th>Surgeon</th><th>Procedure</th><th>Side</th><th>Location</th><th>Payer</th><th>Auth</th><th>Status</th><th></th></tr></thead>
+        <tbody id="worklist-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE 2B · CHARGE ENTRY
+═══════════════════════════════════════════ -->
+<div id="view-charge" class="hidden fade-in">
+  <!-- Patient header -->
+  <div class="sec mb14" style="border-radius:10px">
+    <div class="sec-body" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+      <div style="flex:1">
+        <div id="ce-ptname" style="font-size:17px;font-weight:700">— Select a Case —</div>
+        <div id="ce-ptdetail" style="font-size:11px;color:var(--muted);margin-top:3px">Load from worklist or enter manually</div>
+      </div>
+      <select id="ce-case-select" onchange="loadCase(this.value)" style="width:300px">
+        <option value="">— Load case from worklist —</option>
+      </select>
+      <!-- Claim type toggle -->
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <div style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase">Claim Type</div>
+        <div style="display:flex;gap:6px">
+          <div id="ct-facility" class="claim-type ct-facility" style="cursor:pointer;padding:5px 10px;border-radius:6px;border:1px solid rgba(6,182,212,.3)" onclick="setClaimType('facility')">UB-04 · Facility</div>
+          <div id="ct-prof" class="claim-type" style="cursor:pointer;padding:5px 10px;border-radius:6px;background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--border)" onclick="setClaimType('professional')">CMS-1500 · Prof</div>
+        </div>
+      </div>
+      <span class="badge b-amber pulse" id="ce-status-badge">DRAFT</span>
+    </div>
+  </div>
+
+  <div class="grid2 mb14">
+    <!-- CPT Codes -->
+    <div class="sec">
+      <div class="sec-head">
+        ⚕ Procedure Codes (CPT)
+        <div style="margin-left:auto">
+          <select id="cpt-quick" onchange="addCPT(this.value)" style="width:250px;font-size:11px">
+            <option value="">+ Add CPT…</option>
+            <optgroup label="Total Knee">
+              <option value="27447|Total Knee Arthroplasty|2840|2108">27447 – Total Knee Arthroplasty</option>
+              <option value="27446|Unicompartmental Knee|2210|1640">27446 – Unicompartmental Knee</option>
+              <option value="27487|Revision TKA – Femur + Tibia|4180|3108">27487 – Revision TKA (F+T)</option>
+              <option value="27486|Revision TKA – Femur or Tibia|3450|2564">27486 – Revision TKA (F or T)</option>
+            </optgroup>
+            <optgroup label="Total Hip">
+              <option value="27130|Total Hip Arthroplasty|2940|2186">27130 – Total Hip Arthroplasty</option>
+              <option value="27132|Conversion to THA|3100|2304">27132 – Conversion to THA</option>
+              <option value="27134|Revision THA – Acetabulum + Femur|4520|3360">27134 – Revision THA (A+F)</option>
+              <option value="27137|Revision THA – Acetabulum|3680|2736">27137 – Revision THA (Acetabulum)</option>
+              <option value="27138|Revision THA – Femoral|3620|2692">27138 – Revision THA (Femoral)</option>
+            </optgroup>
+            <optgroup label="Anesthesia">
+              <option value="01402|Anesthesia – TKA|820|610">01402 – Anesthesia TKA</option>
+              <option value="01214|Anesthesia – THA|860|640">01214 – Anesthesia THA</option>
+            </optgroup>
+            <optgroup label="Add-on">
+              <option value="27370|Injection Knee Joint|280|208">27370 – Injection, Knee</option>
+              <option value="20610|Arthrocentesis Major Joint|180|134">20610 – Arthrocentesis</option>
+              <option value="97597|Wound Debridement|240|178">97597 – Wound Debridement</option>
+            </optgroup>
+          </select>
+        </div>
+      </div>
+      <div class="sec-body">
+        <div id="cpt-list"></div>
+        <div class="sep"></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px">
+          <span style="color:var(--muted)">Medicare Allowable</span>
+          <span id="cpt-allow-total" style="font-family:var(--mono);color:var(--cyan)">$0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ICD-10 -->
+    <div class="sec">
+      <div class="sec-head">
+        🏷 Diagnosis Codes (ICD-10)
+        <div style="margin-left:auto">
+          <select id="icd-quick" onchange="addICD(this.value)" style="width:250px;font-size:11px">
+            <option value="">+ Add ICD-10…</option>
+            <optgroup label="Knee OA – Primary">
+              <option value="M17.11|Primary OA, right knee">M17.11 – Primary OA, Right Knee</option>
+              <option value="M17.12|Primary OA, left knee">M17.12 – Primary OA, Left Knee</option>
+              <option value="M17.0|Bilateral primary OA, knee">M17.0 – Bilateral OA, Knee</option>
+            </optgroup>
+            <optgroup label="Knee OA – Secondary">
+              <option value="M17.31|Secondary OA, right knee">M17.31 – Secondary OA, Right</option>
+              <option value="M17.32|Secondary OA, left knee">M17.32 – Secondary OA, Left</option>
+            </optgroup>
+            <optgroup label="Hip OA – Primary">
+              <option value="M16.11|Primary OA, right hip">M16.11 – Primary OA, Right Hip</option>
+              <option value="M16.12|Primary OA, left hip">M16.12 – Primary OA, Left Hip</option>
+              <option value="M16.0|Bilateral primary OA, hip">M16.0 – Bilateral OA, Hip</option>
+            </optgroup>
+            <optgroup label="Hip OA – Secondary">
+              <option value="M16.31|Secondary OA, right hip">M16.31 – Secondary OA, Right Hip</option>
+              <option value="M16.32|Secondary OA, left hip">M16.32 – Secondary OA, Left Hip</option>
+            </optgroup>
+            <optgroup label="Post-Arthroplasty / Revision">
+              <option value="Z96.641|Presence of right artificial knee joint">Z96.641 – Presence R Artificial Knee</option>
+              <option value="Z96.642|Presence of left artificial knee joint">Z96.642 – Presence L Artificial Knee</option>
+              <option value="Z96.641|Presence of right artificial hip joint">Z96.641 – Presence R Artificial Hip</option>
+              <option value="T84.012A|Instability, right knee prosthesis, init">T84.012A – Instability R Knee Prosth</option>
+              <option value="T84.022A|Instability, left knee prosthesis, init">T84.022A – Instability L Knee Prosth</option>
+              <option value="T84.032A|Mech loosening, right knee prosthesis">T84.032A – Loosening R Knee Prosth</option>
+              <option value="T84.042A|Mech loosening, left knee prosthesis">T84.042A – Loosening L Knee Prosth</option>
+            </optgroup>
+            <optgroup label="Comorbidities">
+              <option value="E66.01|Morbid obesity due to excess calories">E66.01 – Morbid Obesity</option>
+              <option value="E11.9|Type 2 DM without complication">E11.9 – Type 2 DM</option>
+              <option value="I10|Essential hypertension">I10 – Hypertension</option>
+              <option value="Z96.641|History of prior arthroplasty">Z96.641 – Prior Arthroplasty</option>
+            </optgroup>
+          </select>
+        </div>
+      </div>
+      <div class="sec-body"><div id="icd-list"></div></div>
+    </div>
+  </div>
+
+  <div class="grid2 mb14">
+    <!-- Modifiers + Payer -->
+    <div class="sec">
+      <div class="sec-head">🔧 Modifiers</div>
+      <div class="sec-body">
+        <div class="mod-grid" id="mod-grid">
+          <div class="mod-btn" onclick="toggleMod(this,'LT')">LT</div>
+          <div class="mod-btn" onclick="toggleMod(this,'RT')">RT</div>
+          <div class="mod-btn" onclick="toggleMod(this,'22')">22</div>
+          <div class="mod-btn" onclick="toggleMod(this,'62')">62</div>
+          <div class="mod-btn" onclick="toggleMod(this,'80')">80</div>
+          <div class="mod-btn" onclick="toggleMod(this,'AS')">AS</div>
+          <div class="mod-btn" onclick="toggleMod(this,'TC')">TC</div>
+          <div class="mod-btn" onclick="toggleMod(this,'26')">26</div>
+          <div class="mod-btn" onclick="toggleMod(this,'51')">51</div>
+          <div class="mod-btn" onclick="toggleMod(this,'59')">59</div>
+        </div>
+        <div id="mod-note" style="margin-top:10px;font-size:11px;color:var(--muted);min-height:16px;line-height:1.5"></div>
+      </div>
+    </div>
+
+    <!-- Payer -->
+    <div class="sec">
+      <div class="sec-head">🏦 Payer Info</div>
+      <div class="sec-body">
+        <div class="form-row c2">
+          <div class="form-group">
+            <label>Primary Payer</label>
+            <select id="ce-payer">
+              <option>Medicare</option>
+              <option>Medicare Advantage – Humana</option>
+              <option>Medicare Advantage – BCBS</option>
+              <option>Medicare Advantage – Aetna</option>
+              <option>Medicaid</option>
+              <option>BCBS Commercial</option>
+              <option>Aetna Commercial</option>
+              <option>UnitedHealthcare</option>
+              <option>Cigna</option>
+              <option>Self Pay</option>
+              <option>Workers Comp</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Place of Service</label>
+            <select id="ce-pos">
+              <option value="24">24 – ASC</option>
+              <option value="21">21 – Inpatient Hospital</option>
+              <option value="22">22 – Outpatient Hospital</option>
+              <option value="11">11 – Office</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Member ID</label>
+            <input type="text" id="ce-memberid" placeholder="Member ID">
+          </div>
+          <div class="form-group">
+            <label>Auth #</label>
+            <input type="text" id="ce-auth" placeholder="Prior auth number">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Implants -->
+  <div class="sec mb14">
+    <div class="sec-head">🔩 Implants &amp; Supplies
+      <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="addImplantRow()">+ Add Line</button>
+    </div>
+    <div class="sec-body">
+      <div style="display:grid;grid-template-columns:3fr 1fr 1fr 1fr 1fr auto;gap:8px;padding-bottom:8px;margin-bottom:4px;border-bottom:1px solid var(--border)">
+        <span style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase">Description</span>
+        <span style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase">Catalog #</span>
+        <span style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase">Qty</span>
+        <span style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase">Unit Cost</span>
+        <span style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase">Total</span>
+        <span></span>
+      </div>
+      <div id="implant-list"></div>
+    </div>
+  </div>
+
+  <!-- Scrubber + Summary + Actions -->
+  <div class="grid2">
+    <div>
+      <!-- Scrubber -->
+      <div class="sec mb14">
+        <div class="sec-head">🔍 Claim Scrubber
+          <button class="btn btn-blue btn-sm" style="margin-left:auto" onclick="runScrubber()">Run Check</button>
+        </div>
+        <div class="sec-body" id="scrubber-results">
+          <div style="color:var(--muted);font-size:12px">Click "Run Check" to validate claim before submission.</div>
+        </div>
+      </div>
+      <!-- Charge Summary -->
+      <div class="sec">
+        <div class="sec-head">📋 Charge Summary</div>
+        <div class="sec-body" id="charge-summary"></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;padding-top:2px">
+      <button class="btn btn-blue" style="width:100%" onclick="runScrubber()">🔍 Run Scrubber</button>
+      <button class="btn btn-primary" style="width:100%" onclick="saveDraft()">💾 Save Draft</button>
+      <button class="btn btn-green" style="width:100%" onclick="markReady()">✔ Mark Ready to Submit</button>
+      <div class="sep"></div>
+      <button class="btn btn-ghost" style="width:100%" onclick="showExportModal('sis')">⬆ Export to SIS (UB-04)</button>
+      <button class="btn btn-ghost" style="width:100%" onclick="showExportModal('cerner')">⬆ Export to Cerner (CMS-1500)</button>
+      <div class="sep"></div>
+      <button class="btn btn-ghost" style="width:100%;color:var(--red)" onclick="clearCharge()">🗑 Clear Form</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE 3A · CLAIMS QUEUE
+═══════════════════════════════════════════ -->
+<div id="view-claims" class="hidden fade-in">
+  <div class="metrics-grid mg-5 mb18">
+    <div class="metric"><div class="metric-label">Ready to Submit</div><div class="metric-value c-amber">4</div></div>
+    <div class="metric"><div class="metric-label">Submitted</div><div class="metric-value c-blue">7</div></div>
+    <div class="metric"><div class="metric-label">In Process</div><div class="metric-value">3</div></div>
+    <div class="metric"><div class="metric-label">Denied</div><div class="metric-value c-red">3</div></div>
+    <div class="metric"><div class="metric-label">Paid MTD</div><div class="metric-value c-green">$198k</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <h3>Claims Queue</h3>
+      <select id="claim-status-filter" onchange="renderClaims()" style="width:auto">
+        <option value="">All Statuses</option>
+        <option>Ready</option><option>Submitted</option><option>In Process</option><option>Denied</option><option>Paid</option>
+      </select>
+      <select id="claim-type-filter" onchange="renderClaims()" style="width:auto">
+        <option value="">Facility + Prof</option>
+        <option value="Facility">Facility Only</option>
+        <option value="Professional">Professional Only</option>
+      </select>
+      <button class="btn btn-primary btn-sm" onclick="submitSelected()">⬆ Submit Selected</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th><input type="checkbox" onclick="toggleAll(this)"></th>
+          <th>Claim #</th><th>Patient</th><th>DOS</th><th>Type</th>
+          <th>Procedure</th><th>CPT(s)</th><th>Payer</th>
+          <th>Billed</th><th>Expected</th><th>Status</th><th>Days</th><th></th>
+        </tr></thead>
+        <tbody id="claims-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE 3B · SECONDARY BILLING
+═══════════════════════════════════════════ -->
+<div id="view-secondary" class="hidden fade-in">
+  <div class="alert alert-info mb14">
+    <strong>Secondary Billing Queue</strong> — These claims have a primary payment posted. Secondary/Medigap claim is ready to generate. Medicare crossover claims are pre-filled with Medicare's payment data.
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <h3>Ready for Secondary Submission</h3>
+      <button class="btn btn-primary btn-sm" onclick="submitAllSecondary()">⬆ Submit All Secondary</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th><input type="checkbox"></th><th>Claim #</th><th>Patient</th><th>DOS</th><th>Primary Payer</th><th>Primary Paid</th><th>Secondary Payer</th><th>Crossover?</th><th>Pt Responsibility</th><th>Secondary Billed</th><th></th></tr></thead>
+        <tbody id="secondary-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE 4A · DENIAL REWORK QUEUE
+═══════════════════════════════════════════ -->
+<div id="view-denials" class="hidden fade-in">
+  <div class="metrics-grid mg-4 mb18">
+    <div class="metric"><div class="metric-label">Active Denials</div><div class="metric-value c-red">3</div><div class="metric-sub">$48,900 at risk</div></div>
+    <div class="metric"><div class="metric-label">Overturned MTD</div><div class="metric-value c-green">5</div><div class="metric-sub">$62,400 recovered</div></div>
+    <div class="metric"><div class="metric-label">Avg Overturn Rate</div><div class="metric-value c-green">71%</div><div class="metric-sub">Industry avg: 56%</div></div>
+    <div class="metric"><div class="metric-label">Written Off MTD</div><div class="metric-value c-amber">$4,200</div><div class="metric-sub">3 claims</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <h3>Denial Rework Queue</h3>
+      <select style="width:auto">
+        <option>All Reason Codes</option>
+        <option>CO-4 Not Covered</option>
+        <option>CO-97 Prior Auth</option>
+        <option>CO-16 Missing Info</option>
+        <option>CO-45 Contractual</option>
+      </select>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Claim #</th><th>Patient</th><th>DOS</th><th>CPT</th><th>Payer</th><th>Billed</th><th>Denial Code</th><th>Reason</th><th>Age</th><th>Action</th></tr></thead>
+        <tbody id="denials-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE 4B · APPEAL LETTERS
+═══════════════════════════════════════════ -->
+<div id="view-appeals" class="hidden fade-in">
+  <div class="grid2">
+    <div>
+      <div class="card mb14">
+        <div class="card-header"><h3>Generate Appeal Letter</h3></div>
+        <div class="card-body">
+          <div class="form-row c2 mb12">
+            <div class="form-group">
+              <label>Select Denied Claim</label>
+              <select id="appeal-claim-select" onchange="loadAppealClaim(this.value)">
+                <option value="">— Select claim —</option>
+                <option value="CLM-2603">CLM-2603 · Frank Diaz · CO-4</option>
+                <option value="CLM-2607">CLM-2607 · Richard Garcia · CO-97</option>
+                <option value="CLM-2611">CLM-2611 · Daniel Harris · CO-16</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Appeal Level</label>
+              <select id="appeal-level">
+                <option>Level 1 – Internal Appeal</option>
+                <option>Level 2 – External Review</option>
+                <option>Level 3 – ALJ Hearing</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group mb12">
+            <label>Denial Reason (auto-filled)</label>
+            <input type="text" id="appeal-reason" placeholder="Select claim above" readonly style="color:var(--muted)">
+          </div>
+          <div class="form-group mb12">
+            <label>Clinical Justification Notes</label>
+            <textarea id="appeal-notes" placeholder="Enter supporting clinical notes, relevant guidelines, or additional documentation…"></textarea>
+          </div>
+          <div class="form-row c2">
+            <button class="btn btn-primary" onclick="generateAppealLetter()">📝 Generate Letter</button>
+            <button class="btn btn-ghost" onclick="clearAppeal()">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <h3>Letter Preview</h3>
+          <button class="btn btn-blue btn-sm" id="copy-letter-btn" onclick="copyLetter()" style="display:none">📋 Copy</button>
+          <button class="btn btn-green btn-sm" id="export-letter-btn" onclick="exportLetter()" style="display:none">⬇ Export</button>
+        </div>
+        <div class="card-body">
+          <div class="letter-preview" id="appeal-letter-preview">
+            Select a denied claim and click Generate Letter to create a pre-filled appeal.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt16">
+    <div class="card-header"><h3>Sent Appeals — Tracking</h3></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Claim #</th><th>Patient</th><th>Denial Code</th><th>Level</th><th>Sent Date</th><th>Deadline</th><th>Outcome</th><th>Amount</th></tr></thead>
+        <tbody id="appeals-tracking-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE 4C · PEER-TO-PEER TRACKER
+═══════════════════════════════════════════ -->
+<div id="view-p2p" class="hidden fade-in">
+  <div class="metrics-grid mg-4 mb18">
+    <div class="metric"><div class="metric-label">Open P2P Requests</div><div class="metric-value c-amber">2</div></div>
+    <div class="metric"><div class="metric-label">Completed P2Ps</div><div class="metric-value c-green">8</div><div class="metric-sub">MTD</div></div>
+    <div class="metric"><div class="metric-label">Overturn Rate</div><div class="metric-value c-green">75%</div><div class="metric-sub">6 of 8 overturned</div></div>
+    <div class="metric"><div class="metric-label">Avg Response Days</div><div class="metric-value">4.2</div></div>
+  </div>
+  <div class="card mb14">
+    <div class="card-header">
+      <h3>Peer-to-Peer Log</h3>
+      <button class="btn btn-primary btn-sm" onclick="openP2PModal()">+ New P2P Request</button>
+    </div>
+    <div style="padding:0">
+      <div class="p2p-row p2p-head">
+        <span>Patient / Claim</span><span>Payer</span><span>Physician</span><span>Requested</span><span>Scheduled</span><span>Outcome</span>
+      </div>
+      <div id="p2p-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE 4D · WRITE-OFFS / ADJUSTMENTS
+═══════════════════════════════════════════ -->
+<div id="view-writeoffs" class="hidden fade-in">
+  <div class="grid2 mb14">
+    <div class="card">
+      <div class="card-header"><h3>Post Write-off / Adjustment</h3></div>
+      <div class="card-body">
+        <div class="form-row c2 mb12">
+          <div class="form-group">
+            <label>Claim Number</label>
+            <input type="text" id="wo-claim" placeholder="e.g. CLM-2603">
+          </div>
+          <div class="form-group">
+            <label>Patient</label>
+            <input type="text" id="wo-patient" placeholder="Patient name">
+          </div>
+        </div>
+        <div class="form-row c3 mb12">
+          <div class="form-group">
+            <label>Adjustment Type</label>
+            <select id="wo-type" onchange="updateWOCode()">
+              <option value="">Select…</option>
+              <optgroup label="Contractual">
+                <option value="CO-45">CO-45 – Contractual Obligation</option>
+                <option value="CO-97">CO-97 – Service Included in Another</option>
+                <option value="CO-4">CO-4 – Service Inconsistent with Modifier</option>
+              </optgroup>
+              <optgroup label="Patient Responsibility">
+                <option value="PR-1">PR-1 – Deductible</option>
+                <option value="PR-2">PR-2 – Coinsurance</option>
+                <option value="PR-3">PR-3 – Copayment</option>
+              </optgroup>
+              <optgroup label="Other">
+                <option value="CO-16">CO-16 – Claim Lacks Info</option>
+                <option value="CO-50">CO-50 – Not Medically Necessary</option>
+                <option value="WO-SB">Small Balance Write-off</option>
+                <option value="WO-BD">Bad Debt Write-off</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Adjustment Code</label>
+            <input type="text" id="wo-code" placeholder="Auto-filled">
+          </div>
+          <div class="form-group">
+            <label>Amount</label>
+            <input type="text" id="wo-amount" placeholder="$0.00">
+          </div>
+        </div>
+        <div class="form-group mb12">
+          <label>Notes / Reason</label>
+          <textarea id="wo-notes" placeholder="Document reason for adjustment…" style="min-height:60px"></textarea>
+        </div>
+        <div class="flex-row">
+          <button class="btn btn-primary" onclick="postWriteoff()">Post Adjustment</button>
+          <button class="btn btn-ghost" onclick="clearWriteoff()">Clear</button>
+          <span id="wo-success" style="font-size:12px;color:var(--green);display:none">✔ Posted</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>Write-off Summary — MTD</h3></div>
+      <div class="card-body">
+        <table><thead><tr><th>Type</th><th>Count</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr><td>CO-45 Contractual</td><td>28</td><td style="color:var(--amber);font-family:var(--mono)">$42,100</td></tr>
+          <tr><td>PR-1 Deductible</td><td>14</td><td style="color:var(--blue);font-family:var(--mono)">$18,400</td></tr>
+          <tr><td>PR-2 Coinsurance</td><td>11</td><td style="color:var(--blue);font-family:var(--mono)">$9,200</td></tr>
+          <tr><td>Small Balance</td><td>6</td><td style="color:var(--muted);font-family:var(--mono)">$840</td></tr>
+          <tr><td>Bad Debt</td><td>2</td><td style="color:var(--red);font-family:var(--mono)">$3,400</td></tr>
+          <tr style="border-top:1px solid var(--border2)"><td><strong>Total</strong></td><td><strong>61</strong></td><td style="font-family:var(--mono);color:var(--amber);font-weight:700">$73,940</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><h3>Recent Adjustments</h3></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Claim #</th><th>Patient</th><th>Adj Code</th><th>Reason</th><th>Amount</th><th>Posted By</th></tr></thead>
+        <tbody id="writeoff-history"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE 5A · ERA AUTO-POST
+═══════════════════════════════════════════ -->
+<div id="view-era" class="hidden fade-in">
+  <div class="alert alert-info mb14">
+    <strong>ERA / 835 Auto-Posting</strong> — Upload an 835 file or paste raw ERA data. The system will auto-match to open claims and post payments, adjustments, and patient responsibility.
+  </div>
+
+  <div class="grid2 mb14">
+    <div class="card">
+      <div class="card-header"><h3>Upload ERA / 835 File</h3></div>
+      <div class="card-body">
+        <div style="border:2px dashed var(--border);border-radius:8px;padding:30px;text-align:center;margin-bottom:14px;cursor:pointer" onclick="simulateERA()" id="era-dropzone">
+          <div style="font-size:32px;margin-bottom:8px">📂</div>
+          <div style="font-weight:600;margin-bottom:4px">Drop 835 file here or click to upload</div>
+          <div style="font-size:11px;color:var(--muted)">Supports standard ASC X12 835 format · Or use demo data below</div>
+        </div>
+        <button class="btn btn-primary" style="width:100%" onclick="simulateERA()">⚡ Load Demo ERA (Medicare 03/07)</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>ERA Summary</h3></div>
+      <div class="card-body" id="era-summary">
+        <div style="color:var(--muted);font-size:12px">Load an ERA file to see summary.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="era-matches-card" style="display:none">
+    <div class="card-header">
+      <h3>Claim Matching Results</h3>
+      <span id="era-match-stats" class="badge b-blue"></span>
+      <button class="btn btn-green btn-sm" onclick="postAllMatched()">✔ Post All Matched</button>
+    </div>
+    <div class="card-body" id="era-matches-body"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE 5B · MANUAL PAYMENT POSTING
+═══════════════════════════════════════════ -->
+<div id="view-payments" class="hidden fade-in">
+  <div class="grid2 mb14">
+    <div class="card">
+      <div class="card-header"><h3>Post EOB Payment</h3></div>
+      <div class="card-body">
+        <div class="form-row c2 mb12">
+          <div class="form-group"><label>Check / EFT #</label><input type="text" id="pp-check" placeholder="e.g. 7482910"></div>
+          <div class="form-group"><label>Payer</label><select id="pp-payer"><option>Medicare</option><option>Medicare Adv – Humana</option><option>Medicare Adv – BCBS</option><option>BCBS Commercial</option><option>Aetna</option><option>UnitedHealthcare</option></select></div>
+          <div class="form-group"><label>Payment Date</label><input type="text" id="pp-date" placeholder="MM/DD/YYYY"></div>
+          <div class="form-group"><label>Total Payment</label><input type="text" id="pp-amount" placeholder="$0.00"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:3fr 1fr 1fr 1fr 1fr auto;gap:8px;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:6px">
+          <span style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase">Claim / Patient</span>
+          <span style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase">Billed</span>
+          <span style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase">Allowed</span>
+          <span style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase">Paid</span>
+          <span style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase">Adj</span>
+          <span></span>
+        </div>
+        <div id="posting-lines"></div>
+        <button class="btn btn-ghost btn-sm mt8" onclick="addPostingLine()">+ Add Line</button>
+        <div class="sep"></div>
+        <div class="flex-row">
+          <button class="btn btn-primary" onclick="postPayment()">Post Payment</button>
+          <button class="btn btn-ghost" onclick="clearPostingForm()">Clear</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>Recent Payments</h3></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Date</th><th>Payer</th><th>Check #</th><th>Amount</th><th>Claims</th><th>Method</th></tr></thead>
+          <tbody>
+            <tr><td>03/08/26</td><td>Medicare</td><td>7482910</td><td class="c-green" style="font-family:var(--mono)">$18,240</td><td>4</td><td><span class="badge b-cyan">ERA</span></td></tr>
+            <tr><td>03/07/26</td><td>Humana MA</td><td>HUM-48821</td><td class="c-green" style="font-family:var(--mono)">$24,100</td><td>3</td><td><span class="badge b-gray">Manual</span></td></tr>
+            <tr><td>03/06/26</td><td>BCBS</td><td>BCB-99112</td><td class="c-green" style="font-family:var(--mono)">$31,450</td><td>5</td><td><span class="badge b-cyan">ERA</span></td></tr>
+            <tr><td>03/05/26</td><td>Medicare</td><td>7481920</td><td class="c-green" style="font-family:var(--mono)">$14,870</td><td>3</td><td><span class="badge b-cyan">ERA</span></td></tr>
+            <tr><td>03/04/26</td><td>Aetna</td><td>AET-22841</td><td class="c-green" style="font-family:var(--mono)">$9,840</td><td>2</td><td><span class="badge b-gray">Manual</span></td></tr>
+            <tr><td>03/03/26</td><td>UHC</td><td>UHC-10481</td><td class="c-green" style="font-family:var(--mono)">$22,100</td><td>3</td><td><span class="badge b-cyan">ERA</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE 6 · PATIENT RESPONSIBILITY
+═══════════════════════════════════════════ -->
+<div id="view-ptbalance" class="hidden fade-in">
+  <div class="metrics-grid mg-4 mb18">
+    <div class="metric"><div class="metric-label">Total Pt Balance</div><div class="metric-value c-amber">$24,840</div><div class="metric-sub">8 patients</div></div>
+    <div class="metric"><div class="metric-label">Collected MTD</div><div class="metric-value c-green">$8,200</div></div>
+    <div class="metric"><div class="metric-label">Overdue &gt;60d</div><div class="metric-value c-red">$4,100</div><div class="metric-sub">3 patients</div></div>
+    <div class="metric"><div class="metric-label">Sent to Collections</div><div class="metric-value c-orange">$1,800</div><div class="metric-sub">1 account</div></div>
+  </div>
+
+  <div class="card mb14">
+    <div class="card-header">
+      <h3>Patient Balance Dashboard</h3>
+      <select style="width:auto"><option>All Statuses</option><option>Outstanding</option><option>Overdue</option><option>Payment Plan</option><option>Paid</option></select>
+      <button class="btn btn-primary btn-sm" onclick="generateStatements()">📄 Generate Statements</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Patient</th><th>DOS</th><th>Procedure</th><th>Billed</th><th>Ins Paid</th><th>Deductible</th><th>Coinsurance</th><th>Copay</th><th>Pt Balance</th><th>Age</th><th>Status</th><th></th></tr></thead>
+        <tbody id="ptbalance-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE 7A · AR TRACKER
+═══════════════════════════════════════════ -->
+<div id="view-ar" class="hidden fade-in">
+  <div class="metrics-grid mg-5 mb18">
+    <div class="metric"><div class="metric-label">Total Outstanding</div><div class="metric-value c-amber">$342k</div><div class="metric-sub">42 open claims</div></div>
+    <div class="metric"><div class="metric-label">Avg Days in AR</div><div class="metric-value">28.4</div><div class="metric-sub">Target: &lt;35</div></div>
+    <div class="metric"><div class="metric-label">Denial Rate MTD</div><div class="metric-value c-red">5.8%</div><div class="metric-sub">Target: &lt;5%</div></div>
+    <div class="metric"><div class="metric-label">First-Pass Rate</div><div class="metric-value c-green">94.2%</div></div>
+    <div class="metric"><div class="metric-label">Collections MTD</div><div class="metric-value c-green">$198k</div></div>
+  </div>
+
+  <div class="aging-grid">
+    <div class="aging-bucket"><div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase">0–30 Days</div><div class="aging-bar" style="background:var(--green);width:100%"></div><div class="aging-val c-green">$148,200</div><div class="aging-cnt">19 claims</div></div>
+    <div class="aging-bucket"><div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase">31–60 Days</div><div class="aging-bar" style="background:var(--amber);width:70%"></div><div class="aging-val c-amber">$94,750</div><div class="aging-cnt">12 claims</div></div>
+    <div class="aging-bucket"><div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase">61–90 Days</div><div class="aging-bar" style="background:var(--orange);width:42%"></div><div class="aging-val c-orange">$62,400</div><div class="aging-cnt">7 claims — ⚠ Review</div></div>
+    <div class="aging-bucket"><div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase">90+ Days</div><div class="aging-bar" style="background:var(--red);width:25%"></div><div class="aging-val c-red">$36,650</div><div class="aging-cnt">4 claims — 🚨 Action</div></div>
+  </div>
+
+  <div class="grid2 mb14">
+    <div class="card">
+      <div class="card-header"><h3>Outstanding by Payer</h3></div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Payer</th><th>Claims</th><th>Billed</th><th>Outstanding</th><th>Avg Days</th><th>%</th></tr></thead>
+        <tbody>
+          <tr><td>Medicare</td><td>18</td><td>$198,400</td><td class="c-amber" style="font-family:var(--mono)">$82,100</td><td>24</td><td><div style="height:6px;background:var(--amber);border-radius:3px;width:60%"></div></td></tr>
+          <tr><td>Medicare Adv – Humana</td><td>8</td><td>$96,200</td><td class="c-amber" style="font-family:var(--mono)">$67,400</td><td>31</td><td><div style="height:6px;background:var(--amber);border-radius:3px;width:48%"></div></td></tr>
+          <tr><td>Medicare Adv – BCBS</td><td>6</td><td>$72,000</td><td class="c-amber" style="font-family:var(--mono)">$54,200</td><td>28</td><td><div style="height:6px;background:var(--amber);border-radius:3px;width:39%"></div></td></tr>
+          <tr><td>BCBS Commercial</td><td>5</td><td>$68,500</td><td class="c-red" style="font-family:var(--mono)">$72,100</td><td>44</td><td><div style="height:6px;background:var(--red);border-radius:3px;width:52%"></div></td></tr>
+          <tr><td>Aetna Commercial</td><td>3</td><td>$41,200</td><td class="c-red" style="font-family:var(--mono)">$38,200</td><td>52</td><td><div style="height:6px;background:var(--red);border-radius:3px;width:27%"></div></td></tr>
+          <tr><td>UnitedHealthcare</td><td>2</td><td>$28,400</td><td class="c-red" style="font-family:var(--mono)">$28,000</td><td>67</td><td><div style="height:6px;background:var(--red);border-radius:3px;width:20%"></div></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>Implant Cost vs Reimbursement</h3></div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Procedure</th><th>Avg Implant Cost</th><th>Avg Reimbursed</th><th>Margin</th><th>Margin %</th></tr></thead>
+        <tbody>
+          <tr><td>TKA – Primary</td><td class="c-red" style="font-family:var(--mono)">$9,780</td><td class="c-green" style="font-family:var(--mono)">$14,200</td><td class="c-green" style="font-family:var(--mono)">$4,420</td><td><span class="badge b-green">31%</span></td></tr>
+          <tr><td>THA – Primary</td><td class="c-red" style="font-family:var(--mono)">$8,700</td><td class="c-green" style="font-family:var(--mono)">$14,800</td><td class="c-green" style="font-family:var(--mono)">$6,100</td><td><span class="badge b-green">41%</span></td></tr>
+          <tr><td>Unicompartmental</td><td class="c-red" style="font-family:var(--mono)">$6,900</td><td class="c-green" style="font-family:var(--mono)">$11,200</td><td class="c-green" style="font-family:var(--mono)">$4,300</td><td><span class="badge b-green">38%</span></td></tr>
+          <tr><td>Revision TKA</td><td class="c-red" style="font-family:var(--mono)">$14,200</td><td class="c-amber" style="font-family:var(--mono)">$18,400</td><td class="c-amber" style="font-family:var(--mono)">$4,200</td><td><span class="badge b-amber">23%</span></td></tr>
+          <tr><td>Revision THA</td><td class="c-red" style="font-family:var(--mono)">$13,800</td><td class="c-amber" style="font-family:var(--mono)">$19,200</td><td class="c-amber" style="font-family:var(--mono)">$5,400</td><td><span class="badge b-amber">28%</span></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE 7B · REPORTS
+═══════════════════════════════════════════ -->
+<div id="view-reports" class="hidden fade-in">
+  <div class="metrics-grid mg-5 mb18">
+    <div class="metric"><div class="metric-label">Charges YTD</div><div class="metric-value">$1.84M</div><div class="metric-sub">187 cases</div></div>
+    <div class="metric"><div class="metric-label">Collections YTD</div><div class="metric-value c-green">$1.61M</div><div class="metric-sub">87.5% rate</div></div>
+    <div class="metric"><div class="metric-label">Avg Charge / Case</div><div class="metric-value">$9,840</div></div>
+    <div class="metric"><div class="metric-label">Denial Rate YTD</div><div class="metric-value c-amber">5.1%</div></div>
+    <div class="metric"><div class="metric-label">AR &gt;90 Days</div><div class="metric-value c-red">10.7%</div><div class="metric-sub">Target: &lt;15%</div></div>
+  </div>
+  <div class="report-grid">
+    <div class="report-card"><div class="ri">📊</div><h4>Monthly AR Summary</h4><p>Aging by payer, denial rate, days in AR, collection rate trends.</p></div>
+    <div class="report-card"><div class="ri">💉</div><h4>Procedure Volume & Revenue</h4><p>TKA vs THA volume, billed vs collected by CPT, surgeon breakdown.</p></div>
+    <div class="report-card"><div class="ri">🚫</div><h4>Denial Analysis</h4><p>Denials by reason code, payer, CPT, surgeon. Month-over-month trend.</p></div>
+    <div class="report-card"><div class="ri">🏦</div><h4>Payer Mix Analysis</h4><p>Revenue by payer with reimbursement rate comparison vs Medicare.</p></div>
+    <div class="report-card"><div class="ri">🔩</div><h4>Implant Cost vs Reimbursement</h4><p>Per-case implant cost vs allowed amount by payer and device line.</p></div>
+    <div class="report-card"><div class="ri">👨‍⚕️</div><h4>Physician Productivity</h4><p>Cases, charges, and collections per surgeon MTD and YTD.</p></div>
+    <div class="report-card"><div class="ri">📝</div><h4>Appeal Outcomes</h4><p>Appeal success rate by denial code, payer, and appeal level.</p></div>
+    <div class="report-card"><div class="ri">👤</div><h4>Patient Responsibility Aging</h4><p>Patient balance aging, collection rate, payment plan performance.</p></div>
+    <div class="report-card"><div class="ri">📤</div><h4>Export Audit Log</h4><p>All SIS/Cerner exports — timestamp, user, case, status confirmation.</p></div>
+  </div>
+</div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- EXPORT MODAL -->
+<div id="export-modal" class="modal-overlay hidden">
+  <div class="modal modal-lg">
+    <div class="modal-head"><h3 id="export-modal-title">Export Charges</h3><button class="btn btn-ghost btn-sm" onclick="closeModal('export-modal')">✕</button></div>
+    <div class="modal-body">
+      <div id="export-preview-area"></div>
+      <div class="payload-box"><pre id="export-payload"></pre></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('export-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmExport()">Confirm &amp; Export</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div id="auth-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-head"><h3>New Prior Auth Request</h3><button class="btn btn-ghost btn-sm" onclick="closeModal('auth-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row c2 mb12">
+        <div class="form-group"><label>Patient Name</label><input type="text" id="am-patient" placeholder="Patient name"></div>
+        <div class="form-group"><label>DOS</label><input type="text" id="am-dos" placeholder="MM/DD/YYYY"></div>
+        <div class="form-group"><label>Procedure</label><select id="am-proc"><option>TKA</option><option>THA</option><option>Revision TKA</option><option>Revision THA</option><option>Unicompartmental</option></select></div>
+        <div class="form-group"><label>Payer</label><select id="am-payer"><option>Medicare Adv – Humana</option><option>Medicare Adv – BCBS</option><option>BCBS Commercial</option><option>Aetna</option><option>UHC</option></select></div>
+        <div class="form-group"><label>CPT Code</label><select id="am-cpt"><option>27447</option><option>27130</option><option>27487</option><option>27134</option><option>27446</option></select></div>
+        <div class="form-group"><label>Units Requested</label><input type="number" id="am-units" value="1"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('auth-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAuthRequest()">Submit Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- ELIGIBILITY MANUAL CHECK MODAL -->
+<div id="elig-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-head"><h3>Manual Eligibility Verification</h3><button class="btn btn-ghost btn-sm" onclick="closeModal('elig-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row c2 mb12">
+        <div class="form-group"><label>Patient Name</label><input type="text" placeholder="Last, First"></div>
+        <div class="form-group"><label>Date of Birth</label><input type="text" placeholder="MM/DD/YYYY"></div>
+        <div class="form-group"><label>Payer</label><select><option>Medicare</option><option>Medicare Adv – Humana</option><option>BCBS Commercial</option><option>Aetna</option><option>UHC</option></select></div>
+        <div class="form-group"><label>Member ID</label><input type="text" placeholder="Member ID"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('elig-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal('elig-modal');alert('Eligibility check submitted.')">Run Check</button>
+    </div>
+  </div>
+</div>
+
+<!-- P2P MODAL -->
+<div id="p2p-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-head"><h3>New Peer-to-Peer Request</h3><button class="btn btn-ghost btn-sm" onclick="closeModal('p2p-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row c2 mb12">
+        <div class="form-group"><label>Denied Claim #</label><input type="text" placeholder="CLM-XXXX"></div>
+        <div class="form-group"><label>Payer</label><select><option>Medicare Adv – Humana</option><option>BCBS Commercial</option><option>Aetna</option><option>UHC</option></select></div>
+        <div class="form-group"><label>Reviewing Physician</label><input type="text" placeholder="Dr. Name"></div>
+        <div class="form-group"><label>Payer Contact #</label><input type="text" placeholder="1-800-XXX-XXXX"></div>
+        <div class="form-group"><label>Request Date</label><input type="text" placeholder="MM/DD/YYYY"></div>
+        <div class="form-group"><label>Scheduled Date</label><input type="text" placeholder="MM/DD/YYYY"></div>
+      </div>
+      <div class="form-group mb12"><label>Clinical Notes</label><textarea placeholder="Summarize medical necessity and supporting documentation…"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('p2p-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitP2P()">Submit P2P Request</button>
+    </div>
+  </div>
+</div>
+<script>
+// ═══════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════
+const WORKLIST = [
+  { id:'W001',pt:'Margaret Sullivan',dob:'1948-03-12',dos:'03/09/26',surgeon:'Dr. Harrington',proc:'TKA',side:'Right',loc:'ASC – Main',payer:'Medicare',memberId:'1HG4TE8MK72',auth:'',claimType:'Facility',status:'Ready',cpts:['27447|Total Knee Arthroplasty|2840|2108'],icds:['M17.11|Primary OA, right knee'] },
+  { id:'W002',pt:'Robert Nguyen',dob:'1952-07-28',dos:'03/09/26',surgeon:'Dr. Patel',proc:'THA',side:'Left',loc:'ASC – Main',payer:'Medicare Advantage – Humana',memberId:'H82740021',auth:'HA-291847',claimType:'Facility',status:'Ready',cpts:['27130|Total Hip Arthroplasty|2940|2186'],icds:['M16.12|Primary OA, left hip'] },
+  { id:'W003',pt:'Dorothy Chen',dob:'1945-11-03',dos:'03/09/26',surgeon:'Dr. Kim',proc:'TKA',side:'Left',loc:'ASC – West',payer:'BCBS Commercial',memberId:'XYZ9918822',auth:'BC-88241',claimType:'Facility',status:'Ready',cpts:['27447|Total Knee Arthroplasty|2840|2108'],icds:['M17.12|Primary OA, left knee'] },
+  { id:'W004',pt:'James Patterson',dob:'1950-05-17',dos:'03/08/26',surgeon:'Dr. Harrington',proc:'Revision TKA',side:'Right',loc:'Hospital OR',payer:'Medicare',memberId:'2JK8MN4PQ91',auth:'',claimType:'Professional',status:'In Review',cpts:['27487|Revision TKA – Femur + Tibia|4180|3108'],icds:['T84.012A|Instability, right knee prosthesis, init','Z96.641|Presence of right artificial knee joint'] },
+  { id:'W005',pt:'Carol Williams',dob:'1958-09-22',dos:'03/08/26',surgeon:'Dr. Patel',proc:'THA',side:'Right',loc:'ASC – Main',payer:'Medicare Advantage – BCBS',memberId:'BCM-774821',auth:'BC-99102',claimType:'Facility',status:'Ready',cpts:['27130|Total Hip Arthroplasty|2940|2186'],icds:['M16.11|Primary OA, right hip'] },
+  { id:'W006',pt:'Thomas Anderson',dob:'1943-02-08',dos:'03/07/26',surgeon:'Dr. Kim',proc:'Unicompartmental',side:'Left',loc:'ASC – West',payer:'Aetna Commercial',memberId:'AET-22819',auth:'AE-12873',claimType:'Facility',status:'Ready',cpts:['27446|Unicompartmental Knee|2210|1640'],icds:['M17.32|Secondary OA, left knee'] },
+];
+
+const ELIGIBILITY = [
+  {pt:'Margaret Sullivan',dos:'03/09/26',payer:'Medicare',plan:'Part B',deduct:226,deductMet:226,oop:1850,oopRemain:0,copay:'20% after deductible',authReq:false,status:'Verified'},
+  {pt:'Robert Nguyen',dos:'03/09/26',payer:'Humana MA Gold',plan:'Medicare Advantage',deduct:500,deductMet:500,oop:3400,oopRemain:1240,copay:'$250 per admission',authReq:true,status:'Verified',authNote:'Auth HA-291847 approved'},
+  {pt:'Dorothy Chen',dos:'03/09/26',payer:'BCBS Commercial',plan:'PPO Gold',deduct:1500,deductMet:800,oop:4500,oopRemain:2800,copay:'20% after deductible',authReq:true,status:'Issue',issue:'Auth required — not obtained. Case may be denied.'},
+  {pt:'Carol Williams',dos:'03/08/26',payer:'Medicare Adv – BCBS',plan:'Medicare Advantage',deduct:300,deductMet:300,oop:2800,oopRemain:600,copay:'$150 copay',authReq:true,status:'Verified',authNote:'Auth BC-99102 approved'},
+  {pt:'Thomas Anderson',dos:'03/07/26',payer:'Aetna Commercial',plan:'HMO Select',deduct:2000,deductMet:2000,oop:6000,oopRemain:1800,copay:'20%',authReq:true,status:'Pending',issue:'Verification in progress — awaiting response'},
+  {pt:'James Patterson',dos:'03/08/26',payer:'Medicare',plan:'Part B',deduct:226,deductMet:226,oop:1850,oopRemain:400,copay:'20% after deductible',authReq:false,status:'Issue',issue:'Insurance inactive — verify coverage dates before proceeding'},
+];
+
+const AUTHS = [
+  {pt:'Robert Nguyen',dos:'03/09/26',proc:'THA',payer:'Humana MA',authNum:'HA-291847',submitted:'02/18/26',expires:'05/09/26',units:1,status:'Approved'},
+  {pt:'Dorothy Chen',dos:'03/09/26',proc:'TKA',payer:'BCBS Commercial',authNum:'Pending',submitted:'03/07/26',expires:'—',units:1,status:'Pending'},
+  {pt:'Carol Williams',dos:'03/08/26',proc:'THA',payer:'Medicare Adv – BCBS',authNum:'BC-99102',submitted:'02/20/26',expires:'04/08/26',units:1,status:'Approved'},
+  {pt:'Thomas Anderson',dos:'03/07/26',proc:'Unicompartmental',payer:'Aetna Commercial',authNum:'AE-12873',submitted:'02/15/26',expires:'03/20/26',units:1,status:'Expiring'},
+  {pt:'James Patterson',dos:'03/08/26',proc:'Revision TKA',payer:'Medicare',authNum:'—',submitted:'—',expires:'—',units:1,status:'N/A – Medicare'},
+  {pt:'Harold Brooks',dos:'03/05/26',proc:'TKA',payer:'UHC Commercial',authNum:'UHC-991021',submitted:'02/10/26',expires:'02/28/26',units:1,status:'Expired'},
+  {pt:'Nancy Wilson',dos:'03/01/26',proc:'TKA',payer:'Medicare Adv',authNum:'MA-448821',submitted:'02/08/26',expires:'04/01/26',units:1,status:'Approved'},
+  {pt:'Susan White',dos:'02/20/26',proc:'TKA',payer:'Cigna Commercial',authNum:'CIG-22019',submitted:'01/30/26',expires:'04/20/26',units:1,status:'Approved'},
+  {pt:'Patricia Lee',dos:'02/24/26',proc:'THA',payer:'Aetna Commercial',authNum:'—',submitted:'02/20/26',expires:'—',units:1,status:'Denied'},
+  {pt:'Daniel Harris',dos:'02/18/26',proc:'Revision THA',payer:'BCBS Commercial',authNum:'BCB-88211',submitted:'02/01/26',expires:'05/18/26',units:1,status:'Approved'},
+];
+
+const CLAIMS = [
+  {id:'CLM-2601',pt:'Harold Brooks',dos:'03/05/26',claimType:'Facility',proc:'TKA',cpts:['27447'],payer:'Medicare',billed:9820,expected:8200,status:'Submitted',days:4,dc:'green'},
+  {id:'CLM-2602',pt:'Linda Park',dos:'03/04/26',claimType:'Professional',proc:'THA',cpts:['27130'],payer:'Humana MA',billed:10480,expected:8800,status:'Paid',days:8,dc:'green'},
+  {id:'CLM-2603',pt:'Frank Diaz',dos:'03/03/26',claimType:'Facility',proc:'Revision TKA',cpts:['27487'],payer:'BCBS Commercial',billed:18200,expected:15400,status:'Denied',days:6,dc:'red'},
+  {id:'CLM-2604',pt:'Nancy Wilson',dos:'03/01/26',claimType:'Facility',proc:'TKA',cpts:['27447'],payer:'Medicare',billed:9400,expected:7900,status:'Submitted',days:8,dc:'green'},
+  {id:'CLM-2605',pt:'George Martin',dos:'02/28/26',claimType:'Professional',proc:'THA',cpts:['27130'],payer:'Aetna Commercial',billed:10900,expected:9200,status:'In Process',days:9,dc:'amber'},
+  {id:'CLM-2606',pt:'Patricia Lee',dos:'02/27/26',claimType:'Facility',proc:'TKA',cpts:['27447'],payer:'Medicare Adv – BCBS',billed:9600,expected:8100,status:'Ready',days:10,dc:'amber'},
+  {id:'CLM-2607',pt:'Richard Garcia',dos:'02/25/26',claimType:'Facility',proc:'TKA',cpts:['27447','01402'],payer:'UnitedHealthcare',billed:10900,expected:9100,status:'Denied',days:12,dc:'red'},
+  {id:'CLM-2608',pt:'Barbara Martinez',dos:'02/24/26',claimType:'Professional',proc:'THA',cpts:['27130'],payer:'Medicare',billed:10200,expected:8600,status:'In Process',days:13,dc:'amber'},
+  {id:'CLM-2609',pt:'Joseph Thompson',dos:'02/22/26',claimType:'Facility',proc:'Unicompartmental',cpts:['27446'],payer:'Cigna',billed:8400,expected:7100,status:'Ready',days:15,dc:'amber'},
+  {id:'CLM-2610',pt:'Susan White',dos:'02/20/26',claimType:'Facility',proc:'TKA',cpts:['27447'],payer:'Medicare',billed:9200,expected:7800,status:'Submitted',days:17,dc:'amber'},
+  {id:'CLM-2611',pt:'Daniel Harris',dos:'02/18/26',claimType:'Professional',proc:'Revision THA',cpts:['27134'],payer:'BCBS Commercial',billed:19800,expected:16400,status:'Denied',days:19,dc:'red'},
+  {id:'CLM-2612',pt:'Karen Jackson',dos:'02/15/26',claimType:'Facility',proc:'THA',cpts:['27130'],payer:'Humana MA',billed:10600,expected:8900,status:'Ready',days:22,dc:'amber'},
+  {id:'CLM-2613',pt:'Paul Lewis',dos:'02/12/26',claimType:'Facility',proc:'TKA',cpts:['27447'],payer:'Medicare',billed:9000,expected:7600,status:'Submitted',days:25,dc:'amber'},
+  {id:'CLM-2614',pt:'Sandra Clark',dos:'02/10/26',claimType:'Professional',proc:'TKA',cpts:['27447','01402'],payer:'Aetna Commercial',billed:11200,expected:9400,status:'Ready',days:27,dc:'red'},
+];
+
+const SECONDARY = [
+  {claim:'CLM-2602',pt:'Linda Park',dos:'03/04/26',primary:'Humana MA',priPaid:8200,secondary:'AARP Medigap',crossover:true,ptResp:0,secBilled:280},
+  {claim:'CLM-2604',pt:'Nancy Wilson',dos:'03/01/26',primary:'Medicare',priPaid:7840,secondary:'BCBS Medigap',crossover:true,ptResp:0,secBilled:1560},
+  {claim:'CLM-2608',pt:'Barbara Martinez',dos:'02/24/26',primary:'Medicare',priPaid:8600,secondary:'Humana Medigap F',crossover:true,ptResp:0,secBilled:320},
+  {claim:'CLM-2610',pt:'Susan White',dos:'02/20/26',primary:'Medicare',priPaid:7800,secondary:'United Medigap',crossover:true,ptResp:0,secBilled:400},
+  {claim:'CLM-2613',pt:'Paul Lewis',dos:'02/12/26',primary:'Medicare',priPaid:7600,secondary:'Cigna Medigap',crossover:false,ptResp:600,secBilled:600},
+];
+
+const DENIALS = [
+  {claim:'CLM-2603',pt:'Frank Diaz',dos:'03/03/26',cpt:'27487',payer:'BCBS Commercial',billed:18200,code:'CO-4',reason:'Procedure inconsistent with modifier',age:6},
+  {claim:'CLM-2607',pt:'Richard Garcia',dos:'02/25/26',cpt:'27447',payer:'UnitedHealthcare',billed:10900,code:'CO-97',reason:'Prior authorization required',age:12},
+  {claim:'CLM-2611',pt:'Daniel Harris',dos:'02/18/26',cpt:'27134',payer:'BCBS Commercial',billed:19800,code:'CO-16',reason:'Missing/invalid information on claim',age:19},
+];
+
+const P2P_DATA = [
+  {pt:'Frank Diaz',claim:'CLM-2603',payer:'BCBS Commercial',physician:'Dr. Harrington',requested:'03/04/26',scheduled:'03/11/26',outcome:'Pending'},
+  {pt:'Richard Garcia',claim:'CLM-2607',payer:'UnitedHealthcare',physician:'Dr. Kim',requested:'02/27/26',scheduled:'03/05/26',outcome:'Overturned'},
+  {pt:'Nancy Wilson',claim:'CLM-2604b',payer:'Aetna',physician:'Dr. Patel',requested:'02/10/26',scheduled:'02/14/26',outcome:'Overturned'},
+  {pt:'Carol Williams',claim:'CLM-2599',payer:'Cigna',physician:'Dr. Harrington',requested:'01/28/26',scheduled:'02/02/26',outcome:'Upheld'},
+  {pt:'Thomas Anderson',claim:'CLM-2581',payer:'Humana MA',physician:'Dr. Kim',requested:'01/15/26',scheduled:'01/20/26',outcome:'Overturned'},
+];
+
+const APPEALS_TRACKING = [
+  {claim:'CLM-2607',pt:'Richard Garcia',code:'CO-97',level:'Level 1',sent:'02/28/26',deadline:'03/28/26',outcome:'Overturned',amount:'$10,900'},
+  {claim:'CLM-2588',pt:'Carol Williams',code:'CO-4',level:'Level 1',sent:'02/14/26',deadline:'03/14/26',outcome:'Upheld',amount:'$0'},
+  {claim:'CLM-2574',pt:'Harold Brooks',code:'CO-97',level:'Level 2',sent:'01/30/26',deadline:'03/01/26',outcome:'Overturned',amount:'$9,200'},
+  {claim:'CLM-2562',pt:'Linda Park',code:'CO-16',level:'Level 1',sent:'01/20/26',deadline:'02/20/26',outcome:'Overturned',amount:'$10,480'},
+  {claim:'CLM-2548',pt:'George Martin',code:'CO-50',level:'Level 1',sent:'01/08/26',deadline:'02/08/26',outcome:'Overturned',amount:'$10,900'},
+];
+
+const PATIENT_BALANCES = [
+  {pt:'Margaret Sullivan',dos:'03/09/26',proc:'TKA',billed:9820,insPaid:7854,deduct:0,coins:1966,copay:0,balance:1966,age:0,status:'Outstanding'},
+  {pt:'Robert Nguyen',dos:'03/09/26',proc:'THA',billed:10480,insPaid:9230,deduct:0,coins:0,copay:250,balance:250,age:0,status:'Outstanding'},
+  {pt:'James Patterson',dos:'03/08/26',proc:'Revision TKA',billed:18200,insPaid:14560,deduct:0,coins:3640,copay:0,balance:3640,age:1,status:'Outstanding'},
+  {pt:'Frank Diaz',dos:'03/03/26',proc:'Revision TKA',billed:18200,insPaid:0,deduct:0,coins:0,copay:0,balance:0,age:6,status:'Denied – Pending'},
+  {pt:'George Martin',dos:'02/28/26',proc:'THA',billed:10900,insPaid:8720,deduct:0,coins:2180,copay:0,balance:2180,age:9,status:'Outstanding'},
+  {pt:'Barbara Martinez',dos:'02/24/26',proc:'THA',billed:10200,insPaid:8600,deduct:0,coins:0,copay:320,balance:320,age:13,status:'Outstanding'},
+  {pt:'Richard Garcia',dos:'02/25/26',proc:'TKA',billed:10900,insPaid:0,deduct:0,coins:0,copay:0,balance:0,age:12,status:'Denied – Appeal Pending'},
+  {pt:'Sandra Clark',dos:'02/10/26',proc:'TKA',billed:11200,insPaid:7840,deduct:1500,coins:1120,copay:0,balance:2620,age:27,status:'Overdue'},
+  {pt:'Paul Lewis',dos:'02/12/26',proc:'TKA',billed:9000,insPaid:7200,deduct:0,coins:1800,copay:0,balance:1800,age:25,status:'Outstanding'},
+];
+
+const WRITEOFF_HISTORY = [
+  {date:'03/07/26',claim:'CLM-2601',pt:'Harold Brooks',code:'CO-45',reason:'Contractual Obligation',amount:'$1,620',by:'Sarah M.'},
+  {date:'03/06/26',claim:'CLM-2598',pt:'Linda Park',code:'PR-2',reason:'Coinsurance',amount:'$840',by:'Sarah M.'},
+  {date:'03/05/26',claim:'CLM-2595',pt:'Nancy Wilson',code:'CO-45',reason:'Contractual Obligation',amount:'$1,560',by:'Sarah M.'},
+  {date:'03/04/26',claim:'CLM-2590',pt:'George Martin',code:'PR-1',reason:'Deductible Amount',amount:'$2,000',by:'Sarah M.'},
+  {date:'03/03/26',claim:'CLM-2585',pt:'Barbara Martinez',code:'WO-SB',reason:'Small Balance Write-off',amount:'$42',by:'Sarah M.'},
+];
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let currentView='worklist', activeCPTs=[], activeICDs=[], activeMods=[], implants=[];
+let currentCase=null, claimType='facility', postingLines=[], exportTarget='sis';
+
+const MOD_NOTES={LT:'Left side – apply to primary CPT',RT:'Right side – apply to primary CPT','22':'Increased procedural complexity – requires documentation','62':'Two-surgeon procedure – each bills with modifier 62','80':'Assistant surgeon','AS':'PA/NP as assistant surgeon',TC:'Technical component only','26':'Professional component only','51':'Multiple procedures – apply to secondary CPT','59':'Distinct procedural service'};
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+function nav(v){
+  document.querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
+  const ni=document.getElementById('nav-'+v); if(ni) ni.classList.add('active');
+  document.querySelectorAll('[id^="view-"]').forEach(el=>el.classList.add('hidden'));
+  const vEl=document.getElementById('view-'+v); if(vEl){vEl.classList.remove('hidden');}
+  currentView=v;
+  const T={worklist:'Coding Worklist',charge:'Charge Entry',claims:'Claims Queue',secondary:'Secondary Billing',denials:'Denial Rework',appeals:'Appeal Letters',p2p:'Peer-to-Peer Tracker',writeoffs:'Write-offs & Adjustments',era:'ERA Auto-Post',payments:'Payment Posting',ptbalance:'Patient Responsibility',ar:'AR Tracker',reports:'Reports',eligibility:'Eligibility Verification',auth:'Prior Auth Tracker'};
+  const title=T[v]||v; const words=title.split(' '); const last=words.pop();
+  document.getElementById('topbar-title').innerHTML=words.join(' ')+(words.length?' ':'')+'<span>'+last+'</span>';
+}
+function topbarAction(){const m={worklist:()=>nav('charge'),charge:saveDraft,claims:submitSelected,payments:postPayment,era:simulateERA,denials:()=>nav('appeals')};(m[currentView]||function(){})();}
+
+// ═══════════════════════════════════════════════════════
+// ELIGIBILITY
+// ═══════════════════════════════════════════════════════
+function renderEligibility(){
+  const tb=document.getElementById('elig-body'); if(!tb)return; tb.innerHTML='';
+  ELIGIBILITY.forEach((e,i)=>{
+    const statusMap={Verified:'b-green',Pending:'b-amber',Issue:'b-red'};
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><strong>${e.pt}</strong></td><td style="font-family:var(--mono)">${e.dos}</td><td>${e.payer}</td><td>${e.plan}</td>
+      <td style="font-family:var(--mono)">$${e.deduct.toLocaleString()}</td>
+      <td style="font-family:var(--mono);color:var(--${e.deductMet>=e.deduct?'green':'amber'})">$${e.deductMet.toLocaleString()}</td>
+      <td style="font-family:var(--mono);color:var(--${e.oopRemain>0?'amber':'green'})">$${e.oopRemain.toLocaleString()}</td>
+      <td style="font-size:11px">${e.copay}</td>
+      <td>${e.authReq?'<span class="badge b-orange">Required</span>':'<span class="badge b-gray">No</span>'}</td>
+      <td><span class="badge ${statusMap[e.status]||'b-gray'}">${e.status}</span>${e.issue?`<div style="font-size:10px;color:var(--red);margin-top:3px">⚠ ${e.issue}</div>`:''}</td>
+      <td><button class="btn btn-ghost btn-xs" onclick="expandElig(${i})">Details</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+function expandElig(i){
+  const e=ELIGIBILITY[i];
+  document.getElementById('elig-expanded').innerHTML=`
+    <div class="elig-card"><div class="elig-header" style="cursor:default"><div class="elig-name">${e.pt} — Benefits Detail</div><span class="badge ${e.status==='Verified'?'b-green':e.status==='Issue'?'b-red':'b-amber'}">${e.status}</span></div>
+    <div class="elig-body"><div class="elig-grid">
+      <div class="elig-item"><div class="elig-item-lbl">Plan</div><div class="elig-item-val">${e.plan}</div></div>
+      <div class="elig-item"><div class="elig-item-lbl">Annual Deductible</div><div class="elig-item-val" style="color:var(--text)">$${e.deduct.toLocaleString()}</div></div>
+      <div class="elig-item"><div class="elig-item-lbl">Deductible Met</div><div class="elig-item-val" style="color:var(--${e.deductMet>=e.deduct?'green':'amber'})">$${e.deductMet.toLocaleString()}</div></div>
+      <div class="elig-item"><div class="elig-item-lbl">OOP Remaining</div><div class="elig-item-val" style="color:var(--${e.oopRemain===0?'green':'amber'})">$${e.oopRemain.toLocaleString()}</div></div>
+      <div class="elig-item"><div class="elig-item-lbl">Copay / Coins</div><div class="elig-item-val" style="font-size:12px">${e.copay}</div></div>
+      <div class="elig-item"><div class="elig-item-lbl">Auth Required</div><div class="elig-item-val">${e.authReq?'Yes':'No'}</div></div>
+      ${e.authNote?`<div class="elig-item" style="grid-column:span 2"><div class="elig-item-lbl">Auth Note</div><div class="elig-item-val" style="color:var(--green);font-size:12px">${e.authNote}</div></div>`:''}
+      ${e.issue?`<div class="elig-item" style="grid-column:span 4;background:var(--red-dim)"><div class="elig-item-lbl">Action Required</div><div class="elig-item-val" style="color:var(--red);font-size:12px">⚠ ${e.issue}</div></div>`:''}
+    </div></div></div>`;
+}
+function verifyAll(){alert('Running batch eligibility verification against payer portals…\n\nAll 6 patients checked. Results updated.');}
+function openEligModal(){document.getElementById('elig-modal').classList.remove('hidden');}
+
+// ═══════════════════════════════════════════════════════
+// PRIOR AUTH
+// ═══════════════════════════════════════════════════════
+function renderAuthTable(){
+  const filter=document.getElementById('auth-filter')?.value||'';
+  const tb=document.getElementById('auth-body'); if(!tb)return; tb.innerHTML='';
+  AUTHS.filter(a=>!filter||a.status===filter).forEach(a=>{
+    const sm={Approved:'b-green',Pending:'b-amber',Expiring:'b-orange',Denied:'b-red','N/A – Medicare':'b-gray',Expired:'b-red'};
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><strong>${a.pt}</strong></td><td style="font-family:var(--mono)">${a.dos}</td><td>${a.proc}</td><td>${a.payer}</td>
+      <td style="font-family:var(--mono);font-size:11px">${a.authNum}</td><td style="font-family:var(--mono);font-size:11px">${a.submitted}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:${a.status==='Expiring'?'var(--orange)':a.status==='Expired'?'var(--red)':'inherit'}">${a.expires}</td>
+      <td>${a.units}</td><td><span class="badge ${sm[a.status]||'b-gray'}">${a.status}</span></td>
+      <td>${a.status==='Pending'?'<button class="btn btn-ghost btn-xs">Follow Up</button>':a.status==='Expiring'?'<button class="btn btn-orange btn-xs">Renew</button>':a.status==='Denied'?'<button class="btn btn-red btn-xs">Appeal</button>':''}</td>`;
+    tb.appendChild(tr);
+  });
+}
+function openAuthModal(){document.getElementById('auth-modal').classList.remove('hidden');}
+function submitAuthRequest(){closeModal('auth-modal');alert('Prior auth request submitted to payer portal. Expected response: 3–5 business days.');}
+
+// ═══════════════════════════════════════════════════════
+// WORKLIST
+// ═══════════════════════════════════════════════════════
+function renderWorklist(){
+  const tb=document.getElementById('worklist-body'); if(!tb)return;
+  const sel=document.getElementById('ce-case-select');
+  tb.innerHTML='';
+  if(sel) sel.innerHTML='<option value="">— Load case from worklist —</option>';
+  WORKLIST.forEach((c,i)=>{
+    const sm={Ready:'b-amber','In Review':'b-blue',Submitted:'b-green',Coded:'b-cyan'};
+    const authOk=c.auth||c.payer==='Medicare';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><strong>${c.pt}</strong><div style="font-size:10px;color:var(--muted)">${c.dob}</div></td>
+      <td style="font-family:var(--mono)">${c.dos}</td><td>${c.surgeon}</td>
+      <td><strong>${c.proc}</strong></td><td>${c.side}</td><td>${c.loc}</td><td>${c.payer}</td>
+      <td>${authOk?`<span class="badge b-green">${c.auth||'N/A'}</span>`:'<span class="badge b-red">⚠ Missing</span>'}</td>
+      <td><span class="badge ${sm[c.status]||'b-gray'}">${c.status}</span></td>
+      <td><button class="btn btn-primary btn-xs" onclick="openCase(${i})">Code →</button></td>`;
+    tr.onclick=(e)=>{if(!e.target.closest('button'))openCase(i)};
+    tb.appendChild(tr);
+    if(sel){const o=document.createElement('option');o.value=i;o.textContent=`${c.pt} · ${c.proc} ${c.side} · ${c.dos}`;sel.appendChild(o);}
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// CHARGE ENTRY
+// ═══════════════════════════════════════════════════════
+function openCase(i){nav('charge');document.getElementById('ce-case-select').value=i;loadCase(i);}
+
+function loadCase(idx){
+  if(idx===''||idx===null)return;
+  const c=WORKLIST[idx]; currentCase=c;
+  document.getElementById('ce-ptname').textContent=c.pt;
+  document.getElementById('ce-ptdetail').innerHTML=`<strong>DOS:</strong> ${c.dos} &nbsp;·&nbsp; <strong>Surgeon:</strong> ${c.surgeon} &nbsp;·&nbsp; <strong>${c.proc}</strong> (${c.side}) &nbsp;·&nbsp; ${c.loc}`;
+  document.getElementById('ce-payer').value=c.payer.includes('Humana')?'Medicare Advantage – Humana':c.payer.includes('BCBS')&&c.payer.includes('Adv')?'Medicare Advantage – BCBS':c.payer.includes('Aetna')&&c.payer.includes('Adv')?'Medicare Advantage – Aetna':c.payer;
+  document.getElementById('ce-memberid').value=c.memberId||'';
+  document.getElementById('ce-auth').value=c.auth||'';
+  document.getElementById('ce-pos').value=c.loc.includes('ASC')?'24':c.loc.includes('Hospital')?'21':'11';
+  setBadge('DRAFT','b-amber');
+  setClaimType(c.claimType==='Professional'?'professional':'facility');
+  activeCPTs=[]; activeICDs=[]; activeMods=[];
+  c.cpts.forEach(s=>{const p=s.split('|');activeCPTs.push({code:p[0],desc:p[1],fee:+p[2],allow:+p[3]});});
+  c.icds.forEach(s=>{const p=s.split('|');activeICDs.push({code:p[0],desc:p[1]});});
+  if(c.side==='Right')activeMods.push('RT'); else if(c.side==='Left')activeMods.push('LT');
+  // Default implants by procedure
+  const I={TKA:[{desc:'Triathlon Tibial Tray',cat:'STO-T100',qty:1,cost:4200},{desc:'Triathlon Femoral Component',cat:'STO-F200',qty:1,cost:3800},{desc:'Triathlon Poly Insert',cat:'STO-P300',qty:1,cost:1200},{desc:'Patellar Button',cat:'STO-PAT',qty:1,cost:480}],
+    THA:[{desc:'Accolade II Femoral Stem',cat:'ACC-FS-12',qty:1,cost:3400},{desc:'Trident Acetabular Shell',cat:'TRI-AC-50',qty:1,cost:2800},{desc:'X3 Polyethylene Liner',cat:'X3-LN-28',qty:1,cost:1400},{desc:'Biolox Delta Ceramic Head',cat:'BIO-28-M',qty:1,cost:1100}],
+    Unicompartmental:[{desc:'Oxford Tibial Component',cat:'OXF-T-R',qty:1,cost:3100},{desc:'Oxford Femoral Component',cat:'OXF-F-R',qty:1,cost:2900},{desc:'Oxford Bearing',cat:'OXF-B-4',qty:1,cost:900}],
+    'Revision TKA':[{desc:'Revision Stem Extension',cat:'REV-SE-1',qty:1,cost:5200},{desc:'Metaphyseal Cone',cat:'REV-MC-1',qty:1,cost:3800},{desc:'Augment Block',cat:'REV-AUG-A',qty:2,cost:1800}],
+    'Revision THA':[{desc:'Revision Stem',cat:'RTHA-ST-1',qty:1,cost:5600},{desc:'Revision Cup',cat:'RTHA-CP-1',qty:1,cost:4200},{desc:'Acetabular Augment',cat:'RTHA-AUG',qty:1,cost:2400}]};
+  implants=(I[c.proc]||I.TKA).map(x=>({...x}));
+  renderCPTs();renderICDs();renderMods();renderImplants();renderChargeSummary();
+  document.getElementById('scrubber-results').innerHTML='<div style="color:var(--muted);font-size:12px">Click "Run Check" to validate claim before submission.</div>';
+}
+
+function setClaimType(t){
+  claimType=t;
+  const fEl=document.getElementById('ct-facility'), pEl=document.getElementById('ct-prof');
+  if(t==='facility'){
+    fEl.className='claim-type ct-facility';fEl.style.cssText='cursor:pointer;padding:5px 10px;border-radius:6px;border:1px solid rgba(6,182,212,.4)';
+    pEl.className='claim-type';pEl.style.cssText='cursor:pointer;padding:5px 10px;border-radius:6px;background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--border)';
+  } else {
+    pEl.className='claim-type ct-prof';pEl.style.cssText='cursor:pointer;padding:5px 10px;border-radius:6px;border:1px solid rgba(168,85,247,.4)';
+    fEl.className='claim-type';fEl.style.cssText='cursor:pointer;padding:5px 10px;border-radius:6px;background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--border)';
+  }
+}
+
+function addCPT(val){
+  if(!val)return;
+  const p=val.split('|'); const code=p[0],desc=p[1],fee=+p[2],allow=+p[3];
+  if(!activeCPTs.find(c=>c.code===code)){activeCPTs.push({code,desc,fee,allow});renderCPTs();renderChargeSummary();}
+  document.getElementById('cpt-quick').value='';
+}
+function addICD(val){
+  if(!val)return;
+  const p=val.split('|'); const code=p[0],desc=p[1];
+  if(!activeICDs.find(c=>c.code===code)){activeICDs.push({code,desc});renderICDs();}
+  document.getElementById('icd-quick').value='';
+}
+function removeCPT(i){activeCPTs.splice(i,1);renderCPTs();renderChargeSummary();}
+function removeICD(i){activeICDs.splice(i,1);renderICDs();}
+
+function renderCPTs(){
+  const el=document.getElementById('cpt-list'); if(!el)return;
+  if(!activeCPTs.length){el.innerHTML='<div style="color:var(--muted);font-size:12px;padding:4px">No CPT codes added</div>';updateAllowTotal();return;}
+  el.innerHTML=activeCPTs.map((c,i)=>`
+    <div class="code-row"><span class="cr-cpt">${c.code}</span><span class="cr-desc">${c.desc}</span>
+    <span class="cr-fee">$${(c.fee||0).toLocaleString()}</span>
+    <span class="cr-allow">$${(c.allow||0).toLocaleString()}</span>
+    <button class="rmv" onclick="removeCPT(${i})">✕</button></div>`).join('');
+  updateAllowTotal();
+}
+function updateAllowTotal(){
+  const el=document.getElementById('cpt-allow-total'); if(!el)return;
+  el.textContent='$'+activeCPTs.reduce((s,c)=>s+(c.allow||0),0).toLocaleString();
+}
+function renderICDs(){
+  const el=document.getElementById('icd-list'); if(!el)return;
+  if(!activeICDs.length){el.innerHTML='<div style="color:var(--muted);font-size:12px;padding:4px">No ICD-10 codes added</div>';return;}
+  el.innerHTML=activeICDs.map((c,i)=>`
+    <div class="code-row"><span class="cr-icd">${c.code}</span><span class="cr-desc">${c.desc}</span>
+    <button class="rmv" onclick="removeICD(${i})">✕</button></div>`).join('');
+}
+function renderMods(){
+  document.querySelectorAll('.mod-btn').forEach(btn=>{
+    btn.classList.toggle('on',activeMods.includes(btn.textContent.trim()));
+  });updateModNote();
+}
+function toggleMod(btn,code){
+  const i=activeMods.indexOf(code);
+  if(i>=0)activeMods.splice(i,1);else activeMods.push(code);
+  btn.classList.toggle('on',activeMods.includes(code));updateModNote();
+}
+function updateModNote(){
+  const el=document.getElementById('mod-note'); if(!el)return;
+  el.textContent=activeMods.length?activeMods.map(m=>MOD_NOTES[m]).filter(Boolean).join(' · '):'';
+}
+function addImplantRow(){implants.push({desc:'',cat:'',qty:1,cost:0});renderImplants();}
+function renderImplants(){
+  const el=document.getElementById('implant-list'); if(!el)return;
+  el.innerHTML=implants.map((imp,i)=>`
+    <div style="display:grid;grid-template-columns:3fr 1fr 1fr 1fr 1fr auto;gap:8px;align-items:center;margin-bottom:5px">
+      <input type="text" value="${imp.desc}" onchange="implants[${i}].desc=this.value;renderChargeSummary()" placeholder="Implant description">
+      <input type="text" value="${imp.cat}" onchange="implants[${i}].cat=this.value" placeholder="Cat #">
+      <input type="number" value="${imp.qty}" min="1" onchange="implants[${i}].qty=parseInt(this.value)||1;renderChargeSummary()" style="width:100%">
+      <input type="text" value="$${imp.cost.toLocaleString()}" onchange="implants[${i}].cost=parseInt(this.value.replace(/[^0-9]/g,''))||0;renderChargeSummary()" placeholder="$0">
+      <span style="font-family:var(--mono);color:var(--green);font-size:12px">$${(imp.qty*imp.cost).toLocaleString()}</span>
+      <button class="rmv" onclick="implants.splice(${i},1);renderImplants();renderChargeSummary()">✕</button>
+    </div>`).join('');
+  renderChargeSummary();
+}
+function renderChargeSummary(){
+  const el=document.getElementById('charge-summary'); if(!el)return;
+  const procTotal=activeCPTs.reduce((s,c)=>s+(c.fee||0),0);
+  const allowTotal=activeCPTs.reduce((s,c)=>s+(c.allow||0),0);
+  const impTotal=implants.reduce((s,i)=>s+i.qty*i.cost,0);
+  const total=procTotal+impTotal;
+  const margin=allowTotal-impTotal;
+  el.innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">CPT Codes</span><span>${activeCPTs.map(c=>`<span class="chip chip-cpt">${c.code}</span>`).join('')||'—'}</span></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">ICD-10</span><span>${activeICDs.map(c=>`<span class="chip chip-icd">${c.code}</span>`).join('')||'—'}</span></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Modifiers</span><span>${activeMods.map(m=>`<span class="chip chip-mod">${m}</span>`).join('')||'—'}</span></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Claim Type</span><span class="claim-type ${claimType==='facility'?'ct-facility':'ct-prof'}">${claimType==='facility'?'UB-04 · Facility':'CMS-1500 · Professional'}</span></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Implant Lines</span><span>${implants.length}</span></div>
+      <div class="sep"></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Proc Charges (Billed)</span><span style="font-family:var(--mono)">$${procTotal.toLocaleString()}</span></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Medicare Allowable</span><span style="font-family:var(--mono);color:var(--cyan)">$${allowTotal.toLocaleString()}</span></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Implant Cost</span><span style="font-family:var(--mono);color:var(--red)">$${impTotal.toLocaleString()}</span></div>
+      <div class="sep"></div>
+      <div style="display:flex;justify-content:space-between"><span style="font-weight:700">Total Billed</span><span style="font-family:var(--mono);font-weight:700;font-size:15px">$${total.toLocaleString()}</span></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Est. Margin</span><span style="font-family:var(--mono);color:var(--${margin>0?'green':'red'})">$${margin.toLocaleString()}</span></div>
+    </div>`;
+}
+
+// SCRUBBER
+function runScrubber(){
+  const el=document.getElementById('scrubber-results'); if(!el)return;
+  const issues=[], warns=[], oks=[];
+  if(!activeCPTs.length) issues.push({title:'No CPT codes',detail:'At least one procedure code is required.'});
+  if(!activeICDs.length) issues.push({title:'No ICD-10 diagnosis codes',detail:'At least one diagnosis code is required for claim submission.'});
+  if(!activeMods.includes('LT')&&!activeMods.includes('RT')) warns.push({title:'No laterality modifier',detail:'TJR procedures require LT or RT modifier. Verify with chart.'});
+  if(activeMods.includes('LT')&&activeMods.includes('RT')) issues.push({title:'Conflicting LT + RT modifiers',detail:'Cannot apply both LT and RT to the same claim. Remove one.'});
+  const payer=document.getElementById('ce-payer')?.value||'';
+  const auth=document.getElementById('ce-auth')?.value||'';
+  const commercialPayers=['BCBS Commercial','Aetna Commercial','UnitedHealthcare','Cigna'];
+  if(commercialPayers.some(p=>payer.includes(p.split(' ')[0]))&&!auth) issues.push({title:'Prior authorization missing',detail:`${payer} requires prior authorization for TJR procedures. Auth number is blank.`});
+  if(activeMods.includes('22')&&activeMods.includes('51')) warns.push({title:'Modifier 22 + 51 conflict',detail:'Using both increased complexity (22) and multiple procedures (51) may trigger a review.'});
+  const kneeProcs=['27447','27446','27486','27487'];
+  const hipProcs=['27130','27132','27134','27137','27138'];
+  const kneeICDs=activeICDs.some(c=>c.code.startsWith('M17')||c.code.startsWith('T84.0'));
+  const hipICDs=activeICDs.some(c=>c.code.startsWith('M16'));
+  const hasKnee=activeCPTs.some(c=>kneeProcs.includes(c.code));
+  const hasHip=activeCPTs.some(c=>hipProcs.includes(c.code));
+  if(hasKnee&&!kneeICDs&&activeICDs.length) warns.push({title:'Knee CPT / diagnosis mismatch',detail:'Knee procedure code selected but no knee diagnosis (M17.xx or T84.xx) found. Verify ICD-10 codes.'});
+  if(hasHip&&!hipICDs&&activeICDs.length) warns.push({title:'Hip CPT / diagnosis mismatch',detail:'Hip procedure code selected but no hip diagnosis (M16.xx) found. Verify ICD-10 codes.'});
+  if(!issues.length&&!warns.length) oks.push({title:'All checks passed','detail':'Claim is clean and ready for submission.'});
+  el.innerHTML=[
+    ...issues.map(i=>`<div class="scrub-item error"><span class="scrub-icon">🚫</span><div class="scrub-text"><strong>${i.title}</strong>${i.detail}</div></div>`),
+    ...warns.map(w=>`<div class="scrub-item warn"><span class="scrub-icon">⚠️</span><div class="scrub-text"><strong>${w.title}</strong>${w.detail}</div></div>`),
+    ...oks.map(o=>`<div class="scrub-item ok"><span class="scrub-icon">✅</span><div class="scrub-text"><strong>${o.title}</strong>${o.detail}</div></div>`),
+  ].join('');
+}
+
+function setBadge(text,cls){
+  const b=document.getElementById('ce-status-badge'); if(!b)return;
+  b.textContent=text; b.className='badge '+cls+(text==='DRAFT'?' pulse':'');
+}
+function saveDraft(){setBadge('SAVED','b-blue');alert('Draft saved for '+(currentCase?.pt||'this case'));}
+function markReady(){setBadge('READY','b-green');alert('Case marked ready to submit. Added to Claims Queue.');}
+function clearCharge(){activeCPTs=[];activeICDs=[];activeMods=[];implants=[];currentCase=null;
+  document.getElementById('ce-ptname').textContent='— Select a Case —';
+  document.getElementById('ce-ptdetail').textContent='Load from worklist or enter manually';
+  document.getElementById('ce-case-select').value='';
+  setBadge('DRAFT','b-amber');setClaimType('facility');
+  renderCPTs();renderICDs();renderMods();renderImplants();renderChargeSummary();
+  document.getElementById('scrubber-results').innerHTML='<div style="color:var(--muted);font-size:12px">Click "Run Check" to validate claim before submission.</div>';
+}
+
+// ═══════════════════════════════════════════════════════
+// CLAIMS
+// ═══════════════════════════════════════════════════════
+function renderClaims(){
+  const sf=document.getElementById('claim-status-filter')?.value||'';
+  const tf=document.getElementById('claim-type-filter')?.value||'';
+  const tb=document.getElementById('claims-body'); if(!tb)return; tb.innerHTML='';
+  CLAIMS.filter(c=>(!sf||c.status===sf)&&(!tf||c.claimType===tf)).forEach(c=>{
+    const sm={Ready:'b-amber',Submitted:'b-blue','In Process':'b-cyan',Denied:'b-red',Paid:'b-green'};
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input type="checkbox" class="claim-chk" data-id="${c.id}"></td>
+      <td style="font-family:var(--mono);font-size:10px">${c.id}</td>
+      <td><strong>${c.pt}</strong></td><td style="font-family:var(--mono)">${c.dos}</td>
+      <td><span class="claim-type ${c.claimType==='Facility'?'ct-facility':'ct-prof'}">${c.claimType}</span></td>
+      <td>${c.proc}</td>
+      <td>${c.cpts.map(x=>`<span class="chip chip-cpt">${x}</span>`).join('')}</td>
+      <td>${c.payer}</td>
+      <td style="font-family:var(--mono);color:var(--text)">$${c.billed.toLocaleString()}</td>
+      <td style="font-family:var(--mono);color:var(--cyan)">$${c.expected.toLocaleString()}</td>
+      <td><span class="badge ${sm[c.status]||'b-gray'}">${c.status}</span></td>
+      <td style="font-family:var(--mono);color:var(--${c.dc})">${c.days}d</td>
+      <td>${c.status==='Ready'?`<button class="btn btn-primary btn-xs" onclick="submitClaim('${c.id}')">Submit</button>`:c.status==='Denied'?`<button class="btn btn-red btn-xs" onclick="nav('denials')">Rework</button>`:c.status==='Paid'?`<button class="btn btn-ghost btn-xs">EOB</button>`:''}</td>`;
+    tb.appendChild(tr);
+  });
+}
+function toggleAll(cb){document.querySelectorAll('.claim-chk').forEach(el=>el.checked=cb.checked);}
+function submitClaim(id){alert(`Submitting ${id} to payer…`);}
+function submitSelected(){
+  const checked=[...document.querySelectorAll('.claim-chk:checked')].map(e=>e.dataset.id);
+  if(!checked.length){alert('Select claims to submit');return;}
+  alert(`Submitting ${checked.length} claim(s):\n${checked.join(', ')}`);
+}
+
+// ═══════════════════════════════════════════════════════
+// SECONDARY BILLING
+// ═══════════════════════════════════════════════════════
+function renderSecondary(){
+  const tb=document.getElementById('secondary-body'); if(!tb)return; tb.innerHTML='';
+  SECONDARY.forEach(s=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input type="checkbox"></td>
+      <td style="font-family:var(--mono);font-size:10px">${s.claim}</td>
+      <td><strong>${s.pt}</strong></td><td style="font-family:var(--mono)">${s.dos}</td>
+      <td>${s.primary}</td>
+      <td style="font-family:var(--mono);color:var(--green)">$${s.priPaid.toLocaleString()}</td>
+      <td>${s.secondary}</td>
+      <td>${s.crossover?'<span class="badge b-cyan">Auto Crossover</span>':'<span class="badge b-amber">Manual</span>'}</td>
+      <td style="font-family:var(--mono);color:var(--${s.ptResp===0?'green':'amber'})">$${s.ptResp.toLocaleString()}</td>
+      <td style="font-family:var(--mono)">$${s.secBilled.toLocaleString()}</td>
+      <td><button class="btn btn-primary btn-xs" onclick="alert('Submitting secondary claim for ${s.pt}…')">Submit</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+function submitAllSecondary(){alert('Submitting all 5 secondary claims to Medigap/secondary payers…');}
+
+// ═══════════════════════════════════════════════════════
+// DENIALS
+// ═══════════════════════════════════════════════════════
+function renderDenials(){
+  const tb=document.getElementById('denials-body'); if(!tb)return; tb.innerHTML='';
+  DENIALS.forEach(d=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-family:var(--mono);font-size:10px">${d.claim}</td>
+      <td><strong>${d.pt}</strong></td><td style="font-family:var(--mono)">${d.dos}</td>
+      <td><span class="chip chip-cpt">${d.cpt}</span></td><td>${d.payer}</td>
+      <td style="font-family:var(--mono);color:var(--amber)">$${d.billed.toLocaleString()}</td>
+      <td><span class="chip chip-mod">${d.code}</span></td>
+      <td style="font-size:11px;color:var(--red)">${d.reason}</td>
+      <td style="font-family:var(--mono);color:var(--${d.age>14?'red':'amber'})">${d.age}d</td>
+      <td style="display:flex;gap:5px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-xs" onclick="nav('appeals')">Appeal</button>
+        <button class="btn btn-blue btn-xs" onclick="nav('p2p')">P2P</button>
+        <button class="btn btn-ghost btn-xs" onclick="nav('writeoffs')">Write-off</button>
+      </td>`;
+    tb.appendChild(tr);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// APPEAL LETTERS
+// ═══════════════════════════════════════════════════════
+const APPEAL_TEMPLATES={
+  'CLM-2603':{reason:'CO-4 – Procedure inconsistent with modifier',template:(n)=>`${new Date().toLocaleDateString()}\n\nBCBS Commercial\nAppeals Department\nPO Box 12345\nAnytown, USA 12345\n\nRE: Appeal of Denied Claim\nClaim Number: CLM-2603\nPatient: Frank Diaz\nDate of Service: 03/03/2026\nCPT Code: 27487 – Revision Total Knee Arthroplasty\nDenial Reason: CO-4 – Procedure inconsistent with modifier\n\nTo Whom It May Concern:\n\nWe are writing to formally appeal the denial of the above-referenced claim. The claim was denied under reason code CO-4, indicating the procedure code is inconsistent with the modifier used.\n\nClinical Justification:\n\nMr. Diaz underwent Revision Total Knee Arthroplasty (CPT 27487) on 03/03/2026, performed by Dr. Harrington at our ASC facility. The procedure involved revision of both the femoral and tibial components due to mechanical loosening of the prior prosthesis (ICD-10: T84.012A). The modifier applied (RT – Right side) is clinically appropriate and consistent with the operative report, which clearly documents a right-sided procedure.\n\nSupporting Documentation Enclosed:\n- Operative Report (03/03/2026)\n- Pre-operative X-rays demonstrating implant failure\n- ICD-10 diagnosis codes: T84.012A, Z96.641\n- Corrected claim form\n\n${n||''}\n\nWe respectfully request reconsideration and approval of this claim for $18,200.00.\n\nSincerely,\nSarah Mitchell, CPC\nLead Coder, TJR Orthopedic Practice\n(555) 867-5309`},
+  'CLM-2607':{reason:'CO-97 – Prior authorization required',template:(n)=>`${new Date().toLocaleDateString()}\n\nUnitedHealthcare\nAppeals Department\nPO Box 30432\nSalt Lake City, UT 84130\n\nRE: Appeal of Denied Claim – Prior Authorization\nClaim Number: CLM-2607\nPatient: Richard Garcia\nDate of Service: 02/25/2026\nCPT Code: 27447 – Total Knee Arthroplasty\nDenial Reason: CO-97 – Service requires prior authorization\n\nTo Whom It May Concern:\n\nWe are appealing the denial of claim CLM-2607 on behalf of patient Richard Garcia. The claim was denied under CO-97 citing prior authorization was not obtained.\n\nThis denial was made in error. Prior authorization was submitted on 02/10/2026 under reference number UHC-991021. Our records confirm the authorization was approved on 02/14/2026 for CPT 27447 – Total Knee Arthroplasty, effective through 05/25/2026.\n\nA copy of the authorization approval letter and claim submission are enclosed. The service was performed within the authorized window and within scope.\n\n${n||''}\n\nWe request immediate reprocessing of this claim for the full billed amount of $10,900.00.\n\nSincerely,\nSarah Mitchell, CPC\nTJR Orthopedic Practice`},
+  'CLM-2611':{reason:'CO-16 – Missing/invalid information on claim',template:(n)=>`${new Date().toLocaleDateString()}\n\nBCBS Commercial\nAppeals Department\n\nRE: Corrected Claim / Appeal\nClaim Number: CLM-2611\nPatient: Daniel Harris\nDate of Service: 02/18/2026\nCPT Code: 27134 – Revision THA, Acetabulum and Femur\nDenial Reason: CO-16 – Claim lacks required information\n\nTo Whom It May Concern:\n\nThis letter accompanies a corrected claim submission for the above-referenced denial. CLM-2611 was denied citing missing or invalid information (CO-16).\n\nUpon review, we identified that the secondary diagnosis code (Z96.641 – Presence of right artificial hip joint) was inadvertently omitted from the original submission. This code is included on the corrected claim attached.\n\nAdditionally, we have included:\n- Complete operative report documenting medical necessity\n- Pre-operative imaging confirming acetabular and femoral component failure\n- Full ICD-10 code set: M16.11, T84.032A, Z96.641\n\n${n||''}\n\nWe request processing of the corrected claim for $19,800.00.\n\nSincerely,\nSarah Mitchell, CPC\nTJR Orthopedic Practice`}
+};
+
+function loadAppealClaim(id){
+  if(!id){document.getElementById('appeal-reason').value='';return;}
+  const t=APPEAL_TEMPLATES[id];
+  if(t){document.getElementById('appeal-reason').value=t.reason;}
+}
+function generateAppealLetter(){
+  const id=document.getElementById('appeal-claim-select').value;
+  const notes=document.getElementById('appeal-notes').value;
+  if(!id){alert('Please select a denied claim.');return;}
+  const t=APPEAL_TEMPLATES[id];
+  if(!t){alert('No template found for this claim.');return;}
+  document.getElementById('appeal-letter-preview').textContent=t.template(notes);
+  document.getElementById('copy-letter-btn').style.display='';
+  document.getElementById('export-letter-btn').style.display='';
+}
+function copyLetter(){
+  navigator.clipboard?.writeText(document.getElementById('appeal-letter-preview').textContent);
+  alert('Letter copied to clipboard.');}
+function exportLetter(){alert('Exporting appeal letter as PDF…');}
+function clearAppeal(){
+  document.getElementById('appeal-claim-select').value='';
+  document.getElementById('appeal-reason').value='';
+  document.getElementById('appeal-notes').value='';
+  document.getElementById('appeal-letter-preview').textContent='Select a denied claim and click Generate Letter to create a pre-filled appeal.';
+  document.getElementById('copy-letter-btn').style.display='none';
+  document.getElementById('export-letter-btn').style.display='none';
+}
+function renderAppealsTracking(){
+  const tb=document.getElementById('appeals-tracking-body'); if(!tb)return; tb.innerHTML='';
+  APPEALS_TRACKING.forEach(a=>{
+    const sm={Overturned:'b-green',Upheld:'b-red',Pending:'b-amber'};
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-family:var(--mono);font-size:10px">${a.claim}</td>
+      <td>${a.pt}</td><td><span class="chip chip-mod">${a.code}</span></td>
+      <td>${a.level}</td><td style="font-family:var(--mono)">${a.sent}</td>
+      <td style="font-family:var(--mono);color:var(--amber)">${a.deadline}</td>
+      <td><span class="badge ${sm[a.outcome]||'b-gray'}">${a.outcome}</span></td>
+      <td style="font-family:var(--mono);color:var(--${a.outcome==='Overturned'?'green':'muted'})">${a.amount}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// P2P TRACKER
+// ═══════════════════════════════════════════════════════
+function renderP2P(){
+  const el=document.getElementById('p2p-list'); if(!el)return; el.innerHTML='';
+  P2P_DATA.forEach(p=>{
+    const sm={Pending:'b-amber',Overturned:'b-green',Upheld:'b-red'};
+    el.innerHTML+=`<div class="p2p-row">
+      <div><strong>${p.pt}</strong><div style="font-size:10px;color:var(--muted)">${p.claim}</div></div>
+      <div>${p.payer}</div><div>${p.physician}</div>
+      <div style="font-family:var(--mono);font-size:11px">${p.requested}</div>
+      <div style="font-family:var(--mono);font-size:11px">${p.scheduled}</div>
+      <div><span class="badge ${sm[p.outcome]||'b-gray'}">${p.outcome}</span>
+      ${p.outcome==='Pending'?'<button class="btn btn-orange btn-xs" style="margin-top:4px" onclick="alert(\'Update P2P outcome\')">Update</button>':''}</div>
+    </div>`;
+  });
+}
+function openP2PModal(){document.getElementById('p2p-modal').classList.remove('hidden');}
+function submitP2P(){closeModal('p2p-modal');alert('P2P request logged. Physician notified. Tracking ID: P2P-2026-'+(Math.floor(Math.random()*900)+100));}
+
+// ═══════════════════════════════════════════════════════
+// WRITE-OFFS
+// ═══════════════════════════════════════════════════════
+function updateWOCode(){const v=document.getElementById('wo-type').value;document.getElementById('wo-code').value=v;}
+function postWriteoff(){
+  const claim=document.getElementById('wo-claim').value;
+  const amount=document.getElementById('wo-amount').value;
+  if(!claim||!amount){alert('Enter claim number and amount.');return;}
+  const s=document.getElementById('wo-success'); s.style.display='';
+  setTimeout(()=>s.style.display='none',3000);
+  prependWriteoffRow(claim,amount);
+}
+function clearWriteoff(){['wo-claim','wo-patient','wo-amount','wo-notes'].forEach(id=>document.getElementById(id).value='');document.getElementById('wo-type').value='';}
+function prependWriteoffRow(claim,amount){
+  const tb=document.getElementById('writeoff-history'); if(!tb)return;
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td>${new Date().toLocaleDateString()}</td><td>${claim}</td><td>—</td>
+    <td><span class="chip chip-mod">${document.getElementById('wo-code').value||'—'}</span></td>
+    <td>${document.getElementById('wo-notes').value||'—'}</td>
+    <td style="font-family:var(--mono);color:var(--amber)">${amount}</td><td>Sarah M.</td>`;
+  tb.insertBefore(tr,tb.firstChild);
+}
+function renderWriteoffHistory(){
+  const tb=document.getElementById('writeoff-history'); if(!tb)return; tb.innerHTML='';
+  WRITEOFF_HISTORY.forEach(w=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-family:var(--mono)">${w.date}</td><td style="font-family:var(--mono);font-size:10px">${w.claim}</td>
+      <td>${w.pt}</td><td><span class="chip chip-mod">${w.code}</span></td>
+      <td style="font-size:11px;color:var(--muted)">${w.reason}</td>
+      <td style="font-family:var(--mono);color:var(--amber)">${w.amount}</td><td>${w.by}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// ERA AUTO-POST
+// ═══════════════════════════════════════════════════════
+const ERA_DEMO={payer:'Medicare',checkNum:'7482910',paymentDate:'03/07/2026',totalPayment:18240,claims:[
+  {claimId:'CLM-2601',pt:'Harold Brooks',billed:9820,allowed:8200,paid:7954,adjCode:'CO-45',adjAmt:1620,ptResp:246,status:'matched'},
+  {claimId:'CLM-2604',pt:'Nancy Wilson',billed:9400,allowed:7900,paid:7654,adjCode:'CO-45',adjAmt:1500,ptResp:246,status:'matched'},
+  {claimId:'CLM-2613',pt:'Paul Lewis',billed:9000,allowed:7600,paid:7322,adjCode:'CO-45',adjAmt:1400,ptResp:278,status:'matched'},
+  {claimId:'CLM-9999',pt:'Unknown Patient',billed:4200,allowed:3100,paid:3100,adjCode:'CO-45',adjAmt:1100,ptResp:0,status:'unmatched'},
+]};
+function simulateERA(){
+  const sumEl=document.getElementById('era-summary');
+  sumEl.innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="flex-row"><span style="color:var(--muted)">Payer</span><strong>${ERA_DEMO.payer}</strong></div>
+      <div class="flex-row"><span style="color:var(--muted)">Check/EFT #</span><span style="font-family:var(--mono)">${ERA_DEMO.checkNum}</span></div>
+      <div class="flex-row"><span style="color:var(--muted)">Payment Date</span><span style="font-family:var(--mono)">${ERA_DEMO.paymentDate}</span></div>
+      <div class="flex-row"><span style="color:var(--muted)">Total Payment</span><span style="font-family:var(--mono);color:var(--green)">$${ERA_DEMO.totalPayment.toLocaleString()}</span></div>
+      <div class="sep"></div>
+      <div class="flex-row"><span style="color:var(--muted)">Claims in ERA</span><span>${ERA_DEMO.claims.length}</span></div>
+      <div class="flex-row"><span style="color:var(--muted)">Matched</span><span class="badge b-green">${ERA_DEMO.claims.filter(c=>c.status==='matched').length} Matched</span></div>
+      <div class="flex-row"><span style="color:var(--muted)">Unmatched</span><span class="badge b-red">${ERA_DEMO.claims.filter(c=>c.status==='unmatched').length} Unmatched</span></div>
+    </div>`;
+  const matchCard=document.getElementById('era-matches-card'); matchCard.style.display='';
+  const matchStat=document.getElementById('era-match-stats');
+  matchStat.textContent=`${ERA_DEMO.claims.filter(c=>c.status==='matched').length} matched · ${ERA_DEMO.claims.filter(c=>c.status==='unmatched').length} unmatched`;
+  const matchBody=document.getElementById('era-matches-body');
+  matchBody.innerHTML=ERA_DEMO.claims.map(c=>`
+    <div class="era-match ${c.status}">
+      <span style="font-size:18px">${c.status==='matched'?'✅':c.status==='partial'?'⚠️':'❌'}</span>
+      <div style="flex:1">
+        <div class="flex-row"><strong>${c.pt}</strong><span class="chip chip-cpt" style="font-size:10px">${c.claimId}</span><span class="badge ${c.status==='matched'?'b-green':c.status==='partial'?'b-amber':'b-red'}">${c.status.toUpperCase()}</span></div>
+        <div class="flex-row" style="margin-top:5px;font-size:11px;gap:16px">
+          <span style="color:var(--muted)">Billed: <strong style="color:var(--text)">$${c.billed.toLocaleString()}</strong></span>
+          <span style="color:var(--muted)">Allowed: <strong style="color:var(--cyan)">$${c.allowed.toLocaleString()}</strong></span>
+          <span style="color:var(--muted)">Paid: <strong style="color:var(--green)">$${c.paid.toLocaleString()}</strong></span>
+          <span style="color:var(--muted)">${c.adjCode}: <strong style="color:var(--amber)">-$${c.adjAmt.toLocaleString()}</strong></span>
+          <span style="color:var(--muted)">Pt Resp: <strong style="color:var(--blue)">$${c.ptResp.toLocaleString()}</strong></span>
+        </div>
+      </div>
+      ${c.status==='matched'?`<button class="btn btn-green btn-xs">Post</button>`:`<button class="btn btn-red btn-xs" onclick="alert('Open manual resolution for ${c.claimId}')">Resolve</button>`}
+    </div>`).join('');
+}
+function postAllMatched(){alert(`Posted ${ERA_DEMO.claims.filter(c=>c.status==='matched').length} payments totaling $${ERA_DEMO.claims.filter(c=>c.status==='matched').reduce((s,c)=>s+c.paid,0).toLocaleString()} from Medicare ERA.\n\nAdjustments auto-posted. Patient responsibility balances generated.`);}
+
+// ═══════════════════════════════════════════════════════
+// MANUAL PAYMENT POSTING
+// ═══════════════════════════════════════════════════════
+function addPostingLine(){
+  postingLines.push({claim:'',billed:'',allowed:'',paid:'',adj:''});
+  renderPostingLines();
+}
+function renderPostingLines(){
+  const el=document.getElementById('posting-lines'); if(!el)return;
+  el.innerHTML=postingLines.map((l,i)=>`
+    <div style="display:grid;grid-template-columns:3fr 1fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:6px;align-items:center">
+      <input type="text" value="${l.claim}" placeholder="Claim # or patient" onchange="postingLines[${i}].claim=this.value">
+      <input type="text" value="${l.billed}" placeholder="$0" onchange="postingLines[${i}].billed=this.value">
+      <input type="text" value="${l.allowed}" placeholder="$0" onchange="postingLines[${i}].allowed=this.value">
+      <input type="text" value="${l.paid}" placeholder="$0" onchange="postingLines[${i}].paid=this.value">
+      <select onchange="postingLines[${i}].adj=this.value" style="font-size:11px">
+        <option value="">Code</option>
+        <option>CO-45</option><option>CO-97</option><option>PR-1</option>
+        <option>PR-2</option><option>PR-3</option><option>CO-4</option><option>CO-16</option>
+      </select>
+      <button class="rmv" onclick="postingLines.splice(${i},1);renderPostingLines()">✕</button>
+    </div>`).join('');
+}
+function postPayment(){
+  const check=document.getElementById('pp-check')?.value;
+  const amount=document.getElementById('pp-amount')?.value;
+  if(!check||!amount){alert('Enter check/EFT number and total amount.');return;}
+  alert(`Payment posted:\nCheck: ${check}\nAmount: ${amount}\nLines: ${postingLines.length}\n\nAdjustments applied. Patient responsibility generated.`);
+}
+function clearPostingForm(){
+  ['pp-check','pp-date','pp-amount'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  postingLines=[];renderPostingLines();
+}
+
+// ═══════════════════════════════════════════════════════
+// PATIENT RESPONSIBILITY
+// ═══════════════════════════════════════════════════════
+function renderPatientBalances(){
+  const tb=document.getElementById('ptbalance-body'); if(!tb)return; tb.innerHTML='';
+  PATIENT_BALANCES.forEach(p=>{
+    const sm={'Outstanding':'b-amber','Overdue':'b-red','Denied – Pending':'b-gray','Denied – Appeal Pending':'b-purple','Paid':'b-green'};
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><strong>${p.pt}</strong></td>
+      <td style="font-family:var(--mono)">${p.dos}</td><td>${p.proc}</td>
+      <td style="font-family:var(--mono)">$${p.billed.toLocaleString()}</td>
+      <td style="font-family:var(--mono);color:var(--green)">$${p.insPaid.toLocaleString()}</td>
+      <td style="font-family:var(--mono);color:var(--${p.deduct>0?'amber':'muted'})">$${p.deduct.toLocaleString()}</td>
+      <td style="font-family:var(--mono);color:var(--${p.coins>0?'amber':'muted'})">$${p.coins.toLocaleString()}</td>
+      <td style="font-family:var(--mono);color:var(--${p.copay>0?'amber':'muted'})">$${p.copay.toLocaleString()}</td>
+      <td style="font-family:var(--mono);font-weight:700;color:var(--${p.balance>0?'amber':'green'})">$${p.balance.toLocaleString()}</td>
+      <td style="font-family:var(--mono);color:var(--${p.age>20?'red':p.age>10?'amber':'muted'})">${p.age}d</td>
+      <td><span class="badge ${sm[p.status]||'b-gray'}">${p.status}</span></td>
+      <td>${p.balance>0?`<button class="btn btn-primary btn-xs" onclick="alert('Generating statement for ${p.pt}')">Statement</button>`:'<span class="badge b-green">Paid</span>'}</td>`;
+    tb.appendChild(tr);
+  });
+}
+function generateStatements(){alert('Generating patient statements for all outstanding balances…\n\n8 statements generated. Ready for mailing.');}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT MODAL
+// ═══════════════════════════════════════════════════════
+function showExportModal(target='sis'){
+  exportTarget=target;
+  const title=target==='cerner'?'Export to Cerner (CMS-1500)':'Export to SIS (UB-04)';
+  document.getElementById('export-modal-title').textContent=title;
+  const c=currentCase||WORKLIST[0];
+  const procTotal=activeCPTs.reduce((s,c)=>s+(c.fee||0),0)||9820;
+  const impTotal=implants.reduce((s,i)=>s+i.qty*i.cost,0)||9780;
+  const payload=target==='sis'?{
+    export_type:'SIS_CHARGE_CAPTURE',form:'UB-04',facility:'TJR ASC – Main',
+    patient:{name:c.pt,dob:c.dob||'1948-03-12',mrn:'MRN-'+Math.floor(Math.random()*90000+10000)},
+    case:{dos:c.dos,surgeon:c.surgeon,procedure:c.proc,side:c.side},
+    cpt_codes:activeCPTs.length?activeCPTs.map(c=>({code:c.code,desc:c.desc,fee:c.fee,allowable:c.allow})):[{code:'27447',desc:'TKA',fee:2840,allowable:2108}],
+    icd_codes:activeICDs.map(c=>c.code).length?activeICDs.map(c=>c.code):['M17.11'],
+    modifiers:activeMods.length?activeMods:['RT'],
+    implants:implants.slice(0,4).map(i=>({desc:i.desc||'Implant',cat:i.cat,qty:i.qty,cost:i.cost})),
+    payer:{name:c.payer,member_id:c.memberId||'',auth:c.auth||''},
+    pos:'24',claim_type:'Facility',total_billed:procTotal+impTotal,
+  }:{
+    export_type:'CERNER_BILLING_INTERFACE',form:'CMS-1500',
+    encounter:{mrn:'MRN-'+Math.floor(Math.random()*90000+10000),dos:c.dos,provider:c.surgeon,location:c.loc},
+    diagnoses:activeICDs.length?activeICDs.map(c=>({code:c.code,desc:c.desc})):[{code:'M17.11',desc:'Primary OA right knee'}],
+    procedures:activeCPTs.length?activeCPTs.map(c=>({cpt:c.code,desc:c.desc,fee:c.fee,allowable:c.allow})):[{cpt:'27447',desc:'TKA',fee:2840}],
+    modifiers:activeMods.length?activeMods:['RT'],
+    payer:{name:c.payer,member_id:c.memberId||'',auth:c.auth||''},
+    claim_type:'Professional',total_charges:procTotal+impTotal,
+  };
+  document.getElementById('export-preview-area').innerHTML=`
+    <div class="alert alert-success">
+      <strong>Ready to export — ${c.pt}</strong><br>
+      ${activeCPTs.length||1} CPT · ${activeICDs.length||1} ICD-10 · ${activeMods.length||1} Modifier · Claim Type: <strong>${target==='sis'?'Facility (UB-04)':'Professional (CMS-1500)'}</strong>
+    </div>`;
+  document.getElementById('export-payload').textContent=JSON.stringify(payload,null,2);
+  document.getElementById('export-modal').classList.remove('hidden');
+}
+function confirmExport(){
+  closeModal('export-modal');
+  alert(`✔ Successfully exported to ${exportTarget==='cerner'?'Cerner':'SIS'}.\nEntry logged in Export Audit Log with timestamp and user reference.`);
+}
+
+// ═══════════════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════════════
+function closeModal(id){document.getElementById(id).classList.add('hidden');}
+document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.add('hidden');});});
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+renderWorklist();
+renderEligibility();
+renderAuthTable();
+renderClaims();
+renderSecondary();
+renderDenials();
+renderAppealsTracking();
+renderP2P();
+renderWriteoffHistory();
+renderPatientBalances();
+addPostingLine();
+renderCPTs(); renderICDs(); renderMods(); renderImplants(); renderChargeSummary();
+nav('worklist');
+</script>
+</body>
+</html>
