@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TotalEMR — Pre-Op</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f0f4f8; --card:#ffffff; --card2:#f8fafc; --border:#d2d6dc; --border2:#e8ecf1;
+  --t1:#1a2332; --t2:#374151; --t3:#5a6577; --t4:#8b95a5;
+  --blue:#0f4c81; --blueL:#e8f0f8; --blueB:#b3cfe6; --accent:#2d6a8a;
+  --green:#0d7a5f; --greenL:#e6f5f0; --greenB:#9dd4c0; --greenT:#065040;
+  --yellow:#b8860b; --yellowL:#fdf6e3; --yellowB:#ecd8a0; --yellowD:#7a5a07;
+  --red:#c0392b; --redL:#fbeae8; --redB:#e6b3ad; --redT:#7b241c;
+  --purple:#6d28d9; --purpleL:#ede9fe;
+  --r:6px; --rl:10px;
+  --sh:0 1px 3px rgba(15,30,50,.08),0 1px 2px rgba(15,30,50,.04);
+  --sh2:0 4px 12px rgba(15,30,50,.08);
+  --tr:150ms ease;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg);color:var(--t1);font-size:13px;line-height:1.5;min-height:100vh}
+::selection{background:var(--blue);color:#fff}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+button{cursor:pointer;font-family:inherit}
+input,select,textarea{font-family:inherit}
+
+.app{display:flex;min-height:100vh}
+.sb{width:56px;background:#1a2332;display:flex;flex-direction:column;align-items:center;position:fixed;top:0;left:0;bottom:0;z-index:100;padding:10px 0;gap:2px;transition:width .2s ease;overflow:hidden}
+.sb:hover{width:180px}
+.sb-logo{width:36px;height:36px;border-radius:var(--r);background:linear-gradient(135deg,var(--blue),var(--accent));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0;margin-bottom:12px}
+.sb-label{font-size:11px;font-weight:600;color:#cbd5e1;white-space:nowrap;opacity:0;transition:opacity .15s;margin-left:8px}
+.sb:hover .sb-label{opacity:1}
+.sb a{display:flex;align-items:center;gap:0;width:100%;padding:10px 0;justify-content:center;color:#8b95a5;text-decoration:none;cursor:pointer;border-left:3px solid transparent;transition:all var(--tr)}
+.sb:hover a{justify-content:flex-start;padding-left:14px}
+.sb a:hover{color:#e2e8f0;background:rgba(255,255,255,.06)}
+.sb a.act{color:#fff;border-left-color:#4a9aca;background:rgba(74,154,202,.15)}
+.sb a svg{width:18px;height:18px;flex-shrink:0}
+.sb-div{width:30px;height:1px;background:rgba(255,255,255,.1);margin:6px 0}
+.sb:hover .sb-div{width:calc(100% - 28px)}
+
+.main{margin-left:56px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.top{background:var(--card);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.top-l{display:flex;align-items:center;gap:12px}
+.top-badge{display:inline-flex;padding:4px 12px;background:linear-gradient(135deg,var(--green),#0a6b52);color:#fff;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.5px}
+.top-h{font-size:15px;font-weight:700}
+.top-s{font-size:11px;color:var(--t3)}
+.top-r{display:flex;align-items:center;gap:10px}
+.stat-pill{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid var(--border)}
+.stat-pill .n{font-weight:800;font-size:14px}
+
+/* Status badges */
+.pt-status-badge{display:inline-flex;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-top:4px}
+.pt-status-badge.ci{background:var(--yellowL);color:var(--yellowD);border:1px solid var(--yellowB)}
+.pt-status-badge.pr{background:var(--blueL);color:var(--blue);border:1px solid var(--blueB)}
+.pt-status-badge.an{background:var(--purpleL);color:var(--purple);border:1px solid #c4b5fd}
+.pt-status-badge.rdy{background:var(--greenL);color:var(--green);border:1px solid var(--greenB)}
+/* Manual vitals */
+.vitals-mode-toggle{display:flex;gap:4px;margin-bottom:8px}
+.vitals-mode-btn{flex:1;padding:7px 12px;border-radius:var(--r);border:1px solid var(--border);background:var(--card);color:var(--t2);font-size:11px;font-weight:600;cursor:pointer;text-align:center;transition:all .12s}
+.vitals-mode-btn.sel{border-color:var(--blueB);background:var(--blueL);color:var(--blue)}
+.vitals-mode-btn:hover{border-color:var(--blue)}
+/* Med action select */
+.med-action-sel{padding:3px 6px;border:1px solid var(--border);border-radius:4px;font-size:9px;font-weight:700;cursor:pointer;background:var(--card);appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%235a6577'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 4px center;padding-right:16px}
+.med-add-row{display:flex;gap:4px;padding:8px 14px;border-top:1px solid var(--border2)}
+.med-add-row input{flex:1;padding:4px 8px;border:1px solid var(--border);border-radius:4px;font-size:10px}
+/* Complete All inline */
+.complete-all-inline{padding:6px 14px;border-radius:4px;font-size:10px;font-weight:700;background:var(--green);color:#fff;border:1px solid var(--green);cursor:pointer;transition:all .15s;white-space:nowrap}
+.complete-all-inline:hover{background:#0a6b52}
+
+.container{display:flex;flex:1;overflow:hidden}
+.patient-list{width:250px;background:var(--card);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.patient-list-header{padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.patient-list-header h3{font-size:12px;font-weight:700;color:var(--t1);text-transform:uppercase;letter-spacing:.04em}
+.patient-cards{flex:1;overflow-y:auto;padding:8px}
+.pt-card{padding:12px;margin-bottom:6px;background:var(--card2);border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;transition:all .2s}
+.pt-card:hover{border-color:var(--border);box-shadow:var(--sh)}
+.pt-card.sel{border-color:var(--blue);background:var(--blueL);box-shadow:0 0 0 1px var(--blueB)}
+.pt-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.pt-card-name{font-weight:600;font-size:12px;color:var(--t1)}
+.pt-card-time{font-size:10px;color:var(--t3);font-weight:500}
+.pt-card-joint{display:inline-flex;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:700;margin-bottom:6px}
+.pt-card-joint.knee{background:var(--blueL);color:var(--blue);border:1px solid var(--blueB)}
+.pt-card-joint.hip{background:var(--purpleL);color:var(--purple)}
+.pt-card-phase{font-size:9px;font-weight:700;padding:3px 8px;border-radius:3px;background:var(--bg);color:var(--t3);margin-bottom:6px;display:inline-block}
+.pt-card-progress{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.pt-card-ring{width:32px;height:32px;position:relative;flex-shrink:0}
+.pt-card-ring svg{width:100%;height:100%}
+.pt-card-ring-txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--t3)}
+.pt-card-ring-txt.done{color:var(--green)}
+.pt-card-percent{display:flex;flex-direction:column;flex:1}
+.pt-card-percent-num{font-size:13px;font-weight:700;color:var(--t1)}
+.pt-card-percent-text{font-size:8px;color:var(--t3);text-transform:uppercase}
+
+.content{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.content-inner{flex:1;overflow-y:auto;padding:16px 20px}
+
+/* Allergy banner */
+.allergy-ban{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:var(--r);margin:8px 0;font-size:11px;font-weight:600;background:var(--redL);border:1px solid var(--redB);color:var(--redT)}
+.allergy-ban.critical{border-color:var(--red);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+
+/* PRE-OP ORDERS SECTION */
+.orders-section{margin:12px 0;padding:14px;border-radius:var(--r);border:1px solid var(--border);background:var(--card2)}
+.orders-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:pointer;user-select:none}
+.orders-title{font-size:11px;font-weight:700;color:var(--t3);letter-spacing:.06em;text-transform:uppercase}
+.orders-arrow{font-size:10px;color:var(--t4);transition:transform .2s}.orders-arrow.open{transform:rotate(180deg)}
+.orders-body{display:none}.orders-body.open{display:block}
+.order-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border2);font-size:11px}
+.order-item:last-child{border-bottom:none}
+.order-check{width:28px;height:28px;border-radius:4px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--card);transition:all .2s;flex-shrink:0;font-size:14px}
+.order-check:hover{border-color:var(--blue)}
+.order-check.done{background:var(--greenL);border-color:var(--greenB);color:var(--green)}
+.order-text{flex:1}
+.order-text-drug{font-weight:600;color:var(--t1)}
+.order-text-dose{color:var(--t3);font-size:10px}
+.order-time{font-size:9px;color:var(--green);font-weight:700}
+
+/* Phases */
+.phase-hd{display:flex;align-items:center;justify-content:space-between;padding:8px 0 4px;margin-top:10px;border-bottom:1px solid var(--border2)}
+.phase-label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.phase-label.complete{color:var(--green)}
+.phase-right{display:flex;align-items:center;gap:6px}
+.phase-ts{font-size:9px;color:var(--green);font-weight:600;padding:2px 6px;border-radius:4px;background:var(--greenL)}
+.phase-count{font-size:9px;font-weight:600;color:var(--t3)}
+.phase-count.complete{color:var(--green)}
+
+/* Checklist items */
+.ck{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:var(--r);transition:background .1s;user-select:none;min-height:48px}
+.ck.tap{cursor:pointer}.ck.tap:hover{background:var(--bg)}.ck.tap:active{background:var(--border2)}
+.ck.expand{background:var(--card2)}
+.ck-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;border:2px solid transparent}
+.ck-icon.g{background:var(--greenL);color:var(--green);border-color:var(--greenB)}
+.ck-icon.y{background:var(--yellowL);color:var(--yellow);border-color:var(--yellowB)}
+.ck-icon.p{background:var(--bg);color:var(--t4);border-color:var(--border)}
+.ck-body{flex:1;min-width:0}
+.ck-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ck-label{font-size:14px;font-weight:600}.ck-label.done{color:var(--t3)}
+.ck-badge{font-size:10px;padding:4px 10px;border-radius:10px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.ck-badge.g{background:var(--greenL);color:var(--green);border:1px solid var(--greenB)}
+.ck-badge.y{background:var(--yellowL);color:var(--yellow);border:1px solid var(--yellowB)}
+.ck-badge.p{background:var(--bg);color:var(--t4);border:1px solid var(--border)}
+.ck-sub{font-size:10px;color:var(--t3);margin-top:2px;line-height:1.4}
+.ck-result{font-size:10px;color:var(--t2);margin-top:2px}
+.ck-undo{font-size:10px;color:var(--redT);font-weight:700;cursor:pointer;padding:4px 10px;border:1px solid var(--redB);border-radius:4px;background:var(--redL);display:inline-block;margin-top:4px}
+.ck-undo:hover{background:var(--redB)}
+
+/* Input panels */
+.inp-panel{padding:4px 0 8px 34px}
+.inp-grid{display:grid;gap:6px;margin-top:6px}
+.inp-grid.g2{grid-template-columns:1fr 1fr}.inp-grid.g3{grid-template-columns:1fr 1fr 1fr}
+.inp-label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;font-weight:600}
+.inp-field{width:100%;padding:7px 10px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);color:var(--t1);font-size:13px;font-weight:600;outline:none}
+.inp-field:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blueL)}
+select.inp-field{padding-right:24px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a6577'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+.opt-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.opt-btn{padding:10px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--card);color:var(--t2);font-size:13px;font-weight:600;cursor:pointer;transition:all .12s;flex:1;text-align:center;min-width:0}
+.opt-btn:hover{border-color:var(--blue);background:var(--blueL)}
+.opt-btn.sel{border-color:var(--greenB);background:var(--greenL);color:var(--green)}
+.opt-btn.sel-warn{border-color:var(--redB);background:var(--redL);color:var(--redT)}
+.opt-btn.sel-info{border-color:var(--blueB);background:var(--blueL);color:var(--blue)}
+.submit-btn{width:100%;padding:10px;border-radius:var(--r);font-size:12px;font-weight:700;cursor:default;border:1px solid var(--border);background:var(--bg);color:var(--t4);transition:all .15s;margin-top:8px;text-transform:uppercase;letter-spacing:.04em}
+.submit-btn.ready{background:var(--green);color:#fff;border-color:var(--green);cursor:pointer}
+.submit-btn.ready:hover{background:#0a6b52}
+.complete-all-btn{width:100%;padding:8px;border-radius:var(--r);font-size:11px;font-weight:700;background:var(--green);color:#fff;border-color:var(--green);cursor:pointer;border:1px solid var(--green);transition:all .15s;margin-top:8px;text-transform:uppercase;letter-spacing:.04em}
+.complete-all-btn:hover{background:#0a6b52}
+
+/* Vitals grid */
+.vitals-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0;padding:12px;background:var(--card2);border-radius:var(--r)}
+.vital-value{text-align:center}
+.vital-label{font-size:9px;color:var(--t3);text-transform:uppercase;font-weight:600;margin-bottom:2px}
+.vital-number{font-size:18px;font-weight:700;color:var(--t1)}
+
+/* Detail panels */
+.detail-panel{padding:8px 14px;margin:4px 0;border-radius:var(--r);border:1px solid var(--border2);background:var(--card2)}
+.cg-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0}
+.cg-k{font-size:9px;color:var(--t3);text-transform:uppercase;font-weight:600}
+.cg-v{font-size:12px;font-weight:600}
+.sm-btn{padding:4px 10px;border-radius:4px;border:1px solid var(--border);background:var(--card);color:var(--t2);font-size:9px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.sm-btn:hover{background:var(--bg)}
+.pay-row{display:flex;justify-content:space-between;padding:4px 0;font-size:11px}
+.pay-amt{font-size:18px;font-weight:800}.pay-amt.zero{color:var(--green)}.pay-amt.due{color:var(--yellow)}
+
+/* Allergy detail */
+.allergy-item{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border2);font-size:11px}
+.allergy-item:last-child{border-bottom:none}
+.allergy-rm{padding:2px 6px;border-radius:3px;border:1px solid var(--redB);background:none;color:var(--redT);font-size:9px;cursor:pointer}
+.allergy-add{display:flex;gap:4px;margin-top:6px}
+.allergy-add input{flex:1;padding:5px 8px;background:var(--card);border:1px solid var(--border);border-radius:4px;color:var(--t1);font-size:11px;outline:none}
+
+/* Med table */
+.med-table{width:100%;border-collapse:collapse;font-size:11px}
+.med-table th{padding:6px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border);background:var(--bg)}
+.med-table td{padding:6px 8px;border-bottom:1px solid var(--border2);vertical-align:top}
+.med-table tr:last-child td{border-bottom:none}
+.med-action{font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;white-space:nowrap;cursor:pointer;border:1px solid transparent}
+.med-continue{background:var(--greenL);color:var(--green)}.med-hold{background:var(--yellowL);color:var(--yellowD)}
+.med-stop{background:var(--redL);color:var(--redT)}.med-musttake{background:var(--blueL);color:var(--blue)}
+.med-review{background:var(--bg);color:var(--t3)}.med-perspec{background:#fff7ed;color:#ea580c}
+.med-edit-input{padding:3px 6px;border:1px solid var(--border);border-radius:3px;font-size:10px;width:90%}
+
+/* IV entries */
+.iv-entry{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:11px;border-bottom:1px solid var(--border2)}
+.iv-entry:last-child{border-bottom:none}
+
+/* Abx */
+.abx-entry{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border2);font-size:11px}
+.abx-entry:last-child{border-bottom:none}
+.abx-given{font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;background:var(--greenL);color:var(--green)}
+.abx-pending{font-size:9px;font-weight:700;padding:4px 12px;border-radius:4px;background:var(--yellowL);color:var(--yellowD);cursor:pointer;border:1px solid var(--yellowB)}
+.abx-pending:hover{background:var(--yellowB)}
+
+/* Signoff */
+.signoff{margin:10px 0 6px;padding:14px;border-radius:var(--r);border:1px solid var(--border);background:var(--card2)}
+.signoff.ready{border-color:var(--greenB);background:var(--greenL)}
+.signoff.signed{border-color:var(--greenB);background:var(--greenL)}
+.signoff-title{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.06em;text-transform:uppercase}
+.sign-btn{padding:10px 20px;border-radius:var(--r);font-size:13px;font-weight:700;white-space:nowrap;cursor:default;border:1px solid var(--border);background:var(--bg);color:var(--t4);transition:all .15s}
+.sign-btn.ok{background:var(--green);color:#fff;border-color:var(--green);cursor:pointer}
+.sign-btn.ok:hover{background:#0a6b52}
+.signoff-attest{font-size:9px;color:var(--t3);margin-top:6px;line-height:1.5}
+.signoff-done{display:flex;align-items:center;gap:8px;padding:4px 0}
+.signoff-done-icon{width:28px;height:28px;border-radius:50%;background:var(--greenL);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;border:1px solid var(--greenB)}
+
+/* Anesthesia */
+.anes-section{margin:10px 0;padding:14px;border-radius:var(--r);border:1px solid var(--border);background:var(--card)}
+.anes-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.anes-header-l{display:flex;align-items:center;gap:8px}
+.anes-title{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.06em;text-transform:uppercase}
+.anes-plan-summary{font-size:11px;color:var(--t2);font-weight:600}
+.anes-arrow{font-size:10px;color:var(--t4);transition:transform .2s}.anes-arrow.open{transform:rotate(180deg)}
+.anes-body{display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border2)}.anes-body.open{display:block}
+.anes-sub{font-size:10px;font-weight:700;color:var(--t3);margin:8px 0 4px;letter-spacing:.04em;text-transform:uppercase}
+.anes-plan-row{display:flex;gap:6px;margin-bottom:8px}
+.anes-option{padding:7px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--card);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;flex:1;text-align:center;transition:all .12s}
+.anes-option.sel{border-color:var(--blueB);background:var(--blueL);color:var(--blue)}
+.anes-option:hover{border-color:var(--blue)}
+.anes-note{background:var(--card2);border:1px solid var(--border2);border-radius:var(--r);padding:12px;font-size:11px;color:var(--t2);line-height:1.6;margin-top:6px;white-space:pre-line}
+.anes-note-title{font-size:9px;font-weight:700;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.anes-sign{margin-top:12px;padding-top:12px;border-top:1px solid var(--border2)}
+
+.phase-status{margin:8px 0;padding:10px 14px;border-radius:var(--r);display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700}
+.phase-status.complete{background:var(--greenL);border:1px solid var(--greenB);color:var(--green)}
+.phase-status.pending{background:var(--yellowL);border:1px solid var(--yellowB);color:var(--yellowD)}
+
+/* Handoff */
+.handoff{margin-top:12px;padding:14px;background:var(--greenL);border:1px solid var(--greenB);border-radius:var(--r)}
+.handoff-title{font-size:11px;font-weight:700;color:var(--green);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.handoff-body{font-size:11px;color:var(--t2);line-height:1.8}
+.handoff-body b{color:var(--t3);font-weight:500}
+
+.connect-monitor{padding:12px;border-radius:var(--r);border:1px solid var(--border);background:var(--card2);margin:8px 0;text-align:center}
+.connect-monitor-btn{padding:8px 16px;background:var(--green);color:#fff;border:none;border-radius:var(--r);font-weight:600;cursor:pointer;font-size:12px}
+.connect-monitor-btn:hover{background:#0a6b52}
+
+/* Mobile toggle button */
+.mob-toggle{display:none;padding:8px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--card);color:var(--t1);font-size:12px;font-weight:600;cursor:pointer;align-items:center;gap:6px}
+.mob-toggle svg{width:16px;height:16px}
+.mob-back{display:none;padding:8px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--card);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;align-items:center;gap:4px;margin-bottom:8px}
+
+/* ===== MOBILE: up to 768px ===== */
+@media(max-width:768px){
+  /* Hide nav sidebar */
+  .sb{display:none}
+  .main{margin-left:0}
+
+  /* Top bar adjustments */
+  .top{padding:10px 12px;gap:8px}
+  .top-h{font-size:14px}
+  .top-s{font-size:10px}
+  .stat-pill{padding:3px 8px;font-size:10px}
+  .stat-pill .n{font-size:12px}
+
+  /* Show mobile toggle button */
+  .mob-toggle{display:inline-flex}
+
+  /* Container goes vertical */
+  .container{flex-direction:column;overflow:visible}
+
+  /* Patient list becomes hidden by default, full-width when shown */
+  .patient-list{width:100%;border-right:none;border-bottom:1px solid var(--border);max-height:none;display:none;flex-shrink:0}
+  .patient-list.mob-show{display:flex;max-height:50vh;overflow-y:auto}
+  .patient-cards{display:flex;flex-direction:column;padding:6px}
+  .pt-card{margin-bottom:4px;padding:10px}
+  .pt-card-name{font-size:13px}
+
+  /* Content area full width */
+  .content{width:100%;overflow:visible}
+  .content-inner{padding:12px}
+
+  /* Back button on content */
+  .mob-back.mob-show{display:inline-flex}
+
+  /* Checklist items — bigger touch targets */
+  .ck{padding:14px 12px;min-height:52px;gap:12px}
+  .ck-icon{width:36px;height:36px;font-size:17px}
+  .ck-label{font-size:14px}
+  .ck-badge{font-size:11px;padding:5px 12px}
+  .ck-undo{font-size:11px;padding:6px 12px}
+  .ck-sub{font-size:11px}
+
+  /* Phase headers */
+  .phase-hd{padding:10px 0 6px;flex-wrap:wrap;gap:4px}
+  .phase-label{font-size:11px}
+  .phase-right{flex-wrap:wrap;gap:4px}
+  .complete-all-inline{padding:8px 16px;font-size:11px}
+
+  /* Option buttons */
+  .opt-btn{padding:12px 10px;font-size:13px;min-height:44px}
+  .opt-row{gap:6px}
+
+  /* Submit/sign buttons */
+  .submit-btn{padding:12px;font-size:13px}
+  .sign-btn{padding:12px 20px;font-size:13px}
+
+  /* Input fields */
+  .inp-field{padding:10px 12px;font-size:14px}
+  .inp-label{font-size:10px}
+  .inp-grid.g3{grid-template-columns:1fr 1fr}
+  .inp-grid.g2{grid-template-columns:1fr 1fr}
+
+  /* Order items */
+  .order-check{width:32px;height:32px;font-size:16px}
+  .order-item{padding:8px 0;gap:10px;font-size:12px}
+  .orders-section{padding:12px}
+
+  /* Vitals grid */
+  .vitals-grid{grid-template-columns:1fr 1fr 1fr;gap:6px;padding:10px}
+  .vital-number{font-size:16px}
+  .vitals-mode-btn{padding:10px;font-size:12px}
+
+  /* Med table — horizontal scroll */
+  .detail-panel{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .med-table{min-width:500px}
+  .med-table td,.med-table th{padding:8px 6px}
+  .med-action-sel{font-size:10px;padding:5px 8px;padding-right:20px}
+  .med-add-row{flex-wrap:wrap;gap:6px}
+  .med-add-row input{min-width:100px}
+
+  /* Allergy banner */
+  .allergy-ban{font-size:12px;padding:10px 12px}
+
+  /* Anesthesia */
+  .anes-section{padding:12px}
+  .anes-option{padding:10px;font-size:13px}
+  .anes-note{font-size:12px;padding:10px}
+
+  /* Signoff */
+  .signoff{padding:12px}
+  .signoff-attest{font-size:10px}
+
+  /* Handoff */
+  .handoff{padding:12px}
+  .handoff-body{font-size:12px}
+
+  /* Status badges in cards */
+  .pt-status-badge{font-size:9px;padding:3px 10px}
+
+  /* Small buttons */
+  .sm-btn{padding:6px 12px;font-size:10px}
+  .allergy-rm{padding:4px 8px;font-size:10px}
+  .connect-monitor-btn{padding:12px 20px;font-size:13px;width:100%}
+
+  /* IV entries */
+  .iv-entry{font-size:12px;padding:6px 0}
+
+  /* Abx entries */
+  .abx-entry{font-size:12px;padding:8px 0}
+  .abx-pending{padding:6px 14px;font-size:10px}
+  .abx-given{font-size:10px;padding:3px 10px}
+}
+
+/* ===== TABLET: 769–1024px ===== */
+@media(min-width:769px) and (max-width:1024px){
+  .sb{width:48px}.sb:hover{width:160px}
+  .main{margin-left:48px}
+  .patient-list{width:200px}
+  .content-inner{padding:14px 16px}
+  .ck{padding:12px}
+  .ck-icon{width:30px;height:30px;font-size:14px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<!-- SIDEBAR -->
+<nav class="sb">
+  <div class="sb-logo">TJS</div>
+  <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="sb-label">Dashboard</span></a>
+  <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg><span class="sb-label">PAC</span></a>
+  <a class="act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg><span class="sb-label">Pre-Op</span></a>
+  <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg><span class="sb-label">Clinic</span></a>
+  <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4m-8.66-3.34 2.83-2.83m11.66-5.66 2.83-2.83M1 12h4m14 0h4m-3.34 8.66-2.83-2.83M6.17 6.17 3.34 3.34"/></svg><span class="sb-label">OR</span></a>
+  <div class="sb-div"></div>
+  <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span class="sb-label">Settings</span></a>
+</nav>
+
+<div class="main">
+<!-- TOP BAR -->
+<div class="top">
+  <div class="top-l">
+    <div><div class="top-h">Pre-Op</div><div class="top-s" id="topDate"></div></div>
+  </div>
+  <div class="top-r">
+    <button class="mob-toggle" id="mobToggle" onclick="toggleMobList()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4-4v-2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span id="mobPtLabel">Cases</span></button>
+    <div class="stat-pill"><span class="n" id="totalCount">4</span> Cases</div>
+    <div class="stat-pill" style="border-color:var(--greenB);color:var(--green)"><span class="n" id="readyCount">0</span> Ready</div>
+  </div>
+</div>
+
+<!-- MAIN CONTAINER -->
+<div class="container">
+  <!-- PATIENT LIST SIDEBAR -->
+  <div class="patient-list">
+    <div class="patient-list-header">
+      <h3>Cases</h3>
+    </div>
+    <div class="patient-cards" id="patientList"></div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="content">
+    <div class="content-inner" id="contentArea"></div>
+  </div>
+</div>
+</div>
+</div>
+
+<script>
+const NOW=new Date(2026,2,23,6,15);
+const ft=d=>d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+const fd=d=>d.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
+let mobListOpen=false;
+function isMob(){return window.innerWidth<=768}
+function toggleMobList(){mobListOpen=!mobListOpen;const pl=document.querySelector('.patient-list');if(pl){if(mobListOpen)pl.classList.add('mob-show');else pl.classList.remove('mob-show')}updateMobLabel()}
+function updateMobLabel(){const lb=document.getElementById('mobPtLabel');if(lb){const pt=PTS.find(function(p){return p.id===selectedPt});lb.textContent=pt?pt.ln+', '+pt.fn:'Cases'}}
+function mobSelPt(id){selectedPt=id;mobListOpen=false;const pl=document.querySelector('.patient-list');if(pl)pl.classList.remove('mob-show');render()}
+
+const MDB={"Eliquis 5mg BID":{cls:"DOAC",ac:"per_specialist",pre:"Per Cardiologist",pr:"Dr. Rao"},"Lisinopril 10mg daily":{cls:"ACE-I",ac:"hold",pre:"Hold day of",pr:"Dr. Adams"},"Metoprolol 25mg BID":{cls:"BB",ac:"must_take",pre:"MUST take AM w/ sip water",pr:"Dr. Rao"},"Metformin 1000mg BID":{cls:"Biguanide",ac:"hold",pre:"Hold day of",pr:"Dr. Adams"},"Atorvastatin 20mg QHS":{cls:"Statin",ac:"continue",pre:"Continue",pr:"Dr. Adams"},"Aspirin 81mg daily":{cls:"Antiplatelet",ac:"hold",pre:"Hold 7d",pr:"OTC"},"Calcium + D3 600mg":{cls:"Supplement",ac:"continue",pre:"Continue",pr:"OTC"},"Gabapentin 300mg TID":{cls:"Anticonvulsant",ac:"continue",pre:"Continue",pr:"Dr. Adams"},"Aspirin 325mg daily":{cls:"Antiplatelet",ac:"hold",pre:"Hold 7d",pr:"OTC"},"Lisinopril 20mg daily":{cls:"ACE-I",ac:"hold",pre:"Hold day of",pr:"Dr. Kim"},"Amlodipine 5mg daily":{cls:"CCB",ac:"continue",pre:"Take AM",pr:"Dr. Kim"},"Tamsulosin 0.4mg QHS":{cls:"Alpha Block",ac:"continue",pre:"Continue",pr:"Dr. Kim"},"Vitamin D3 2000IU":{cls:"Supplement",ac:"continue",pre:"Continue",pr:"OTC"},"Jardiance 25mg daily":{cls:"SGLT2i",ac:"stop",pre:"STOP 3d pre — DKA risk",pr:"Dr. Park"},"Glipizide 5mg BID":{cls:"Sulfonylurea",ac:"hold",pre:"Hold day of",pr:"Dr. Park"},"Metoprolol 50mg BID":{cls:"BB",ac:"must_take",pre:"MUST take AM w/ sip water",pr:"Dr. Liu"},"HCTZ 25mg daily":{cls:"Diuretic",ac:"continue",pre:"Continue",pr:"Dr. Chen"},"Atorvastatin 40mg QHS":{cls:"Statin",ac:"continue",pre:"Continue",pr:"Dr. Chen"},"Fish Oil 1200mg daily":{cls:"Supplement",ac:"hold",pre:"Hold 7d",pr:"HERB"},"Omeprazole 20mg daily":{cls:"PPI",ac:"continue",pre:"Continue",pr:"Dr. Chen"},"Vitamin D3 1000IU":{cls:"Supplement",ac:"continue",pre:"Continue",pr:"OTC"},"Ibuprofen 400mg PRN":{cls:"NSAID",ac:"stop",pre:"Discontinued",pr:"OTC"}};
+const mi=n=>MDB[n]||{cls:"—",ac:"review",pre:"Review",pr:"—"};
+
+const PTS=[
+{id:1,fn:"Margaret",ln:"Thompson",age:68,sex:"F",mrn:"TJR-20241",dob:"03/15/1957",joint:"Knee",lat:"Right",proc:"Right TKA",surgeon:"Dr. Henderson",orTime:"07:30",bay:"Pre-Op 1",wt:82,allergies:[{drug:"Penicillin",reaction:"Rash",severity:"Moderate"},{drug:"Sulfa",reaction:"GI upset",severity:"Mild"}],isDiabetic:true,a1cVal:6.2,caregiver:{name:"Robert Thompson",rel:"Son",phone:"(770) 555-0192"},meds:["Eliquis 5mg BID","Lisinopril 10mg daily","Metoprolol 25mg BID","Metformin 1000mg BID","Atorvastatin 20mg QHS","Aspirin 81mg daily","Calcium + D3 600mg","Gabapentin 300mg TID"],mhs:{"Eliquis 5mg BID":{s:1,a:1},"Lisinopril 10mg daily":{s:1,a:1},"Metformin 1000mg BID":{s:1,a:1},"Aspirin 81mg daily":{s:1,a:1}},abxOrders:[{drug:"Ancef",dose:"2g IV"}],clinicOrders:[{drug:"Celebrex",dose:"200mg PO"},{drug:"Tylenol",dose:"1000mg PO"},{drug:"TXA",dose:"1g IV"}],vtePlan:"Resume Eliquis POD#1"},
+{id:2,fn:"James",ln:"Rodriguez",age:72,sex:"M",mrn:"TJR-20242",dob:"11/08/1953",joint:"Hip",lat:"Left",proc:"Left THA",surgeon:"Dr. Patel",orTime:"09:00",bay:"Pre-Op 3",wt:95,allergies:[],isDiabetic:false,a1cVal:null,caregiver:{name:"Maria Rodriguez",rel:"Wife",phone:"(770) 555-0231"},meds:["Aspirin 325mg daily","Lisinopril 20mg daily","Amlodipine 5mg daily","Tamsulosin 0.4mg QHS","Vitamin D3 2000IU"],mhs:{"Aspirin 325mg daily":{s:1,a:1},"Lisinopril 20mg daily":{s:1,a:1}},abxOrders:[{drug:"Ancef",dose:"2g IV"}],clinicOrders:[{drug:"TXA",dose:"1g IV"}],vtePlan:"ASA 81mg BID x6wk"},
+{id:3,fn:"Dorothy",ln:"Chen",age:65,sex:"F",mrn:"TJR-20243",dob:"07/22/1960",joint:"Knee",lat:"Left",proc:"Left TKA",surgeon:"Dr. Henderson",orTime:"11:00",bay:"—",wt:88,allergies:[{drug:"Latex",reaction:"Anaphylaxis",severity:"Severe",critical:true}],isDiabetic:true,a1cVal:7.9,caregiver:{name:"Lisa Chen",rel:"Daughter",phone:"(770) 555-0367"},meds:["Metformin 1000mg BID","Jardiance 25mg daily","Glipizide 5mg BID","Metoprolol 50mg BID","Lisinopril 20mg daily","HCTZ 25mg daily","Atorvastatin 40mg QHS","Fish Oil 1200mg daily","Calcium + D3 600mg","Gabapentin 300mg TID","Omeprazole 20mg daily"],mhs:{"Metformin 1000mg BID":{s:1,a:0},"Jardiance 25mg daily":{s:1,a:0},"Fish Oil 1200mg daily":{s:1,a:0},"Lisinopril 20mg daily":{s:1,a:0}},abxOrders:[{drug:"Ancef",dose:"2g IV"}],clinicOrders:[{drug:"Celebrex",dose:"200mg PO"},{drug:"Tylenol",dose:"1000mg PO"},{drug:"TXA",dose:"1g IV"}],vtePlan:"ASA 81mg BID x6wk"},
+{id:4,fn:"William",ln:"Foster",age:58,sex:"M",mrn:"TJR-20244",dob:"09/03/1967",joint:"Hip",lat:"Right",proc:"Right THA",surgeon:"Dr. Patel",orTime:"13:00",bay:"—",wt:78,allergies:[{drug:"Codeine",reaction:"Nausea",severity:"Moderate"}],isDiabetic:false,a1cVal:null,caregiver:{name:"Sarah Foster",rel:"Wife",phone:"(770) 555-0412"},meds:["Omeprazole 20mg daily","Vitamin D3 1000IU","Ibuprofen 400mg PRN"],mhs:{},abxOrders:[{drug:"Ancef",dose:"2g IV"}],clinicOrders:[{drug:"TXA",dose:"1g IV"}],vtePlan:"ASA 81mg BID x6wk"}
+];
+
+// State
+const S={};PTS.forEach(p=>{S[p.id]={comp:{},exp:null,esc:[],signoff:null,anesSignoff:null,pocGlucose:null,cg:{...p.caregiver},cgExp:false,cgEdit:false,payExp:false,algExp:false,medExp:false,ivLines:[],abxGiven:{},abxList:[...p.abxOrders],abxExp:false,anesPlan:{type:"Spinal",block:p.joint==="Knee"?"Adductor Canal Block":null},anesExp:false,anesNoteExp:false,phTs:{CHECKIN:null,ASSESS:null,ANES:null},vitals:null,ordersGiven:{},ordersExp:false};p.clinicOrders.forEach(o=>{S[p.id].ordersGiven[o.drug]=null})});
+let selectedPt=1;
+let statFilter=null;
+
+// Checklist definition
+function cl(pt){return[
+{id:"arrived",ph:"CI",tp:"tap",lb:"Patient Arrived"},
+{id:"identity",ph:"CI",tp:"tap",lb:"Identity Verified & Wristband",sb:"DOB "+pt.dob+" · MRN "+pt.mrn},
+{id:"npo",ph:"CI",tp:"input",lb:"NPO Status Confirmed",sb:"Last solids / clear liquids",inp:"npo"},
+{id:"adult",ph:"CI",tp:"detail",lb:"Responsible Adult Present",sb:S[pt.id].cg?S[pt.id].cg.name+" ("+S[pt.id].cg.rel+")":"NONE"},
+{id:"payment",ph:"CI",tp:"detail",lb:"Final Payment Confirmed",sb:"Paid in Full"},
+{id:"hs",ph:"PR",tp:"input",lb:"Day-of Health Screening",sb:"Symptoms, changes",inp:"hs"},
+{id:"vitals",ph:"PR",tp:"input",lb:"Vitals",inp:"vitals"},
+{id:"allergies",ph:"PR",tp:"detail",lb:"Allergies Verified",sb:pt.allergies.length?pt.allergies.map(a=>a.drug).join(", "):"NKDA"},
+{id:"medrecon",ph:"PR",tp:"detail",lb:"Medication Reconciliation",sb:pt.meds.length+" meds"},
+{id:"iv",ph:"PR",tp:"input",lb:"IV Access",inp:"iv"},
+{id:"sitemark",ph:"PR",tp:"tap",lb:"Surgical Site Marked & Verified",sb:pt.lat+" "+pt.joint},
+{id:"nursing",ph:"PR",tp:"input",lb:"Nursing Assessment",sb:"Skin, mobility, mental, fall risk",inp:"na"},
+{id:"abx",ph:"PR",tp:"detail",lb:"Pre-Op Antibiotics Given",sb:S[pt.id].abxList.map(a=>a.drug+" "+a.dose).join(", ")},
+{id:"preopmeds",ph:"PR",tp:"detail",lb:"Pre-Op Medications Administered"}
+]}
+const PL={CI:"Check-In",PR:"Pre-Op Ready",AN:"Anesthesia Ready"};
+
+function prog(pt){const s=S[pt.id],c=cl(pt);const d=c.filter(i=>s.comp[i.id]).length;return{d,t:c.length,p:Math.round(d/c.length*100)}}
+function phase(pt){const s=S[pt.id],c=cl(pt);if(!c.filter(i=>i.ph==="CI").every(i=>s.comp[i.id]))return"CI";if(!c.filter(i=>i.ph==="PR").every(i=>s.comp[i.id]))return"PR";if(!s.signoff)return"PR";if(!s.anesSignoff)return"AN";return"RDY"}
+function chkPh(pid){const s=S[pid],pt=PTS.find(p=>p.id===pid),c=cl(pt);["CI","PR"].forEach(ph=>{if(c.filter(i=>i.ph===ph).every(i=>s.comp[i.id])&&!s.phTs[ph==="CI"?"CHECKIN":"ASSESS"])s.phTs[ph==="CI"?"CHECKIN":"ASSESS"]=ft(NOW)})}
+
+// Actions
+function ci(pid,iid,det){S[pid].comp[iid]={time:ft(NOW),detail:det||null};S[pid].exp=null;chkPh(pid);render()}
+function undo(pid,iid){delete S[pid].comp[iid];render()}
+function te(pid,iid){S[pid].exp=S[pid].exp===iid?null:iid;render()}
+function selPt(id){selectedPt=id;render()}
+function tOrd(pid){S[pid].ordersExp=!S[pid].ordersExp;render()}
+function gOrd(pid,drug){S[pid].ordersGiven[drug]=ft(NOW);render()}
+function completeAllCI(pid){const pt=PTS.find(p=>p.id===pid),c=cl(pt).filter(i=>i.ph==="CI");c.forEach(item=>{if(!S[pid].comp[item.id])ci(pid,item.id)});render()}
+function completeAllPR(pid){const pt=PTS.find(p=>p.id===pid),c=cl(pt).filter(i=>i.ph==="PR");c.forEach(item=>{if(!S[pid].comp[item.id])ci(pid,item.id)});render()}
+function tCg(pid){S[pid].cgExp=!S[pid].cgExp;S[pid].cgEdit=false;render()}
+function eCg(pid){S[pid].cgEdit=true;render()}
+function sCg(pid){const n=document.getElementById("cg-n-"+pid),r=document.getElementById("cg-r-"+pid),p=document.getElementById("cg-p-"+pid);if(n&&n.value.trim())S[pid].cg={name:n.value.trim(),rel:r?r.value.trim():"",phone:p?p.value.trim():""};S[pid].cgEdit=false;if(!S[pid].comp.adult)ci(pid,"adult",S[pid].cg.name+" ("+S[pid].cg.rel+") — present");else render()}
+function tPay(pid){S[pid].payExp=!S[pid].payExp;render()}
+function cPay(pid){ci(pid,"payment","Confirmed");S[pid].payExp=false}
+function tAlg(pid){S[pid].algExp=!S[pid].algExp;render()}
+function aAlg(pid){const d=document.getElementById("alg-d-"+pid),r=document.getElementById("alg-r-"+pid);if(!d||!d.value.trim())return;PTS.find(p=>p.id===pid).allergies.push({drug:d.value.trim(),reaction:r?r.value.trim():"Unknown",severity:"Unknown"});d.value="";if(r)r.value="";render()}
+function rAlg(pid,idx){PTS.find(p=>p.id===pid).allergies.splice(idx,1);render()}
+function cAlg(pid){const pt=PTS.find(p=>p.id===pid);ci(pid,"allergies",pt.allergies.length?pt.allergies.map(a=>a.drug).join(", "):"NKDA");S[pid].algExp=false}
+function tMed(pid){S[pid].medExp=!S[pid].medExp;render()}
+function cMed(pid){ci(pid,"medrecon","Reconciled");S[pid].medExp=false}
+function chgMedAc(pid,med,newAc){var pt=PTS.find(function(p){return p.id===pid});if(!pt)return;if(!MDB[med])MDB[med]={cls:"—",ac:newAc,pre:newAc==="continue"?"Continue":newAc==="hold"?"Hold day of":newAc==="stop"?"Discontinued":newAc==="must_take"?"MUST take AM":newAc==="per_specialist"?"Per Specialist":"Review",pr:"—"};else MDB[med].ac=newAc;MDB[med].pre=newAc==="continue"?"Continue":newAc==="hold"?"Hold day of":newAc==="stop"?"Discontinued":newAc==="must_take"?"MUST take AM w/ sip water":newAc==="per_specialist"?"Per Specialist":"Review";render()}
+function addMed(pid){var d=document.getElementById("med-add-n-"+pid);if(!d||!d.value.trim())return;var nm=d.value.trim();PTS.find(function(p){return p.id===pid}).meds.push(nm);if(!MDB[nm])MDB[nm]={cls:"—",ac:"review",pre:"Review",pr:"—"};d.value="";render()}
+function rmMed(pid,idx){PTS.find(function(p){return p.id===pid}).meds.splice(idx,1);render()}
+function aIV(pid){const g=document.getElementById("iv-g-"+pid),s=document.getElementById("iv-s-"+pid),a=document.getElementById("iv-a-"+pid);if(!g||!g.value||!s||!s.value)return;S[pid].ivLines.push({gauge:g.value,site:s.value,attempts:a?a.value:"1",time:ft(NOW)});if(S[pid].ivLines.length===1)ci(pid,"iv",g.value+" "+s.value);S[pid].exp="iv";render()}
+function tAbx(pid){S[pid].abxExp=!S[pid].abxExp;render()}
+function gAbx(pid,idx){S[pid].abxGiven[idx]=ft(NOW);if(S[pid].abxList.every(function(_,i){return S[pid].abxGiven[i]})){const det=S[pid].abxList.map(function(a,i){return a.drug+" "+a.dose+" @ "+S[pid].abxGiven[i]}).join(", ");ci(pid,"abx",det)}render()}
+function aAbx(pid){const d=document.getElementById("abx-d-"+pid),ds=document.getElementById("abx-ds-"+pid);if(!d||!d.value.trim())return;S[pid].abxList.push({drug:d.value.trim(),dose:ds?ds.value.trim():"IV"});d.value="";if(ds)ds.value="";render()}
+function rAbx(pid,idx){S[pid].abxList.splice(idx,1);delete S[pid].abxGiven[idx];const ng={};Object.keys(S[pid].abxGiven).forEach(function(k){const ki=parseInt(k);if(ki>idx)ng[ki-1]=S[pid].abxGiven[k];else if(ki<idx)ng[ki]=S[pid].abxGiven[k]});S[pid].abxGiven=ng;render()}
+const NA={};PTS.forEach(function(p){NA[p.id]={skin:"Intact",mobility:"Independent",mental:"Alert & oriented",fall:"Low"}});
+function naS(pid,k,v){NA[pid][k]=v;render()}
+function naD(pid){const n=NA[pid];ci(pid,"nursing","Skin:"+n.skin+" Mob:"+n.mobility+" Mental:"+n.mental+" Fall:"+n.fall)}
+const HS={};
+function hsS(pid,k,v){if(!HS[pid])HS[pid]={};HS[pid][k]=v;if(HS[pid].symptoms&&HS[pid].changes){autoCompleteHS(pid)}else{render()}}
+function autoCompleteHS(pid){const h=HS[pid];if(!h||!h.symptoms||!h.changes)return;ci(pid,"hs",h.symptoms==="None"&&h.changes==="No changes"?"No new symptoms/changes":"Sym:"+h.symptoms+" Chg:"+h.changes)}
+function doSO(pid){S[pid].signoff={time:ft(NOW)};S[pid].phTs.ASSESS=S[pid].phTs.ASSESS||ft(NOW);render()}
+function tAnes(pid){S[pid].anesExp=!S[pid].anesExp;render()}
+function sAT(pid,v){S[pid].anesPlan.type=v;render()}
+function sAB(pid,v){S[pid].anesPlan.block=v;render()}
+function tAN(pid){S[pid].anesNoteExp=!S[pid].anesNoteExp;render()}
+function doAS(pid){S[pid].anesSignoff={time:ft(NOW)};S[pid].phTs.ANES=ft(NOW);render()}
+function setStatFilter(f){statFilter=statFilter===f?null:f;render()}
+const VM={};PTS.forEach(p=>{VM[p.id]="monitor"});
+function setVM(pid,m){VM[pid]=m;render()}
+function connectMonitor(pid){const v={sbp:128,dbp:76,hr:72,temp:98.4,spo2:99,rr:14};S[pid].vitals={sbp:v.sbp,dbp:v.dbp,hr:v.hr,temp:v.temp,spo2:v.spo2,rr:v.rr};render()}
+function saveManualVitals(pid){const g=function(id){var el=document.getElementById(id);return el?el.value:""};var sbp=g("mv-sbp-"+pid),dbp=g("mv-dbp-"+pid),hr=g("mv-hr-"+pid),temp=g("mv-temp-"+pid),spo2=g("mv-spo2-"+pid),rr=g("mv-rr-"+pid);if(!sbp||!dbp||!hr)return;S[pid].vitals={sbp:parseInt(sbp),dbp:parseInt(dbp),hr:parseInt(hr),temp:parseFloat(temp)||98.6,spo2:parseInt(spo2)||99,rr:parseInt(rr)||14};render()}
+function confirmVitals(pid){const v=S[pid].vitals;if(v)ci(pid,"vitals",v.sbp+"/"+v.dbp+" HR:"+v.hr+" T:"+v.temp+" SpO2:"+v.spo2+" RR:"+v.rr);else render()}
+
+function spN(pt){return"PROCEDURE: Spinal Anesthesia\nPatient positioned sitting. Sterile prep lumbar spine.\n25g Whitacre at L3-L4 midline. CSF obtained first pass.\nBupivacaine 0.75% 1.8mL (13.5mg) + Fentanyl 15mcg IT.\nNeedle removed intact. Sensory T10 bilateral confirmed.\nHemodynamically stable. No complications."}
+function gaN(pt){return"PROCEDURE: General Endotracheal Anesthesia\nASA monitors. Pre-oxygenated.\nPropofol 2mg/kg, Fentanyl 1mcg/kg, Rocuronium 0.6mg/kg.\nDirect laryngoscopy Grade I. ETT "+(pt.sex==="F"?"7.0":"7.5")+" placed.\nETCO2 confirmed. Sevoflurane 1-2% O2/Air.\nStable throughout."}
+function blN(pt){return"PROCEDURE: US-Guided Adductor Canal Block\nPatient supine, "+pt.lat.toLowerCase()+" leg externally rotated.\nLinear probe mid-thigh. Canal identified deep to sartorius.\n22g 80mm needle in-plane lateral to medial.\nAspiration negative. Hydrodissection 2mL NS.\nRopivacaine 0.5% 20mL (100mg) with intermittent aspiration.\nSpread confirmed on US. No complications."}
+function esc(s){const d=document.createElement("div");d.textContent=s||"";return d.innerHTML;}
+
+function render(){
+document.getElementById("topDate").textContent=fd(NOW)+" · Total Joint Specialists — ASC";
+
+const rdyCount=PTS.filter(p=>phase(p)==="RDY").length;
+const issCount=0;
+const pendCount=PTS.length-rdyCount-issCount;
+document.getElementById("readyCount").textContent=rdyCount;
+
+
+// Render patient list
+let pl='';
+PTS.forEach(pt=>{
+const s=S[pt.id],pr=prog(pt),ph=phase(pt);
+const jType=pt.joint==="Hip"?"hip":"knee";
+const isSel=selectedPt===pt.id;
+pl+='<div class="pt-card'+(isSel?' sel':'')+'" onclick="isMob()?mobSelPt('+pt.id+'):selPt('+pt.id+')">';
+pl+='<div class="pt-card-header"><div class="pt-card-name">'+esc(pt.ln)+', '+esc(pt.fn)+'</div><div class="pt-card-time">'+pt.orTime+'</div></div>';
+pl+='<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">';
+pl+='<span class="pt-card-joint '+jType+'">'+pt.lat+' '+pt.joint+'</span>';
+var statusMap={CI:{cls:"ci",lb:"Checking In"},PR:{cls:"pr",lb:"Checked In"},AN:{cls:"an",lb:"Pre-Op Ready"},RDY:{cls:"rdy",lb:"OR Ready"}};
+var stInfo=statusMap[ph]||statusMap.CI;
+pl+='<span class="pt-status-badge '+stInfo.cls+'">'+stInfo.lb+'</span>';
+pl+='</div>';
+pl+='</div>';
+});
+document.getElementById("patientList").innerHTML=pl;
+
+// Render main content for selected patient
+let h='';
+const pt=PTS.find(p=>p.id===selectedPt);
+if(pt){
+const s=S[pt.id],c=cl(pt),pr=prog(pt),ph=phase(pt),isR=ph==="RDY";
+
+// Allergy banners
+if(pt.allergies.length){const cr=pt.allergies.some(function(a){return a.critical});h+='<div class="allergy-ban'+(cr?' critical':'')+'">⚠ ALLERGIES: '+pt.allergies.map(function(a){return a.drug+" ("+a.reaction+")"}).join(" · ")+'</div>';if(cr)h+='<div class="allergy-ban critical" style="font-weight:700">⛔ LATEX ANAPHYLAXIS — Latex-free OR MANDATORY</div>'}
+
+// PRE-OP ORDERS SECTION
+h+='<div class="orders-section"><div class="orders-header" onclick="tOrd('+pt.id+')"><span class="orders-title">Pre-Op Orders</span><div class="orders-arrow'+(s.ordersExp?' open':'')+'">▼</div></div>';
+if(s.ordersExp){h+='<div class="orders-body open">';
+h+='<div style="font-size:9px;font-weight:700;color:var(--t3);letter-spacing:.04em;text-transform:uppercase;padding:4px 0 2px">Clinic Pre-Op Meds</div>';
+pt.clinicOrders.forEach(ord=>{const isDone=!!s.ordersGiven[ord.drug];h+='<div class="order-item"><div class="order-check'+(isDone?' done':'')+'" onclick="event.stopPropagation();gOrd('+pt.id+',\''+ord.drug.replace(/'/g,"\\'")+'\')">'+(!isDone?'□':'✓')+'</div><div class="order-text"><div class="order-text-drug">'+ord.drug+'</div><div class="order-text-dose">'+ord.dose+'</div></div>'+(isDone?'<div class="order-time">'+s.ordersGiven[ord.drug]+'</div>':'')+'</div>'});
+h+='<div style="font-size:9px;font-weight:700;color:var(--t3);letter-spacing:.04em;text-transform:uppercase;padding:8px 0 2px;margin-top:4px;border-top:1px solid var(--border2)">IV Antibiotics</div>';
+s.abxList.forEach(function(a,i){var gv=s.abxGiven[i];h+='<div class="order-item"><div class="order-check'+(gv?' done':'')+'" onclick="event.stopPropagation();gAbx('+pt.id+','+i+')">'+(gv?'✓':'□')+'</div><div class="order-text"><div class="order-text-drug">'+a.drug+'</div><div class="order-text-dose">'+a.dose+'</div></div>';if(gv)h+='<div class="order-time">'+gv+'</div>';h+='<button class="allergy-rm" onclick="event.stopPropagation();rAbx('+pt.id+','+i+')" style="margin-left:4px">✕</button></div>'});
+h+='<div style="display:flex;gap:4px;padding:6px 0;align-items:center"><input class="inp-field" id="abx-ord-d-'+pt.id+'" placeholder="Antibiotic" style="font-size:10px;flex:1" onclick="event.stopPropagation()"><input class="inp-field" id="abx-ord-ds-'+pt.id+'" placeholder="Dose (e.g. 2g IV)" style="font-size:10px;max-width:100px" onclick="event.stopPropagation()"><div class="sm-btn" onclick="event.stopPropagation();var d=document.getElementById(\'abx-ord-d-'+pt.id+'\'),ds=document.getElementById(\'abx-ord-ds-'+pt.id+'\');if(d&&d.value.trim()){S['+pt.id+'].abxList.push({drug:d.value.trim(),dose:ds?ds.value.trim():\'IV\'});d.value=\'\';if(ds)ds.value=\'\';render()}">+ Add Abx</div></div>';
+h+='</div>'}h+='</div>';
+
+// PHASES
+["CI","PR"].forEach(function(phk){
+var items=c.filter(function(i){return i.ph===phk}),dN=items.filter(function(i){return s.comp[i.id]}).length,allD=dN===items.length;
+var tsKey=phk==="CI"?"CHECKIN":"ASSESS",ts=s.phTs[tsKey];
+h+='<div class="phase-hd"><span class="phase-label'+(allD?' complete':'')+'">'+PL[phk]+'</span><div class="phase-right">'+(ts?'<span class="phase-ts">✓ '+ts+'</span>':'');
+if(!allD){if(phk==="CI")h+='<button class="complete-all-inline" onclick="event.stopPropagation();completeAllCI('+pt.id+')">✓ Complete All</button>';else if(phk==="PR")h+='<button class="complete-all-inline" onclick="event.stopPropagation();completeAllPR('+pt.id+')">✓ Complete All</button>';}
+h+='<span class="phase-count'+(allD?' complete':'')+'">'+dN+'/'+items.length+'</span></div></div>';
+
+items.forEach(function(item){
+var done=!!s.comp[item.id],cp=s.comp[item.id],isE=s.exp===item.id;
+var detailOpen=(item.id==="adult"&&s.cgExp)||(item.id==="payment"&&s.payExp)||(item.id==="allergies"&&s.algExp)||(item.id==="medrecon"&&s.medExp)||(item.id==="abx"&&s.abxExp);
+var oc="";
+var detailMap={adult:"tCg",payment:"tPay",allergies:"tAlg",medrecon:"tMed",abx:"tAbx"};
+if(detailMap[item.id])oc='onclick="'+detailMap[item.id]+'('+pt.id+')"';
+else if(!done){if(item.tp==="tap")oc='onclick="ci('+pt.id+',\''+item.id+'\')"';else if(item.tp==="input")oc='onclick="te('+pt.id+',\''+item.id+'\')"'}
+else if(done)oc='onclick="undo('+pt.id+',\''+item.id+'\')"';
+
+h+='<div class="ck'+(oc?' tap':'')+((isE||detailOpen)?' expand':'')+'" '+oc+'><div class="ck-icon '+(done?'g':'p')+'">'+(done?'✓':'○')+'</div><div class="ck-body"><div class="ck-top"><span class="ck-label'+(done?' done':'')+'">'+item.lb+'</span>';
+if(done){h+='<span class="ck-badge g">'+cp.time+'</span><div class="ck-undo" onclick="event.stopPropagation();undo('+pt.id+',\''+item.id+'\')">↩ Undo</div>'}
+else if(item.tp==="tap")h+='<span class="ck-badge p">Tap</span>';
+else if(item.tp==="input")h+='<span class="ck-badge y">Input</span>';
+else h+='<span class="ck-badge p">View</span>';
+h+='</div>';if(cp&&cp.detail)h+='<div class="ck-result">'+cp.detail+'</div>';else if(item.sb)h+='<div class="ck-sub">'+item.sb+'</div>';h+='</div></div>';
+
+// DETAIL PANELS
+// Caregiver
+if(item.id==="adult"&&s.cgExp){var cg=s.cg;h+='<div class="detail-panel">';if(s.cgEdit){h+='<div class="inp-grid g3" style="margin-bottom:6px"><div><div class="inp-label">Name</div><input class="inp-field" id="cg-n-'+pt.id+'" value="'+(cg?cg.name:'')+'" onclick="event.stopPropagation()"></div><div><div class="inp-label">Relationship</div><input class="inp-field" id="cg-r-'+pt.id+'" value="'+(cg?cg.rel:'')+'" onclick="event.stopPropagation()"></div><div><div class="inp-label">Phone</div><input class="inp-field" id="cg-p-'+pt.id+'" value="'+(cg?cg.phone:'')+'" onclick="event.stopPropagation()"></div></div><button class="submit-btn ready" onclick="event.stopPropagation();sCg('+pt.id+')">Save & Confirm</button>'}else{if(cg){h+='<div class="cg-row"><span class="cg-k">Name</span><span class="cg-v">'+cg.name+'</span></div><div class="cg-row"><span class="cg-k">Relationship</span><span class="cg-v">'+cg.rel+'</span></div><div class="cg-row"><span class="cg-k">Phone</span><span class="cg-v">'+cg.phone+'</span></div>'}h+='<div style="display:flex;gap:6px;margin-top:6px">';if(!done)h+='<button class="submit-btn ready" style="flex:1" onclick="event.stopPropagation();ci('+pt.id+',\'adult\',\''+(cg?cg.name+' ('+cg.rel+')':'')+' — present\')">Confirm Present</button>';h+='<div class="sm-btn" onclick="event.stopPropagation();eCg('+pt.id+')">✏ Change</div></div>'}h+='</div>'}
+// Payment
+if(item.id==="payment"&&s.payExp){h+='<div class="detail-panel"><div class="pay-row"><span style="color:var(--t3)">Status</span><span style="color:var(--green);font-weight:700">Paid in Full</span></div>';if(!done)h+='<button class="submit-btn ready" style="margin-top:6px" onclick="event.stopPropagation();cPay('+pt.id+')">Confirm Payment</button>';h+='</div>'}
+// Allergies
+if(item.id==="allergies"&&s.algExp){h+='<div class="detail-panel">';if(pt.allergies.length)pt.allergies.forEach(function(a,i){h+='<div class="allergy-item"><span><b style="color:var(--redT)">'+a.drug+'</b> — '+a.reaction+'</span><button class="allergy-rm" onclick="event.stopPropagation();rAlg('+pt.id+','+i+')">✕</button></div>'});else h+='<div style="font-size:11px;color:var(--green);padding:4px 0">NKDA</div>';h+='<div class="allergy-add"><input class="inp-field" id="alg-d-'+pt.id+'" placeholder="Drug" style="font-size:11px" onclick="event.stopPropagation()"><input class="inp-field" id="alg-r-'+pt.id+'" placeholder="Reaction" style="font-size:11px;max-width:120px" onclick="event.stopPropagation()"><div class="sm-btn" onclick="event.stopPropagation();aAlg('+pt.id+')">+ Add</div></div>';if(!done)h+='<button class="submit-btn ready" style="margin-top:6px" onclick="event.stopPropagation();cAlg('+pt.id+')">Verify Allergies</button>';h+='</div>'}
+// Meds
+if(item.id==="medrecon"&&s.medExp){var acOpts=["must_take","continue","hold","stop","per_specialist","review"];var acLabels={must_take:"MUST TAKE",continue:"CONTINUE",hold:"HOLD",stop:"STOP",per_specialist:"PER SPEC",review:"REVIEW"};h+='<div class="detail-panel" style="padding:0;overflow-x:auto"><table class="med-table"><thead><tr><th>Medication</th><th>Class</th><th>Action</th><th>Pre-Op</th><th>Prescriber</th><th></th></tr></thead><tbody>';var sr=pt.meds.map(function(med,idx){return{med:med,idx:idx}}).sort(function(a,b){var o={stop:0,per_specialist:1,must_take:2,hold:3,continue:4,review:5};return(o[mi(a.med).ac]||5)-(o[mi(b.med).ac]||5)});sr.forEach(function(obj){var med=obj.med,m=mi(med);var selHtml='<select class="med-action-sel" onchange="event.stopPropagation();chgMedAc('+pt.id+',\''+med.replace(/'/g,"\\'")+'\',this.value)">';acOpts.forEach(function(ac){selHtml+='<option value="'+ac+'"'+(m.ac===ac?' selected':'')+'>'+acLabels[ac]+'</option>'});selHtml+='</select>';h+='<tr onclick="event.stopPropagation()"><td style="font-weight:600">'+med+'</td><td style="font-size:9px;color:var(--t3)">'+m.cls+'</td><td>'+selHtml+'</td><td style="font-size:9px">'+m.pre+'</td><td style="font-size:9px;color:var(--t3)">'+m.pr+'</td><td><button class="allergy-rm" onclick="event.stopPropagation();rmMed('+pt.id+','+obj.idx+')">✕</button></td></tr>'});h+='</tbody></table>';h+='<div class="med-add-row"><input class="inp-field" id="med-add-n-'+pt.id+'" placeholder="Add medication..." style="font-size:10px" onclick="event.stopPropagation()"><div class="sm-btn" onclick="event.stopPropagation();addMed('+pt.id+')">+ Add</div></div>';if(!done)h+='<div style="padding:8px 14px"><button class="submit-btn ready" onclick="event.stopPropagation();cMed('+pt.id+')">Confirm Reconciliation</button></div>';h+='</div>'}
+// Abx — summary view (detailed admin in Pre-Op Orders)
+if(item.id==="abx"&&s.abxExp){h+='<div class="detail-panel"><div style="font-size:10px;color:var(--t3);margin-bottom:6px">Administer antibiotics from the <b>Pre-Op Orders</b> section above.</div>';s.abxList.forEach(function(a,i){var gv=s.abxGiven[i];h+='<div class="abx-entry"><span style="font-weight:600">'+a.drug+' '+a.dose+'</span>';if(gv)h+='<span class="abx-given">Given @ '+gv+'</span>';else h+='<span class="abx-pending" onclick="event.stopPropagation();gAbx('+pt.id+','+i+')">Mark Given</span>';h+='</div>'});h+='</div>'}
+// IV
+if(item.id==="iv"&&isE){h+='<div class="inp-panel">';if(s.ivLines.length){s.ivLines.forEach(function(l,i){h+='<div class="iv-entry"><span style="color:var(--green)">✓</span> <b>Line '+(i+1)+':</b> '+l.gauge+' '+l.site+', '+l.attempts+' att @ '+l.time+'</div>'});h+='<div style="font-size:10px;color:var(--t3);margin:6px 0">Add line:</div>'}h+='<div class="inp-grid g3"><div><div class="inp-label">Gauge</div><select class="inp-field" id="iv-g-'+pt.id+'" onclick="event.stopPropagation()"><option value="">—</option><option>16g</option><option>18g</option><option>20g</option><option>22g</option></select></div><div><div class="inp-label">Site</div><select class="inp-field" id="iv-s-'+pt.id+'" onclick="event.stopPropagation()"><option value="">—</option><option>R Hand</option><option>L Hand</option><option>R AC</option><option>L AC</option><option>R Forearm</option><option>L Forearm</option><option>R Wrist</option><option>L Wrist</option></select></div><div><div class="inp-label">Attempts</div><select class="inp-field" id="iv-a-'+pt.id+'" onclick="event.stopPropagation()"><option>1</option><option>2</option><option>3</option></select></div></div><button class="submit-btn ready" onclick="event.stopPropagation();aIV('+pt.id+')">'+(s.ivLines.length?'Add Line':'Record IV')+'</button></div>'}
+// Nursing
+if(item.id==="nursing"&&isE){var n=NA[pt.id];h+='<div class="inp-panel">';[{id:"skin",q:"Skin",opts:["Intact","Rash/irritation","Open wound"]},{id:"mobility",q:"Mobility",opts:["Independent","Cane/walker","Wheelchair"]},{id:"mental",q:"Mental status",opts:["Alert & oriented","Confused/anxious"]},{id:"fall",q:"Fall risk",opts:["Low","Moderate","High"]}].forEach(function(q){h+='<div class="inp-label" style="margin-top:6px">'+q.q+'</div><div class="opt-row">';q.opts.forEach(function(o){var sl=n[q.id]===o,f=o===q.opts[0],la=o===q.opts[q.opts.length-1]&&q.opts.length>2;h+='<div class="opt-btn'+(sl?(f?' sel':(la?' sel-warn':' sel-info')):'')+'" onclick="event.stopPropagation();naS('+pt.id+',\''+q.id+'\',\''+o.replace(/'/g,"\\'")+'\')">'+o+'</div>'});h+='</div>'});h+='<button class="submit-btn ready" onclick="event.stopPropagation();naD('+pt.id+')">Record Assessment</button></div>'}
+// Health screening
+if(item.id==="hs"&&isE){var hs=HS[pt.id]||{};h+='<div class="inp-panel"><div class="inp-label" style="margin-top:4px">New symptoms?</div><div class="opt-row">';["None","Cough/cold","Fever","Chest pain","SOB","Other"].forEach(function(o){var sl=hs.symptoms===o;h+='<div class="opt-btn'+(sl?(o==='None'?' sel':' sel-warn'):'')+'" onclick="event.stopPropagation();hsS('+pt.id+',\'symptoms\',\''+o+'\')">'+o+'</div>'});h+='</div><div class="inp-label" style="margin-top:8px">Health/med changes?</div><div class="opt-row">';["No changes","New medication","ER visit","Other"].forEach(function(o){var sl=hs.changes===o;h+='<div class="opt-btn'+(sl?(o==='No changes'?' sel':' sel-warn'):'')+'" onclick="event.stopPropagation();hsS('+pt.id+',\'changes\',\''+o+'\')">'+o+'</div>'});h+='</div></div>'}
+// Vitals
+if(item.id==="vitals"&&isE){const v=s.vitals;var vm=VM[pt.id]||"monitor";h+='<div class="inp-panel">';if(!v){h+='<div class="vitals-mode-toggle"><button class="vitals-mode-btn'+(vm==="monitor"?" sel":"")+'" onclick="event.stopPropagation();setVM('+pt.id+',\'monitor\')">↻ Monitor Auto-Fill</button><button class="vitals-mode-btn'+(vm==="manual"?" sel":"")+'" onclick="event.stopPropagation();setVM('+pt.id+',\'manual\')">✏ Manual Entry</button></div>';if(vm==="monitor"){h+='<div class="connect-monitor"><button class="connect-monitor-btn" onclick="event.stopPropagation();connectMonitor('+pt.id+')">↻ Connect & Auto-Fill</button></div>'}else{h+='<div class="inp-grid g3"><div><div class="inp-label">SBP</div><input class="inp-field" type="number" id="mv-sbp-'+pt.id+'" placeholder="120" onclick="event.stopPropagation()"></div><div><div class="inp-label">DBP</div><input class="inp-field" type="number" id="mv-dbp-'+pt.id+'" placeholder="80" onclick="event.stopPropagation()"></div><div><div class="inp-label">HR</div><input class="inp-field" type="number" id="mv-hr-'+pt.id+'" placeholder="72" onclick="event.stopPropagation()"></div><div><div class="inp-label">Temp °F</div><input class="inp-field" type="number" step="0.1" id="mv-temp-'+pt.id+'" placeholder="98.6" onclick="event.stopPropagation()"></div><div><div class="inp-label">SpO2 %</div><input class="inp-field" type="number" id="mv-spo2-'+pt.id+'" placeholder="99" onclick="event.stopPropagation()"></div><div><div class="inp-label">RR</div><input class="inp-field" type="number" id="mv-rr-'+pt.id+'" placeholder="14" onclick="event.stopPropagation()"></div></div><button class="submit-btn ready" onclick="event.stopPropagation();saveManualVitals('+pt.id+')">Save Vitals</button>'}}else{h+='<div class="vitals-grid"><div class="vital-value"><div class="vital-label">BP</div><div class="vital-number">'+v.sbp+'/'+v.dbp+'</div></div><div class="vital-value"><div class="vital-label">HR</div><div class="vital-number">'+v.hr+'</div></div><div class="vital-value"><div class="vital-label">Temp°F</div><div class="vital-number">'+v.temp+'</div></div><div class="vital-value"><div class="vital-label">SpO2%</div><div class="vital-number">'+v.spo2+'</div></div><div class="vital-value"><div class="vital-label">RR</div><div class="vital-number">'+v.rr+'</div></div></div><button class="submit-btn ready" onclick="event.stopPropagation();confirmVitals('+pt.id+')">✓ Confirm Vitals</button>'}h+='</div>'}
+// NPO
+if(item.id==="npo"&&isE){h+='<div class="inp-panel"><div class="inp-grid g2"><div><div class="inp-label">Last Solids</div><input class="inp-field" type="time" id="nf'+pt.id+'" onclick="event.stopPropagation()"></div><div><div class="inp-label">Last Clears</div><input class="inp-field" type="time" id="nc'+pt.id+'" onclick="event.stopPropagation()"></div></div><button class="submit-btn ready" onclick="event.stopPropagation();var f=document.getElementById(\'nf'+pt.id+'\').value,c=document.getElementById(\'nc'+pt.id+'\').value;if(f||c)ci('+pt.id+',\'npo\',\'Solids:\'+(f||\'denied\')+\' Clears:\'+(c||\'denied\'))">Confirm NPO</button></div>'}
+});
+
+// SIGN-OFF
+if(phk==="PR"){var prItems=c.filter(function(i){return i.ph==="PR"}),prD=prItems.every(function(i){return s.comp[i.id]});var allItems=c.filter(function(i){return["CI","PR"].indexOf(i.ph)>=0});var allD2=allItems.every(function(i){return s.comp[i.id]});if(s.signoff){h+='<div class="signoff signed"><div class="signoff-done"><div class="signoff-done-icon">✓</div><div style="margin-left:4px"><div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;font-weight:700">Pre-Op Nurse Attested</div><div style="color:var(--green);font-weight:700;font-size:11px">'+s.signoff.time+'</div></div></div></div>'}
+else if(allD2){h+='<div class="signoff ready"><div style="display:flex;align-items:center;justify-content:space-between"><div class="signoff-title">Pre-Op Nurse Sign & Attest</div><button class="sign-btn ok" onclick="event.stopPropagation();doSO('+pt.id+')">✓ Sign & Attest</button></div><div class="signoff-attest">All items complete. By signing, I confirm this patient is ready for anesthesia.</div></div>'}
+else{var pn=allItems.filter(function(i){return!s.comp[i.id]}).length;h+='<div class="phase-status pending">○ '+pn+' item'+(pn>1?'s':'')+' remaining</div>'}}
+});
+
+// ANESTHESIA
+var aD=!!s.anesSignoff,ts3=s.phTs.ANES;
+var pSum=s.anesPlan.type+(pt.joint==='Knee'&&s.anesPlan.block?' + '+s.anesPlan.block:'');
+h+='<div class="phase-hd"><span class="phase-label'+(aD?' complete':'')+'">Anesthesia Ready</span><div class="phase-right">'+(ts3?'<span class="phase-ts">✓ '+ts3+'</span>':'');
+if(!aD)h+='<button class="complete-all-inline" onclick="event.stopPropagation();doAS('+pt.id+')">✓ Complete All</button>';
+h+='<span class="phase-count'+(aD?' complete':'')+'">'+(aD?'Signed':'Pending')+'</span></div></div>';
+
+// Anesthesia Plan row (checklist style)
+h+='<div class="ck'+(s.anesExp?' expand':'')+' tap" onclick="tAnes('+pt.id+')"><div class="ck-icon '+(aD?'g':'p')+'">'+(aD?'✓':'○')+'</div><div class="ck-body"><div class="ck-top"><span class="ck-label'+(aD?' done':'')+'">Anesthesia Plan</span>';
+if(aD)h+='<span class="ck-badge g">'+s.anesSignoff.time+'</span>';
+else h+='<span class="ck-badge y">'+pSum+'</span>';
+h+='</div><div class="ck-sub">'+pSum+'</div></div></div>';
+if(s.anesExp){h+='<div class="inp-panel"><div class="inp-label">Type</div><div class="opt-row" style="margin-bottom:8px">';["Spinal","General"].forEach(function(t){h+='<div class="opt-btn'+(s.anesPlan.type===t?' sel':'')+'" onclick="event.stopPropagation();sAT('+pt.id+',\''+t+'\')">'+t+'</div>'});h+='</div>';
+if(pt.joint==="Knee"){h+='<div class="inp-label">Nerve Block</div><div class="opt-row" style="margin-bottom:8px">';["Adductor Canal Block","No Block"].forEach(function(b){h+='<div class="opt-btn'+(s.anesPlan.block===b?' sel':'')+'" onclick="event.stopPropagation();sAB('+pt.id+',\''+b+'\')">'+b+'</div>'});h+='</div>'}
+h+='</div>'}
+
+// Procedure Note row (checklist style)
+h+='<div class="ck'+(s.anesNoteExp?' expand':'')+' tap" onclick="tAN('+pt.id+')"><div class="ck-icon '+(aD?'g':'p')+'">'+(aD?'✓':'○')+'</div><div class="ck-body"><div class="ck-top"><span class="ck-label'+(aD?' done':'')+'">Procedure Note</span>';
+h+='<span class="ck-badge p">'+(s.anesNoteExp?'Hide':'View')+'</span></div><div class="ck-sub">'+s.anesPlan.type+(pt.joint==="Knee"&&s.anesPlan.block===" Adductor Canal Block"?" + Block":"")+'</div></div></div>';
+if(s.anesNoteExp){h+='<div class="inp-panel"><div class="anes-note"><div class="anes-note-title">'+s.anesPlan.type+' Note</div>'+(s.anesPlan.type==='Spinal'?spN(pt):gaN(pt))+'</div>';if(pt.joint==="Knee"&&s.anesPlan.block==="Adductor Canal Block")h+='<div class="anes-note" style="margin-top:6px"><div class="anes-note-title">Adductor Canal Block Note</div>'+blN(pt)+'</div>';h+='</div>'}
+
+// HANDOFF
+if(isR){h+='<div class="handoff"><div class="handoff-title">● Ready for OR</div><div class="handoff-body"><div><b>Patient:</b> '+pt.ln+', '+pt.fn+' · '+pt.age+pt.sex+' · '+pt.wt+'kg</div><div><b>Procedure:</b> '+pt.proc+' — '+pt.surgeon+'</div><div><b>Anesthesia:</b> '+pSum+'</div><div><b>Allergies:</b> '+(pt.allergies.length?pt.allergies.map(function(a){return a.drug}).join(', '):'NKDA')+'</div>';if(s.comp.vitals)h+='<div><b>Vitals:</b> '+s.comp.vitals.detail+'</div>';if(s.ivLines.length)h+='<div><b>IV:</b> '+s.ivLines.map(function(l){return l.gauge+' '+l.site}).join(', ')+'</div>';if(s.comp.npo)h+='<div><b>NPO:</b> '+s.comp.npo.detail+'</div>';if(s.comp.abx)h+='<div><b>Abx:</b> '+s.comp.abx.detail+'</div>';h+='<div><b>VTE:</b> '+pt.vtePlan+'</div><div style="margin-top:4px;border-top:1px solid var(--greenB);padding-top:4px"><b>Check-In:</b> '+(s.phTs.CHECKIN||'—')+' · <b>Pre-Op:</b> '+(s.phTs.ASSESS||'—')+' · <b>Anesthesia:</b> '+(s.phTs.ANES||'—')+'</div></div></div>'}
+}
+document.getElementById("contentArea").innerHTML=h;
+updateMobLabel();
+}
+
+render();
+</script>
+</body>
+</html>
