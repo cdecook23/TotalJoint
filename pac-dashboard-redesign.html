@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TotalEMR — PAC Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f0f4f8; --card:#ffffff; --border:#d2d6dc; --border-light:#e8ecf1;
+  --t1:#1a2332; --t2:#374151; --t3:#5a6577; --t4:#8b95a5;
+  --pri:#0f4c81; --priL:#e8f0f8; --priB:#b3cfe6; --priD:#0a3a63;
+  --green:#0d7a5f; --greenL:#e6f5f0; --greenB:#9dd4c0; --greenT:#065040;
+  --yellow:#b8860b; --yellowL:#fdf6e3; --yellowB:#ecd8a0; --yellowT:#7a5a07;
+  --red:#c0392b; --redL:#fbeae8; --redB:#e6b3ad; --redT:#7b241c;
+  --accent:#2d6a8a; --accentL:#e4eff5;
+  --r:6px; --rl:10px;
+  --sh:0 1px 3px rgba(15,30,50,.08),0 1px 2px rgba(15,30,50,.04);
+  --sh2:0 4px 12px rgba(15,30,50,.08);
+  --tr:150ms ease;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg);color:var(--t1);font-size:13px;line-height:1.5;min-height:100vh;overflow-x:hidden}
+::selection{background:var(--pri);color:#fff}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+button{cursor:pointer;font-family:inherit}
+input,select,textarea{font-family:inherit}
+
+.app{display:flex;min-height:100vh}
+.sb{width:56px;background:#1a2332;border-right:none;display:flex;flex-direction:column;align-items:center;position:fixed;top:0;left:0;bottom:0;z-index:100;padding:10px 0;gap:2px;transition:width .2s ease;overflow:hidden}
+.sb:hover{width:180px}
+.sb-logo{width:36px;height:36px;border-radius:var(--r);background:linear-gradient(135deg,var(--pri),var(--accent));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0;margin-bottom:12px}
+.sb-label{font-size:11px;font-weight:600;color:#cbd5e1;white-space:nowrap;opacity:0;transition:opacity .15s;margin-left:8px}
+.sb:hover .sb-label{opacity:1}
+.sb a{display:flex;align-items:center;gap:0;width:100%;padding:10px 0;justify-content:center;color:#8b95a5;text-decoration:none;border-left:3px solid transparent;cursor:pointer;transition:all var(--tr)}
+.sb:hover a{justify-content:flex-start;padding-left:14px}
+.sb a:hover{color:#e2e8f0;background:rgba(255,255,255,.06)}
+.sb a.act{color:#fff;border-left-color:#4a9aca;background:rgba(74,154,202,.15)}
+.sb a svg{width:18px;height:18px;flex-shrink:0}
+.sb-div{width:30px;height:1px;background:rgba(255,255,255,.1);margin:6px 0}
+.sb:hover .sb-div{width:calc(100% - 28px)}
+.sb-foot{margin-top:auto;font-size:10px;color:#5a6577;white-space:nowrap;opacity:0;transition:opacity .15s}
+.sb:hover .sb-foot{opacity:1}
+
+.main{margin-left:56px;flex:1;display:flex;flex-direction:column;min-height:100vh;transition:margin-right .3s ease}
+.main.po{margin-right:520px}
+
+/* Topbar */
+.top{background:var(--card);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.top-l{display:flex;align-items:center;gap:12px}
+.top-badge{display:inline-flex;padding:4px 12px;background:linear-gradient(135deg,var(--pri),var(--accent));color:#fff;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.5px}
+.top-h{font-size:15px;font-weight:700}
+.top-s{font-size:11px;color:var(--t3)}
+.top-r{display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:var(--r);font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--card);color:var(--t2);transition:all var(--tr)}
+.btn:hover{background:var(--bg)}
+.btn-p{background:var(--pri);color:#fff;border-color:var(--pri)}
+.btn-p:hover{background:var(--priD)}
+.btn-green{background:var(--green);color:#fff;border-color:var(--green)}
+.btn-green:hover{background:#047857}
+.btn-agent{background:#f0fdf4;color:#059669;border-color:#a7f3d0}
+.btn-agent:hover{background:#dcfce7}
+.btn-agent .agent-dot{width:6px;height:6px;border-radius:50%;background:#059669;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.btn svg{width:14px;height:14px}
+.avatars{display:flex}.avatar{width:26px;height:26px;border-radius:50%;border:2px solid var(--card);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;margin-left:-5px}.avatar:first-child{margin-left:0}
+
+/* Top config tabs */
+.config-bar{display:flex;align-items:center;gap:0;background:var(--card);border-bottom:1px solid var(--border);padding:0 20px;overflow-x:auto}
+.config-tab{padding:9px 14px;font-size:12px;font-weight:600;color:var(--t3);border-bottom:2px solid transparent;cursor:pointer;transition:all var(--tr);display:flex;align-items:center;gap:5px;white-space:nowrap}
+.config-tab:hover{color:var(--t1)}
+.config-tab.act{color:var(--pri);border-bottom-color:var(--pri)}
+.config-tab svg{width:14px;height:14px}
+
+/* Stats */
+.stats{display:flex;gap:10px;padding:12px 20px;background:var(--bg)}
+.st-card{flex:1;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:12px 16px;cursor:pointer;transition:all var(--tr);position:relative;overflow:hidden}
+.st-card:hover{box-shadow:var(--sh);transform:translateY(-1px)}
+.st-card.act{border-color:var(--pri);box-shadow:0 0 0 1px var(--pri)}
+.st-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
+.st-card.c-total::before{background:var(--pri)}.st-card.c-ready::before{background:var(--green)}.st-card.c-pend::before{background:var(--yellow)}.st-card.c-nr::before{background:var(--red)}
+.st-n{font-size:26px;font-weight:700;line-height:1;margin-bottom:2px}
+.st-card.c-total .st-n{color:var(--pri)}.st-card.c-ready .st-n{color:var(--green)}.st-card.c-pend .st-n{color:var(--yellow)}.st-card.c-nr .st-n{color:var(--red)}
+.st-l{font-size:11px;color:var(--t3);font-weight:500}
+
+/* Filters */
+.flt{display:flex;align-items:center;gap:8px;padding:10px 20px;background:var(--card);border-bottom:1px solid var(--border)}
+.sb-box{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:6px 10px;flex:0 0 220px;transition:border-color var(--tr)}
+.sb-box:focus-within{border-color:var(--pri)}
+.sb-box svg{width:14px;height:14px;color:var(--t4);flex-shrink:0}
+.sb-box input{border:none;background:none;outline:none;font-size:12px;color:var(--t1);width:100%}
+.fsel{padding:6px 28px 6px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--card);font-size:12px;color:var(--t2);appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;cursor:pointer}
+
+/* TABLE */
+.tw{padding:0 20px 20px;flex:1;padding-top:10px}
+table{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border-radius:var(--rl);border:1px solid var(--border);overflow:hidden;table-layout:fixed}
+thead th{padding:8px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);background:var(--bg);border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;position:sticky;top:89px;z-index:10}
+thead th:first-child{padding-left:14px}
+thead th:nth-child(1){width:17%}
+thead th:nth-child(2){width:11%}
+thead th:nth-child(3){width:10%;text-align:center}
+thead th:nth-child(4){width:32%}
+thead th:nth-child(5){width:30%}
+tbody tr.ptr{transition:background var(--tr)}
+tbody tr.ptr:hover{background:#f9fafb}
+tbody tr.ptr.sel{background:var(--priL)}
+tbody tr td{padding:7px 10px;border-bottom:1px solid var(--border-light);vertical-align:middle;overflow:hidden}
+tbody tr:last-child td{border-bottom:none}
+tbody tr td:first-child{padding-left:14px}
+
+.pc{display:flex;align-items:center;gap:6px;cursor:pointer;overflow:hidden}
+.pc:hover .pn{color:var(--pri);text-decoration:underline}
+.pi{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.pi.ready{background:var(--green)}.pi.pending{background:var(--yellow)}.pi.not-ready{background:var(--red)}
+.pn{font-weight:600;font-size:12px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pm{font-size:9px;color:var(--t4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb{display:inline-flex;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;vertical-align:middle}
+.pb.tka,.pb.ptk,.pb.pk,.pb.rtk,.pb.mua,.pb.other{background:var(--priL);color:var(--pri)}.pb.tha,.pb.pth,.pb.rth{background:var(--accentL);color:var(--accent)}
+
+.surg-cell .sd{font-weight:600;font-size:11px;white-space:nowrap}
+.surg-cell .sd-meta{display:flex;align-items:center;gap:3px;margin-top:1px;flex-wrap:wrap}
+.cd{font-size:9px;font-weight:700;border-radius:3px;padding:1px 4px;display:inline-block}
+.cd.urgent{background:var(--redL);color:var(--red)}.cd.soon{background:var(--yellowL);color:var(--yellow)}.cd.ok{background:var(--greenL);color:var(--green)}
+.site{display:inline-flex;padding:1px 4px;border-radius:3px;font-size:9px;font-weight:600}
+.site.hosp{background:#fef3c7;color:#92400e}.site.asc{background:var(--accentL);color:var(--accent)}
+
+/* Inline edit */
+.inline-edit{display:inline-flex;align-items:center;gap:2px;cursor:pointer;border-radius:3px;padding:0 3px;transition:background var(--tr)}
+.inline-edit:hover{background:var(--priL)}
+.inline-edit svg{width:10px;height:10px;color:var(--t4);opacity:0;transition:opacity var(--tr)}
+.inline-edit:hover svg{opacity:1}
+.ie-dropdown{position:absolute;background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:400;min-width:160px;padding:4px;max-height:200px;overflow-y:auto}
+.ie-dropdown .ie-opt{padding:6px 10px;border-radius:4px;cursor:pointer;font-size:12px;transition:background var(--tr)}
+.ie-dropdown .ie-opt:hover{background:var(--priL)}
+.ie-dropdown .ie-opt.active{background:var(--priL);color:var(--pri);font-weight:600}
+
+.rb-w{display:flex;align-items:center;gap:5px}
+.rb{flex:1;height:5px;background:#e5e7eb;border-radius:3px;overflow:hidden;min-width:40px}
+.rf{height:100%;border-radius:3px;transition:width .4s ease}
+.rf.g{background:var(--green)}.rf.y{background:var(--yellow)}.rf.r{background:var(--red)}
+.rp{font-size:11px;font-weight:700;min-width:28px;text-align:right}
+.rp.g{color:var(--green)}.rp.y{color:var(--yellow)}.rp.r{color:var(--red)}
+
+/* CHIPS — bigger */
+.sg{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.sc{display:inline-flex;align-items:center;gap:3px;padding:4px 9px;border-radius:5px;font-size:11px;font-weight:600;white-space:nowrap;cursor:pointer;transition:all var(--tr);border:1px solid transparent;user-select:none}
+.sc:hover{filter:brightness(.92);transform:scale(1.04)}
+.sc.expanded{box-shadow:0 0 0 2px var(--pri)}
+.sc .ic{font-size:10px;line-height:1}
+.sc-g{background:var(--greenL);color:var(--greenT);border-color:var(--greenB)}
+.sc-y{background:var(--yellowL);color:var(--yellowT);border-color:var(--yellowB)}
+.sc-r{background:var(--redL);color:var(--redT);border-color:var(--redB)}
+
+/* INLINE EXPANSION */
+.exp-row td{padding:0 !important;border-bottom:1px solid var(--border) !important;background:#fafbfc}
+.exp-inner{overflow:hidden;transition:max-height .25s ease,padding .2s ease;max-height:0;padding:0 14px}
+.exp-row.open .exp-inner{max-height:500px;padding:12px 14px}
+.exp-title{font-size:12px;font-weight:600;color:var(--t1);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.exp-title .exp-actions{display:flex;gap:6px;align-items:center}
+.exp-title button.exp-close{background:none;border:none;font-size:14px;color:var(--t3);cursor:pointer;padding:2px 6px;border-radius:4px}
+.exp-title button.exp-close:hover{background:var(--border);color:var(--t1)}
+.exp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.exp-item{display:flex;align-items:flex-start;gap:8px;padding:7px 10px;background:var(--card);border:1px solid var(--border);border-radius:var(--r)}
+.ei-icon{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;margin-top:1px}
+.ei-icon.done{background:var(--greenL);color:var(--green)}.ei-icon.warn{background:var(--yellowL);color:var(--yellow)}.ei-icon.miss{background:var(--redL);color:var(--red)}
+.ei-info{flex:1;min-width:0}.ei-label{font-weight:600;font-size:11px}.ei-detail{font-size:10px;color:var(--t3);margin-top:1px}
+.ei-badge{font-size:10px;font-weight:600;padding:1px 6px;border-radius:3px;flex-shrink:0;margin-left:auto}
+
+.act-btn{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:var(--r);font-size:11px;font-weight:600;border:1px solid;cursor:pointer;transition:all var(--tr)}
+.act-btn-blue{background:var(--priL);color:var(--pri);border-color:var(--priB)}.act-btn-blue:hover{background:var(--pri);color:#fff}
+.act-btn-green{background:var(--greenL);color:var(--greenT);border-color:var(--greenB)}.act-btn-green:hover{background:var(--green);color:#fff}
+.act-btn-red{background:var(--redL);color:var(--redT);border-color:var(--redB)}.act-btn-red:hover{background:var(--red);color:#fff}
+
+/* SLIDE-OVER */
+.p-ov{position:fixed;inset:0;background:rgba(0,0,0,.08);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}
+.p-ov.open{opacity:1;pointer-events:auto}
+.panel{position:fixed;top:0;right:0;bottom:0;width:520px;background:var(--card);border-left:1px solid var(--border);box-shadow:-6px 0 20px rgba(0,0,0,.06);z-index:300;transform:translateX(100%);transition:transform .3s ease;display:flex;flex-direction:column;overflow:hidden}
+.panel.open{transform:translateX(0)}
+.p-hd{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;background:var(--bg)}
+.p-name{font-size:17px;font-weight:700}.p-meta{font-size:11px;color:var(--t3);margin-top:2px}
+.p-flags{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.p-flag{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:600}
+.p-flag.alert{background:var(--redL);color:var(--red);border:1px solid var(--redB)}
+.p-flag.warn{background:var(--yellowL);color:var(--yellow);border:1px solid var(--yellowB)}
+.p-flag.info{background:var(--priL);color:var(--pri);border:1px solid var(--priB)}
+.p-close{width:28px;height:28px;border-radius:var(--r);border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--t3);cursor:pointer;flex-shrink:0}
+.p-close:hover{background:var(--bg);color:var(--t1)}
+.p-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 18px}
+.p-tab{padding:8px 14px;font-size:11px;font-weight:600;color:var(--t3);border-bottom:2px solid transparent;cursor:pointer;transition:all var(--tr)}
+.p-tab:hover{color:var(--t1)}.p-tab.act{color:var(--pri);border-bottom-color:var(--pri)}
+.p-body{flex:1;overflow-y:auto;padding:14px 18px}
+.p-sec{margin-bottom:16px}
+.p-sec-t{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border-light)}
+.p-sec-t .cnt{background:var(--bg);padding:1px 5px;border-radius:8px;font-size:10px}
+.p-sec-t .sec-actions{margin-left:auto;display:flex;gap:6px}
+.pcl{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border-light)}
+.pcl:last-child{border-bottom:none}
+.pcl-i{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.pcl-i.done{background:var(--greenL);color:var(--green)}.pcl-i.pend{background:var(--yellowL);color:var(--yellow)}.pcl-i.miss{background:var(--redL);color:var(--red)}
+.pcl-txt{flex:1;min-width:0}.pcl-lb{font-weight:500;font-size:12px}.pcl-dt{font-size:10px;color:var(--t3)}
+.pcl-badge{font-size:10px;font-weight:600;padding:1px 6px;border-radius:3px}
+.allergy-ban{display:flex;align-items:center;gap:6px;padding:7px 10px;background:var(--redL);border:1px solid var(--redB);border-radius:var(--r);margin-bottom:10px;font-size:11px;color:var(--redT);font-weight:500}
+
+/* MODALS */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-ov.open{opacity:1;pointer-events:auto}
+.modal{background:var(--card);border-radius:var(--rl);box-shadow:0 20px 60px rgba(0,0,0,.15);max-height:85vh;overflow:hidden;display:flex;flex-direction:column}
+.modal-sm{width:480px}.modal-lg{width:700px}.modal-xl{width:850px}
+.modal-hd{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-hd h3{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.modal-body{padding:16px 20px;overflow-y:auto;flex:1}
+.modal-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px;background:var(--bg)}
+
+/* H&P Form */
+.hp-section{margin-bottom:14px;border:1px solid var(--border-light);border-radius:var(--r);overflow:hidden}
+.hp-section-title{padding:7px 12px;background:var(--bg);font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border-light)}
+.hp-row{padding:8px 12px;display:flex;gap:10px}
+.hp-field{flex:1;display:flex;flex-direction:column;gap:3px}
+.hp-field label{font-size:10px;font-weight:600;color:var(--t3)}
+.hp-field input,.hp-field textarea{padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;color:var(--t1);background:var(--card);width:100%;resize:vertical}
+.hp-field textarea{line-height:1.4}
+.hp-readonly{background:var(--bg) !important;color:var(--t3) !important}
+
+/* Config panels */
+.config-panel{display:none;padding:20px;max-width:800px;margin:0 auto}
+.config-panel.active{display:block}
+.config-section{margin-bottom:20px;border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
+.config-section h4{padding:10px 14px;background:var(--bg);font-size:12px;font-weight:600;color:var(--t2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.config-section h4 span{font-weight:400;font-size:11px;color:var(--t4)}
+.proto-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border-light)}
+.proto-row:last-child{border-bottom:none}
+.proto-label{font-weight:500;font-size:12px;color:var(--t1)}
+.proto-detail{font-size:10px;color:var(--t3);margin-top:1px}
+.proto-input{padding:4px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;width:80px;text-align:center}
+.proto-toggle{width:36px;height:20px;border-radius:10px;border:none;background:#d1d5db;position:relative;flex-shrink:0;transition:background .2s}
+.proto-toggle::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform .2s}
+.proto-toggle.on{background:var(--accent)}
+.proto-toggle.on::after{transform:translateX(16px)}
+
+/* Orders modal */
+.ord-group{margin-bottom:12px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.ord-group-title{padding:8px 12px;background:var(--bg);font-size:11px;font-weight:600;color:var(--t2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.ord-item{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid var(--border-light)}
+.ord-item:last-child{border-bottom:none}
+.ord-item input[type="checkbox"]{accent-color:var(--accent);width:15px;height:15px;flex-shrink:0}
+.ord-item-info{flex:1;min-width:0}
+.ord-item-name{font-weight:500;font-size:12px}
+.ord-item-detail{font-size:10px;color:var(--t3)}
+.ord-item .ord-remove{background:none;border:none;color:var(--t4);font-size:14px;padding:2px 4px;border-radius:3px;opacity:0;transition:all var(--tr)}
+.ord-item:hover .ord-remove{opacity:1}
+.ord-remove:hover{color:var(--red)!important;background:var(--redL)!important}
+
+/* Consent viewer */
+.consent-doc{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:20px;font-size:12px;line-height:1.7;max-height:400px;overflow-y:auto}
+.consent-doc h4{font-size:14px;margin-bottom:8px;text-align:center}
+.consent-doc .sig-line{margin-top:20px;padding-top:12px;border-top:1px solid var(--border);display:flex;gap:20px}
+.consent-doc .sig-line div{flex:1}
+.consent-doc .sig-line .sig-mark{border-bottom:1px solid var(--t1);min-height:30px;margin-top:4px;display:flex;align-items:flex-end;padding-bottom:2px;font-style:italic;color:var(--pri)}
+
+/* Med protocol computed dates */
+.med-date-card{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border-light);transition:background var(--tr)}
+.med-date-card:last-child{border-bottom:none}
+.med-date-card:hover{background:var(--bg)}
+.med-date-icon{width:32px;height:32px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.med-date-icon.hold{background:var(--yellowL);color:var(--yellowT)}
+.med-date-icon.stop{background:var(--redL);color:var(--redT)}
+.med-date-icon.take{background:var(--priL);color:var(--pri)}
+.med-date-icon.start{background:var(--greenL);color:var(--greenT)}
+
+/* Agent */
+.msg-type{display:flex;gap:0;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;width:fit-content}
+.msg-type-btn{padding:6px 14px;font-size:12px;font-weight:600;color:var(--t3);cursor:pointer;background:var(--card);border-right:1px solid var(--border);transition:all var(--tr)}
+.msg-type-btn:last-child{border-right:none}
+.msg-type-btn:hover{background:var(--bg)}
+.msg-type-btn.active{background:var(--priL);color:var(--pri)}
+.agent-pt{display:flex;align-items:flex-start;gap:8px;padding:8px;border:1px solid var(--border);border-radius:var(--r);margin-bottom:6px;cursor:pointer;transition:all var(--tr)}
+.agent-pt:hover,.agent-pt.selected{border-color:var(--pri);background:var(--priL)}
+.agent-pt-name{font-weight:600;font-size:12px}.agent-pt-detail{font-size:10px;color:var(--t3);margin-top:1px}
+.agent-missing{display:flex;gap:3px;flex-wrap:wrap;margin-top:4px}
+.agent-tag{font-size:9px;padding:1px 5px;border-radius:3px;background:var(--redL);color:var(--redT);font-weight:600}
+.msg-preview{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px;font-size:11px;color:var(--t2);white-space:pre-wrap;line-height:1.6;margin-top:6px}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--green);color:#fff;padding:10px 20px;border-radius:var(--r);font-size:12px;font-weight:500;box-shadow:0 6px 16px rgba(0,0,0,.15);z-index:999;display:flex;align-items:center;gap:8px;transition:transform .3s ease;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast svg{width:16px;height:16px;flex-shrink:0}
+
+/* Add order input */
+.add-order-row{display:flex;gap:6px;padding:8px 12px;align-items:center}
+.add-order-row input{flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="app">
+<!-- SIDEBAR -->
+<nav class="sb">
+  <div class="sb-logo">TJS</div>
+  <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="sb-label">Dashboard</span></a>
+  <a class="act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg><span class="sb-label">PAC</span></a>
+  <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="sb-label">Pre-Op</span></a>
+  <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/></svg><span class="sb-label">OR</span></a>
+  <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span class="sb-label">PACU</span></a>
+  <div class="sb-div"></div>
+  <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.22 4.22l2.83 2.83m9.9 9.9l2.83 2.83M1 12h4m14 0h4M4.22 19.78l2.83-2.83m9.9-9.9l2.83-2.83"/></svg><span class="sb-label">Settings</span></a>
+  <div class="sb-foot">TJR Hub v4.1</div>
+</nav>
+
+<div class="main" id="mainArea">
+  <!-- TOPBAR -->
+  <div class="top">
+    <div class="top-l"><span class="top-badge">PAC</span><div><div class="top-h">Pre-Admission Certification</div><div class="top-s">Mar 23, 2026 — 4 patients</div></div></div>
+    <div class="top-r">
+      <button class="btn btn-agent" onclick="openAgent()"><span class="agent-dot"></span> Readiness Agent</button>
+      <div class="avatars"><div class="avatar" style="background:var(--priL);color:var(--pri)">CD</div><div class="avatar" style="background:var(--accentL);color:var(--accent)">JS</div></div>
+    </div>
+  </div>
+
+  <!-- CONFIG BAR -->
+  <div class="config-bar">
+    <div class="config-tab act" id="ctabDash" onclick="switchConfigTab('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Worklist</div>
+    <div class="config-tab" id="ctabOrders" onclick="switchConfigTab('orders')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders</div>
+    <div class="config-tab" id="ctabConsents" onclick="switchConfigTab('consents')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Consents</div>
+    <div class="config-tab" id="ctabHP" onclick="switchConfigTab('hp')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M9 15h6M9 11h6"/></svg>H&P</div>
+    <div class="config-tab" id="ctabMeds" onclick="switchConfigTab('medications')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5A2.25 2.25 0 0 0 8.25 22.5h7.5A2.25 2.25 0 0 0 18 20.25V3.75A2.25 2.25 0 0 0 15.75 1.5H13.5m-3 0V3h3V1.5m-3 0h3m-6 18h9"/></svg>Medications</div>
+    <div class="config-tab" id="ctabProto" onclick="switchConfigTab('protocol')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.22 4.22l2.83 2.83m9.9 9.9l2.83 2.83M1 12h4m14 0h4M4.22 19.78l2.83-2.83m9.9-9.9l2.83-2.83"/></svg>Protocol</div>
+  </div>
+
+  <!-- DASHBOARD VIEW -->
+  <div id="dashboardView">
+    <div class="stats" id="statsRow"></div>
+    <div class="flt">
+      <div class="sb-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="qInput" placeholder="Search patient, MRN..." oninput="render()"></div>
+      <select class="fsel" id="dateFilter" onchange="render()"><option value="all">All Dates</option><option value="today">Today</option><option value="tomorrow">Tomorrow</option><option value="week">This Week</option></select>
+      <select class="fsel" id="locFilter" onchange="render()"><option value="all">All Locations</option><optgroup label="ASC"><option value="asc_gwinnett">ASC Gwinnett</option><option value="asc_cumming">ASC Cumming</option><option value="asc_cherokee">ASC Cherokee</option><option value="asc_sandy">ASC Sandy Springs</option></optgroup><optgroup label="Hospital"><option value="hosp_cumming">Hosp Cumming</option><option value="hosp_sandy">Hosp Sandy Springs</option><option value="hosp_cherokee">Hosp Cherokee</option><option value="hosp_gw_law">Hosp Gwinnett Lawrenceville</option><option value="hosp_gw_dul">Hosp Gwinnett Duluth</option></optgroup></select>
+      <select class="fsel" id="surgFilter" onchange="render()"><option value="all">All Surgeons</option><option value="Alva">Dr. Alva</option><option value="Bradbury">Dr. Bradbury</option><option value="DeCook">Dr. DeCook</option><option value="Dean">Dr. Dean</option><option value="Godfrey">Dr. Godfrey</option><option value="Gottsman">Dr. Gottsman</option><option value="Guild">Dr. Guild</option><option value="Gupta">Dr. Gupta</option><option value="Land">Dr. Land</option><option value="Manfredi">Dr. Manfredi</option><option value="Naylor">Dr. Naylor</option><option value="Reimer">Dr. Reimer</option><option value="Seng">Dr. Seng</option><option value="Vojdani">Dr. Vojdani</option><option value="Wood">Dr. Wood</option><option value="Young">Dr. Young</option></select>
+    </div>
+    <div class="tw">
+      <table><thead><tr><th>Patient</th><th>Surgery</th><th>Ready</th><th>Clinical</th><th>Surgeon</th></tr></thead><tbody id="ptBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- CONFIG VIEWS -->
+  <div class="config-panel" id="ordersConfig"></div>
+  <div class="config-panel" id="consentsConfig"></div>
+  <div class="config-panel" id="hpConfig"></div>
+  <div class="config-panel" id="medsConfig"></div>
+  <div class="config-panel" id="protocolConfig"></div>
+</div>
+
+<!-- SLIDE-OVER -->
+<div class="p-ov" id="panelOv" onclick="closePanel()"></div>
+<div class="panel" id="panel"><div class="p-hd" id="panelHd"></div><div class="p-tabs" id="panelTabs"></div><div class="p-body" id="panelBody"></div></div>
+
+<!-- AGENT MODAL -->
+<div class="modal-ov" id="agentOv" onclick="closeAgent()"><div class="modal modal-sm" onclick="event.stopPropagation()"><div class="modal-hd"><h3><svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" width="18" height="18"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg> Readiness Agent</h3><button class="p-close" onclick="closeAgent()">&#10005;</button></div><div class="modal-body" id="agentBody"></div><div class="modal-foot" id="agentFoot"></div></div></div>
+
+<!-- H&P MODAL -->
+<div class="modal-ov" id="hpOv" onclick="closeHP()"><div class="modal modal-lg" onclick="event.stopPropagation()"><div class="modal-hd"><h3 id="hpTitle">H&P</h3><button class="p-close" onclick="closeHP()">&#10005;</button></div><div class="modal-body" id="hpBody"></div><div class="modal-foot" id="hpFoot"></div></div></div>
+
+<!-- ORDERS MODAL -->
+<div class="modal-ov" id="ordOv" onclick="closeOrd()"><div class="modal modal-lg" onclick="event.stopPropagation()"><div class="modal-hd"><h3 id="ordTitle">Orders</h3><button class="p-close" onclick="closeOrd()">&#10005;</button></div><div class="modal-body" id="ordBody"></div><div class="modal-foot" id="ordFoot"></div></div></div>
+
+<!-- CONSENT VIEWER MODAL -->
+<div class="modal-ov" id="consOv" onclick="closeCons()"><div class="modal modal-lg" onclick="event.stopPropagation()"><div class="modal-hd"><h3 id="consTitle">Consent</h3><button class="p-close" onclick="closeCons()">&#10005;</button></div><div class="modal-body" id="consBody"></div><div class="modal-foot" id="consFoot"></div></div></div>
+
+<!-- INLINE EDIT DROPDOWN -->
+<div class="ie-dropdown" id="ieDropdown" style="display:none"></div>
+
+<div class="toast" id="toast"></div>
+</div>
+
+<script>
+const TODAY = new Date('2026-03-23');
+const P = [
+  {id:1,f:"Margaret",l:"Thompson",mrn:"NTH-2847561",age:68,sex:"F",dob:"06/18/1957",prov:"DeCook",loc:"asc_cumming",proc:"ptk",side:"Left",bilateral:false,surgSite:{type:"asc",loc:"Cumming"},surgDate:"2026-03-22",ins:"Medicare",cg:{name:"Thomas Thompson",rel:"Husband",phone:"(770) 555-0143",conf:true},allergies:[{drug:"Penicillin",rx:"rash"},{drug:"Sulfa",rx:"hives"}],labs:{cbc:{done:true,date:"03/10",abn:false,vals:"WBC 6.8, Hgb 13.2, Plt 245"},bmp:{done:true,date:"03/10",abn:false,vals:"Na 140, K 4.2, Cr 0.9, Glu 112"},ptinr:{done:true,date:"03/10",abn:false,vals:"PT 12.1, INR 1.0"},ua:{done:true,date:"03/10",abn:false,vals:"Negative"},ts:{done:true,date:"03/10",abn:false,vals:"A+"},hba1c:{done:true,date:"03/01",abn:false,vals:"7.2%"}},ekg:{done:true,date:"03/10",abn:false,note:"NSR, rate 72",meas:{rate:72},cardiacClr:null},clrs:{pcp:{need:true,done:true,date:"03/08",doc:"Dr. Patel",note:"Cleared"},endo:{need:true,done:true,date:"03/05",doc:"Dr. Shah",note:"A1c optimized"}},cons:{tjs_surg:{signed:true,date:"03/12"},anes:{signed:true,date:"03/12"}},cls:{st:"done",date:"03/12"},meds:[{name:"Eliquis 5mg BID",action:"HOLD",note:"Hold 3 days pre-op",sent:true,ack:true},{name:"Metformin 1000mg BID",action:"HOLD",note:"Hold 48hrs pre-op",sent:true,ack:true},{name:"Atorvastatin 40mg",action:"CONTINUE",note:"",sent:true,ack:true},{name:"Lisinopril 10mg",action:"HOLD",note:"Hold morning of surgery",sent:true,ack:false}],hp:{st:"signed",date:"03/14"},orders:{pre:{st:"signed",date:"03/14"},post:{st:"signed",date:"03/14"}},instr:{sent:true,conf:true,date:"03/12"},npo:{sent:true,conf:true},ht_in:64,wt_lb:185,a1c:{val:7.2,date:"03/01"}},
+  {id:2,f:"Robert",l:"Williams",mrn:"NTH-5518293",age:71,sex:"M",dob:"09/03/1954",prov:"DeCook",loc:"hosp_gw_law",proc:"ptk",side:"Bilateral",bilateral:true,surgSite:{type:"hosp",loc:"Gwinnett Lawrenceville"},surgDate:"2026-03-24",ins:"Medicare",cg:{name:"Barbara Williams",rel:"Wife",phone:"(678) 555-0292",conf:true},allergies:[],labs:{cbc:{done:true,date:"03/12",abn:false,vals:"WBC 7.1, Hgb 14.0, Plt 210"},bmp:{done:true,date:"03/12",abn:false,vals:"Na 138, K 4.5, Cr 1.1"},ptinr:{done:true,date:"03/12",abn:false,vals:"PT 11.8, INR 1.0"},ua:{done:false},ts:{done:false},hba1c:null},ekg:{done:true,date:"03/12",abn:false,note:"NSR, rate 68",meas:{rate:68},cardiacClr:null},clrs:{pcp:{need:true,done:false,doc:"",note:""}},cons:{tjs_surg:{signed:true,date:"03/10"},anes:{signed:false}},cls:{st:"done",date:"03/11"},meds:[{name:"Aspirin 81mg",action:"HOLD",note:"Hold 7 days pre-op",sent:true,ack:true},{name:"Metoprolol 25mg",action:"MUST TAKE",note:"Take morning of surgery with sip of water",sent:true,ack:true}],hp:{st:"none"},orders:{pre:{st:"none"},post:{st:"none"}},instr:{sent:false,conf:false},npo:{sent:true,conf:false},ht_in:70,wt_lb:220,a1c:null},
+  {id:3,f:"Helen",l:"Kowalski",mrn:"NTH-6618492",age:66,sex:"F",dob:"11/22/1959",prov:"Smith",loc:"asc_cherokee",proc:"pth",side:"Right",bilateral:false,surgSite:{type:"asc",loc:"Cherokee"},surgDate:"2026-03-26",ins:"BCBS",cg:null,allergies:[{drug:"Codeine",rx:"nausea"}],labs:{cbc:{done:false},bmp:{done:false},ptinr:{done:false},ua:{done:false},ts:{done:false},hba1c:null},ekg:{done:false},clrs:{pcp:{need:true,done:false,doc:"",note:""}},cons:{tjs_surg:{signed:false},anes:{signed:false}},cls:{st:"sched",date:"03/24"},meds:[{name:"Ibuprofen 400mg PRN",action:"STOP",note:"Discontinue 1 week pre-op",sent:false,ack:false}],hp:{st:"none"},orders:{pre:{st:"none"},post:{st:"none"}},instr:{sent:false,conf:false},npo:{sent:false,conf:false},ht_in:62,wt_lb:155,a1c:null},
+  {id:4,f:"Maria",l:"Gonzalez",mrn:"NTH-8834127",age:71,sex:"F",dob:"02/14/1955",prov:"DeCook",loc:"asc_sandy",proc:"pth",side:"Left",bilateral:false,surgSite:{type:"asc",loc:"Sandy Springs"},surgDate:"2026-04-02",ins:"Medicare",cg:{name:"Rosa Gonzalez",rel:"Daughter",phone:"(404) 555-0513",conf:false},allergies:[],labs:{cbc:{done:true,date:"03/15",abn:false,vals:"WBC 5.9, Hgb 12.8, Plt 198"},bmp:{done:true,date:"03/15",abn:false,vals:"Na 141, K 3.9, Cr 0.8"},ptinr:{done:true,date:"03/15",abn:false,vals:"PT 12.0, INR 1.0"},ua:{done:false},ts:{done:true,date:"03/15",abn:false,vals:"O+"},hba1c:{done:true,date:"02/28",abn:false,vals:"6.8%"}},ekg:{done:true,date:"03/15",abn:true,note:"Sinus bradycardia, rate 54",meas:{rate:54},cardiacClr:null},clrs:{pcp:{need:true,done:true,date:"03/10",doc:"Dr. Lee",note:"Cleared"},cardio:{need:true,done:false,doc:"Dr. Mehta",note:"Pending EKG review"}},cons:{tjs_surg:{signed:true,date:"03/18"},anes:{signed:false}},cls:{st:"done",date:"03/16"},meds:[{name:"Metformin 500mg BID",action:"HOLD",note:"Hold 48hrs pre-op",sent:true,ack:true},{name:"Amlodipine 5mg",action:"CONTINUE",note:"",sent:true,ack:true},{name:"Vitamin D 2000 IU",action:"CONTINUE",note:"",sent:false,ack:false}],hp:{st:"none"},orders:{pre:{st:"signed",date:"03/18"},post:{st:"none"}},instr:{sent:true,conf:false,date:"03/18"},npo:{sent:false,conf:false},ht_in:63,wt_lb:168,a1c:{val:6.8,date:"02/28"}}
+];
+
+/* ═══ MEDICATION PROTOCOL RULES ═══ */
+const MED_RULES = [
+  {cat:'Anticoagulants',rules:[
+    {drug:'Eliquis (Apixaban)',holdDays:3,action:'HOLD',resumePostOp:'24-48 hrs post-op per surgeon',note:'Last dose 3 days before surgery'},
+    {drug:'Xarelto (Rivaroxaban)',holdDays:3,action:'HOLD',resumePostOp:'24-48 hrs post-op per surgeon',note:'Last dose 3 days before surgery'},
+    {drug:'Warfarin (Coumadin)',holdDays:5,action:'HOLD',resumePostOp:'POD 1, bridge if high-risk',note:'Check INR day before surgery; must be <1.5'},
+    {drug:'Plavix (Clopidogrel)',holdDays:7,action:'HOLD',resumePostOp:'Per cardiology',note:'Coordinate with cardiologist'},
+    {drug:'Aspirin 81mg',holdDays:7,action:'HOLD',resumePostOp:'POD 0 if DVT prophylaxis',note:'Hold 7 days unless surgeon DVT protocol'},
+    {drug:'Aspirin 325mg',holdDays:7,action:'HOLD',resumePostOp:'Per surgeon',note:'Switch to 81mg for DVT prophylaxis post-op'}
+  ]},
+  {cat:'Diabetes Medications',rules:[
+    {drug:'Metformin',holdHours:48,action:'HOLD',resumePostOp:'When tolerating PO & Cr stable',note:'Hold 48 hours before surgery'},
+    {drug:'Sulfonylureas (Glipizide, Glyburide)',holdDays:1,action:'HOLD',resumePostOp:'When eating normally',note:'Hold morning of surgery — hypoglycemia risk'},
+    {drug:'SGLT2 Inhibitors (Jardiance, Farxiga)',holdDays:3,action:'HOLD',resumePostOp:'48 hrs post-op, tolerating PO',note:'DKA risk; hold 3 days before'},
+    {drug:'Insulin (Long-acting)',holdDays:0,action:'MUST TAKE',resumePostOp:'Continue post-op',note:'Take 50-80% of evening dose night before; hold morning dose'},
+    {drug:'Insulin (Short/Rapid)',holdDays:1,action:'HOLD',resumePostOp:'Resume with meals',note:'Hold morning of surgery'}
+  ]},
+  {cat:'Cardiovascular',rules:[
+    {drug:'Beta-Blockers (Metoprolol, Atenolol)',holdDays:0,action:'MUST TAKE',resumePostOp:'Continue',note:'MUST TAKE morning of surgery with sip of water'},
+    {drug:'ACE Inhibitors (Lisinopril, Enalapril)',holdDays:1,action:'HOLD',resumePostOp:'POD 1 if BP stable',note:'Hold morning of surgery — hypotension under anesthesia'},
+    {drug:'ARBs (Losartan, Valsartan)',holdDays:1,action:'HOLD',resumePostOp:'POD 1 if BP stable',note:'Hold morning of surgery — hypotension risk'},
+    {drug:'Calcium Channel Blockers (Amlodipine)',holdDays:0,action:'CONTINUE',resumePostOp:'Continue',note:'Continue through surgery'},
+    {drug:'Statins (Atorvastatin, Rosuvastatin)',holdDays:0,action:'CONTINUE',resumePostOp:'Continue',note:'Continue through surgery'},
+    {drug:'Diuretics (HCTZ, Furosemide)',holdDays:1,action:'HOLD',resumePostOp:'POD 1 if volume stable',note:'Hold morning of surgery'}
+  ]},
+  {cat:'NSAIDs & Pain',rules:[
+    {drug:'Ibuprofen (Advil, Motrin)',holdDays:7,action:'STOP',resumePostOp:'Avoid — use Celecoxib per protocol',note:'Discontinue 1 week before surgery'},
+    {drug:'Naproxen (Aleve)',holdDays:14,action:'STOP',resumePostOp:'Avoid — use Celecoxib per protocol',note:'Discontinue 2 weeks before surgery'},
+    {drug:'Celecoxib (Celebrex)',holdDays:0,action:'CONTINUE',resumePostOp:'Per protocol as multimodal analgesia',note:'Continue per TJS multimodal protocol'},
+    {drug:'Acetaminophen (Tylenol)',holdDays:0,action:'CONTINUE',resumePostOp:'Scheduled 1000mg q8h x 2 weeks',note:'Continue — part of pre-op multimodal'}
+  ]},
+  {cat:'Supplements & Herbals',rules:[
+    {drug:'Fish Oil / Omega-3',holdDays:7,action:'STOP',resumePostOp:'2 weeks post-op',note:'Bleeding risk; stop 1 week before'},
+    {drug:'Vitamin E (>400 IU)',holdDays:7,action:'STOP',resumePostOp:'2 weeks post-op',note:'Bleeding risk; stop 1 week before'},
+    {drug:'Ginkgo Biloba',holdDays:14,action:'STOP',resumePostOp:'2 weeks post-op',note:'Bleeding risk'},
+    {drug:'Garlic supplements',holdDays:7,action:'STOP',resumePostOp:'2 weeks post-op',note:'Bleeding risk'},
+    {drug:'Vitamin D',holdDays:0,action:'CONTINUE',resumePostOp:'Continue',note:'Continue through surgery'},
+    {drug:'Calcium',holdDays:0,action:'CONTINUE',resumePostOp:'Continue',note:'Continue through surgery'}
+  ]}
+];
+
+/* ═══ PROTOCOL CONFIG ═══ */
+const PROTO = {
+  labWindow: 30, ekgRequired: true, ekgAgeMin: 50, tsRequired: true,
+  uaRequired: true, hba1cThreshold: 8.0, bmiLimit: 47,
+  clrPcpRequired: true, clrCardioForAbnEKG: true,
+  anticoagHold: 3, metforminHold: 48,
+  abxDefault: 'Cefazolin 2g IV', abxPCNallergy: 'Clindamycin 900mg IV',
+  txaEnabled: true, dexEnabled: true,
+  dvtProph: 'Aspirin 81mg BID x 4 weeks', dvtAlt: 'Enoxaparin 40mg SQ daily',
+  consentSurg: true, consentAnes: true, consentHosp: false,
+  hpSections: ['Demographics','Allergies','HPI','PMH','Medications','ROS','PE','Labs','EKG','Clearances','A&P'],
+  autoPopAP: true
+};
+
+const PRE_ORD = [
+  {cat:'Labs',items:[{name:'CBC',on:true,detail:'Within 30 days'},{name:'BMP',on:true,detail:'Within 30 days'},{name:'PT/INR',on:true,detail:'Within 30 days'},{name:'Type & Screen',on:true,detail:''},{name:'Urinalysis',on:true,detail:''},{name:'HbA1c',on:false,detail:'If diabetic'}]},
+  {cat:'Imaging',items:[{name:'EKG',on:true,detail:'Within 30 days if age > 50'},{name:'Chest X-Ray',on:false,detail:'If indicated'}]},
+  {cat:'Pre-Op Medications',items:[{name:'Cefazolin 2g IV',on:true,detail:'Within 60 min of incision; Clindamycin if PCN allergy'},{name:'Tranexamic Acid 1g IV',on:true,detail:'Prior to incision'},{name:'Dexamethasone 10mg IV',on:true,detail:'At induction'},{name:'Acetaminophen 1000mg PO',on:true,detail:'2 hrs pre-op'},{name:'Celecoxib 400mg PO',on:true,detail:'2 hrs pre-op'},{name:'Gabapentin 300mg PO',on:false,detail:'Night before & morning of; age-adjusted'}]},
+  {cat:'Anesthesia',items:[{name:'Spinal preferred',on:true,detail:'Hyperbaric bupivacaine 0.75%'},{name:'Adductor Canal Block',on:true,detail:'20mL 0.25% bupivacaine'},{name:'iPACK Block (TKA only)',on:true,detail:'Posterior knee; 20mL 0.25% bupivacaine'}]}
+];
+const POST_ORD = [
+  {cat:'Activity',items:[{name:'Ambulate day of surgery',on:true,detail:'PT eval POD 0'},{name:'WBAT with assistive device',on:true,detail:''},{name:'DVT prophylaxis exercises',on:true,detail:'Ankle pumps, quad sets q1h'},{name:'Cryotherapy PRN',on:true,detail:'Ice/cryo-cuff to site'}]},
+  {cat:'Medications',items:[{name:'Aspirin 81mg BID x 4 weeks',on:true,detail:'DVT prophylaxis'},{name:'Oxycodone 5mg q4h PRN',on:true,detail:'Max 30mg/day'},{name:'Acetaminophen 1000mg q8h',on:true,detail:'Scheduled x 2 weeks'},{name:'Celecoxib 200mg BID x 2wk',on:true,detail:''},{name:'Ondansetron 4mg IV q6h PRN',on:true,detail:'Nausea'},{name:'Docusate 100mg BID',on:true,detail:'While on opioids'},{name:'Famotidine 20mg daily',on:true,detail:'GI prophylaxis'}]},
+  {cat:'Monitoring',items:[{name:'VS q4h x 24h, then q8h',on:true,detail:''},{name:'I&O until ambulating',on:true,detail:''},{name:'CBC POD 1',on:true,detail:'Transfuse if Hgb < 7.0'},{name:'BMP POD 1',on:false,detail:'If renal concerns'}]},
+  {cat:'Discharge Criteria',items:[{name:'Pain controlled PO (VAS<5)',on:true,detail:''},{name:'Ambulating > 100 ft',on:true,detail:'With device'},{name:'Tolerating PO',on:true,detail:''},{name:'Voiding independently',on:true,detail:''},{name:'Caregiver present',on:true,detail:''}]}
+];
+
+/* ═══ HELPERS ═══ */
+function bmi(p){if(!p.ht_in||!p.wt_lb)return null;return((p.wt_lb/(p.ht_in*p.ht_in))*703).toFixed(1)}
+function daysUntil(d){return Math.ceil((new Date(d+'T00:00:00')-TODAY)/864e5)}
+function fmtDate(d){return new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}
+function fmtFullDate(d){return new Date(d+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}
+function cdLabel(days){if(days<0)return{t:Math.abs(days)+'d ago',c:'urgent'};if(days===0)return{t:'TODAY',c:'urgent'};if(days===1)return{t:'TMRW',c:'urgent'};if(days<=7)return{t:days+'d',c:'soon'};return{t:days+'d',c:'ok'};}
+function addDays(dateStr,n){const d=new Date(dateStr+'T00:00:00');d.setDate(d.getDate()+n);return d.toISOString().split('T')[0];}
+function computeHoldDate(surgDate,holdDays){return addDays(surgDate,-holdDays);}
+function computeHoldDateHours(surgDate,hours){return addDays(surgDate,-Math.ceil(hours/24));}
+
+/* Compute medication dates for a patient */
+function computeMedDates(p){
+  const results=[];
+  p.meds.forEach(m=>{
+    let holdDate=null,stopDate=null,resumeDate=null,matchedRule=null;
+    // Try to match to a rule
+    for(const cat of MED_RULES){
+      for(const rule of cat.rules){
+        if(m.name.toLowerCase().includes(rule.drug.split(' ')[0].toLowerCase()) ||
+           m.name.toLowerCase().includes(rule.drug.split('(')[0].trim().toLowerCase())){
+          matchedRule=rule;break;
+        }
+      }
+      if(matchedRule)break;
+    }
+    if(matchedRule){
+      if(matchedRule.holdDays>0) holdDate=computeHoldDate(p.surgDate,matchedRule.holdDays);
+      else if(matchedRule.holdHours) holdDate=computeHoldDateHours(p.surgDate,matchedRule.holdHours);
+      results.push({med:m.name,action:matchedRule.action,holdDate,note:matchedRule.note,resume:matchedRule.resumePostOp,rule:matchedRule});
+    } else {
+      results.push({med:m.name,action:m.action,holdDate:null,note:m.note,resume:'Per surgeon',rule:null});
+    }
+  });
+  return results;
+}
+
+/* ═══ READINESS ═══ */
+function readiness(p){
+  const items=[],days=daysUntil(p.surgDate);
+  const lk=['cbc','bmp','ptinr','ua','ts'],ld=lk.filter(k=>p.labs[k]?.done).length,la=lk.filter(k=>p.labs[k]?.abn).length;
+  items.push({cat:'clinical',id:'labs',label:'Labs',abbr:'Labs',done:ld===lk.length,partial:ld>0&&ld<lk.length,detail:`${ld}/${lk.length}${la?' ('+la+' abn)':''}`,warn:la>0});
+  items.push({cat:'clinical',id:'ekg',label:'EKG',abbr:'EKG',done:!!p.ekg?.done&&(!p.ekg.abn||p.ekg.cardiacClr!==null),partial:p.ekg?.done&&p.ekg.abn&&p.ekg.cardiacClr===null,detail:!p.ekg?.done?'Not done':(p.ekg.abn?'Abnormal':(p.ekg.meas?'NSR '+p.ekg.meas.rate+'bpm':'Normal')),warn:p.ekg?.done&&p.ekg.abn});
+  const cn=Object.entries(p.clrs).filter(([,c])=>c.need),cd2=cn.filter(([,c])=>c.done).length;
+  items.push({cat:'clinical',id:'clr',label:'Clearances',abbr:'Clear',done:cn.length===0||cd2===cn.length,partial:cd2>0&&cd2<cn.length,detail:cn.length===0?'None needed':`${cd2}/${cn.length}`,warn:false});
+  items.push({cat:'clinical',id:'cls',label:'Class',abbr:'Class',done:p.cls?.st==='done',partial:p.cls?.st==='sched',detail:p.cls?.st==='done'?'Done':(p.cls?.st==='sched'?'Sched '+p.cls.date:'None'),warn:false});
+  const ms=p.meds.filter(m=>m.sent).length,ma=p.meds.filter(m=>m.ack).length;
+  items.push({cat:'clinical',id:'meds',label:'Meds',abbr:'Meds',done:p.meds.length===0||(ms===p.meds.length&&ma===p.meds.length),partial:ms>0&&(ms<p.meds.length||ma<p.meds.length),detail:p.meds.length===0?'None':`${ma}/${p.meds.length} ack`,warn:false});
+  const ck=Object.keys(p.cons),csd=ck.filter(k=>p.cons[k]?.signed).length;
+  items.push({cat:'surgeon',id:'cons',label:'Consents',abbr:'Consent',done:csd===ck.length,partial:csd>0&&csd<ck.length,detail:`${csd}/${ck.length}`,warn:false});
+  items.push({cat:'surgeon',id:'hp',label:'H&P',abbr:'H&P',done:p.hp?.st==='signed',partial:p.hp?.st==='draft',detail:p.hp?.st==='signed'?'Signed':(p.hp?.st==='draft'?'Draft':'None'),warn:false});
+  const preO=p.orders?.pre?.st==='signed',postO=p.orders?.post?.st==='signed';
+  items.push({cat:'surgeon',id:'ord',label:'Orders',abbr:'Orders',done:preO&&postO,partial:preO||postO,detail:`Pre:${preO?'Y':'N'} Post:${postO?'Y':'N'}`,warn:false});
+  const total=items.length,dc=items.filter(i=>i.done).length,pct=Math.round((dc/total)*100);
+  let st='ready';if(pct<100&&days<=3)st='not-ready';else if(pct<100&&days<=7)st='pending';else if(pct<50)st='not-ready';else if(pct<100)st='pending';
+  const b=bmi(p);if(b&&parseFloat(b)>=PROTO.bmiLimit)st='not-ready';
+  return{st,pct,dc,total,items,days};
+}
+function getMissing(p){return readiness(p).items.filter(i=>!i.done).map(i=>i.label)}
+
+/* ═══ STATE ═══ */
+let activeFilter='all',selectedPt=null,panelTab='overview',expandedChip=null,agentSelected=new Set(),activeConfigTab='dashboard';
+// Track temp order state for add/remove in modal
+let tempPreOrd=null,tempPostOrd=null,currentOrdPid=null;
+
+/* ═══ CASCADE: When date/loc/proc/side change ═══ */
+function cascadeUpdate(pid){
+  const p=P.find(x=>x.id===pid);if(!p)return;
+  // Invalidate H&P if signed (needs re-sign with new data)
+  if(p.hp?.st==='signed'){p.hp={st:'draft',date:p.hp.date};showToast('H&P needs re-signing — procedure details changed','yellow');}
+  // Invalidate orders
+  if(p.orders?.pre?.st==='signed'||p.orders?.post?.st==='signed'){
+    if(p.orders.pre?.st==='signed')p.orders.pre.st='draft';
+    if(p.orders.post?.st==='signed')p.orders.post.st='draft';
+  }
+  // Invalidate consents
+  Object.keys(p.cons).forEach(k=>{if(p.cons[k].signed){p.cons[k].signed=false;p.cons[k].date=null;}});
+  render();
+  if(selectedPt===pid){const pp=P.find(x=>x.id===pid);if(pp){renderPanelHd(pp);renderPanelBody(pp);}}
+}
+
+/* ═══ INLINE EDITING ═══ */
+let activeIE=null;
+const PROC_MAP={ptk:{abbr:'PTK',full:'Primary Total Knee Arthroplasty',joint:'knee',type:'tka'},pth:{abbr:'PTH',full:'Primary Total Hip Arthroplasty',joint:'hip',type:'tha'},pk:{abbr:'PK',full:'Partial Knee Arthroplasty',joint:'knee',type:'tka'},rtk:{abbr:'RTK',full:'Revision Total Knee Arthroplasty',joint:'knee',type:'tka'},rth:{abbr:'RTH',full:'Revision Total Hip Arthroplasty',joint:'hip',type:'tha'},mua:{abbr:'MUA',full:'Manipulation Under Anesthesia — Knee',joint:'knee',type:'tka'},other:{abbr:'OTH',full:'Other Procedure',joint:'joint',type:'tka'},tka:{abbr:'TKA',full:'Total Knee Arthroplasty',joint:'knee',type:'tka'},tha:{abbr:'THA',full:'Total Hip Arthroplasty',joint:'hip',type:'tha'}};
+function procInfo(p){return PROC_MAP[p.proc]||PROC_MAP.tka;}
+function showInlineEdit(pid,field,el,ev){
+  ev.stopPropagation();
+  const p=P.find(x=>x.id===pid);if(!p)return;
+  const dd=document.getElementById('ieDropdown');
+  if(activeIE&&activeIE.pid===pid&&activeIE.field===field){dd.style.display='none';activeIE=null;return;}
+  activeIE={pid,field};
+  let opts=[];
+  if(field==='proc')opts=[{val:'ptk',label:'Primary Total Knee'},{val:'pth',label:'Primary Total Hip'},{val:'pk',label:'Partial Knee'},{val:'rtk',label:'Revision Total Knee'},{val:'rth',label:'Revision Total Hip'},{val:'mua',label:'Manipulation Total Knee'},{val:'other',label:'Other'}];
+  else if(field==='side')opts=[{val:'Left',label:'Left'},{val:'Right',label:'Right'},{val:'Bilateral',label:'Bilateral'}];
+  else if(field==='loc')opts=[
+    {val:'asc_gwinnett',label:'ASC \u2014 Gwinnett'},{val:'asc_cumming',label:'ASC \u2014 Cumming'},{val:'asc_cherokee',label:'ASC \u2014 Cherokee'},{val:'asc_sandy',label:'ASC \u2014 Sandy Springs'},
+    {val:'hosp_cumming',label:'Hospital \u2014 Cumming'},{val:'hosp_sandy',label:'Hospital \u2014 Sandy Springs'},{val:'hosp_cherokee',label:'Hospital \u2014 Cherokee'},{val:'hosp_gw_law',label:'Hospital \u2014 Gwinnett Lawrenceville'},{val:'hosp_gw_dul',label:'Hospital \u2014 Gwinnett Duluth'}
+  ];
+  else if(field==='date'){
+    // Date picker inline
+    dd.innerHTML=`<div style="padding:8px"><label style="font-size:11px;font-weight:600;color:var(--t3)">Surgery Date</label><input type="date" value="${p.surgDate}" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:4px;font-size:12px;margin-top:4px" onchange="updateField(${pid},'date',this.value)"></div>`;
+    const rect=el.getBoundingClientRect();
+    dd.style.left=rect.left+'px';dd.style.top=(rect.bottom+4)+'px';dd.style.display='block';
+    return;
+  }
+  const current=field==='proc'?p.proc:field==='side'?p.side:p.loc;
+  dd.innerHTML=opts.map(o=>`<div class="ie-opt${o.val===current?' active':''}" onclick="updateField(${pid},'${field}','${o.val}')">${o.label}</div>`).join('');
+  const rect=el.getBoundingClientRect();
+  dd.style.left=rect.left+'px';dd.style.top=(rect.bottom+4)+'px';dd.style.display='block';
+}
+function updateField(pid,field,val){
+  const p=P.find(x=>x.id===pid);if(!p)return;
+  const dd=document.getElementById('ieDropdown');dd.style.display='none';activeIE=null;
+  if(field==='proc'){p.proc=val;p.bilateral=false;}
+  else if(field==='side'){p.side=val;p.bilateral=val==='Bilateral';}
+  else if(field==='loc'){
+    p.loc=val;
+    const locMap={
+      'asc_gwinnett':{type:'asc',loc:'Gwinnett'},'asc_cumming':{type:'asc',loc:'Cumming'},'asc_cherokee':{type:'asc',loc:'Cherokee'},'asc_sandy':{type:'asc',loc:'Sandy Springs'},
+      'hosp_cumming':{type:'hosp',loc:'Cumming'},'hosp_sandy':{type:'hosp',loc:'Sandy Springs'},'hosp_cherokee':{type:'hosp',loc:'Cherokee'},'hosp_gw_law':{type:'hosp',loc:'Gwinnett Lawrenceville'},'hosp_gw_dul':{type:'hosp',loc:'Gwinnett Duluth'}
+    };
+    p.surgSite=locMap[val]||{type:'asc',loc:val};
+  }
+  else if(field==='date'){p.surgDate=val;}
+  cascadeUpdate(pid);
+}
+document.addEventListener('click',()=>{const dd=document.getElementById('ieDropdown');if(dd)dd.style.display='none';activeIE=null;});
+
+/* ═══ CONFIG TABS ═══ */
+function switchConfigTab(tab){
+  activeConfigTab=tab;
+  document.querySelectorAll('.config-tab').forEach(t=>t.classList.remove('act'));
+  const tabMap={dashboard:'ctabDash',orders:'ctabOrders',consents:'ctabConsents',hp:'ctabHP',medications:'ctabMeds',protocol:'ctabProto'};
+  document.getElementById(tabMap[tab]).classList.add('act');
+  document.getElementById('dashboardView').style.display=tab==='dashboard'?'':'none';
+  document.querySelectorAll('.config-panel').forEach(p=>p.classList.remove('active'));
+  if(tab!=='dashboard'){
+    const elMap={orders:'ordersConfig',consents:'consentsConfig',hp:'hpConfig',medications:'medsConfig',protocol:'protocolConfig'};
+    document.getElementById(elMap[tab]).classList.add('active');
+    if(tab==='orders')renderOrdersConfig();
+    if(tab==='consents')renderConsentsConfig();
+    if(tab==='hp')renderHPConfig();
+    if(tab==='medications')renderMedsConfig();
+    if(tab==='protocol')renderProtocolConfig();
+  }
+}
+
+function renderOrdersConfig(){
+  function renderGrp(groups,prefix){
+    return groups.map((g,gi)=>`<div class="config-section"><h4>${g.cat} <span>${g.items.length} items</span></h4>${g.items.map((it,ii)=>`
+      <div class="proto-row"><input type="checkbox" ${it.on?'checked':''} onchange="${prefix}[${gi}].items[${ii}].on=this.checked" style="accent-color:var(--accent)"><div style="flex:1"><div class="proto-label">${it.name}</div><div class="proto-detail">${it.detail}</div></div></div>`).join('')}
+      <div class="add-order-row"><input id="addOrd_${prefix}_${gi}" placeholder="Add custom order..." onkeydown="if(event.key==='Enter')addConfigOrder('${prefix}',${gi})"><button class="btn" style="font-size:11px;padding:3px 8px" onclick="addConfigOrder('${prefix}',${gi})">+ Add</button></div>
+    </div>`).join('');
+  }
+  document.getElementById('ordersConfig').innerHTML=`
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:4px">Order Set Templates</h3>
+    <p style="font-size:12px;color:var(--t3);margin-bottom:16px">Configure default order sets. Individual orders modified per-patient when editing. Use + Add to add custom orders to any group.</p>
+    <div class="msg-type" style="margin-bottom:16px"><div class="msg-type-btn active" id="ocTabPre" onclick="document.getElementById('ocPre').style.display='';document.getElementById('ocPost').style.display='none';this.classList.add('active');document.getElementById('ocTabPost').classList.remove('active')">Pre-Op Orders</div><div class="msg-type-btn" id="ocTabPost" onclick="document.getElementById('ocPost').style.display='';document.getElementById('ocPre').style.display='none';this.classList.add('active');document.getElementById('ocTabPre').classList.remove('active')">Post-Op Orders</div></div>
+    <div id="ocPre">${renderGrp(PRE_ORD,'PRE_ORD')}</div>
+    <div id="ocPost" style="display:none">${renderGrp(POST_ORD,'POST_ORD')}</div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button class="btn btn-p" onclick="showToast('Order templates saved','green');switchConfigTab('dashboard')">Save Templates</button></div>`;
+}
+function addConfigOrder(prefix,gi){
+  const arr=prefix==='PRE_ORD'?PRE_ORD:POST_ORD;
+  const inp=document.getElementById('addOrd_'+prefix+'_'+gi);
+  if(!inp||!inp.value.trim())return;
+  arr[gi].items.push({name:inp.value.trim(),on:true,detail:'Custom order'});
+  renderOrdersConfig();showToast('Order added','green');
+}
+
+function renderConsentsConfig(){
+  document.getElementById('consentsConfig').innerHTML=`
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:4px">Consent Configuration</h3>
+    <p style="font-size:12px;color:var(--t3);margin-bottom:16px">Configure which consents are required and tracked. Click "View Template" to preview consent documents.</p>
+    <div class="config-section"><h4>Required Consents</h4>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">Surgical Consent</div><div class="proto-detail">TJS procedure-specific consent form</div></div><button class="btn" style="font-size:10px;padding:2px 8px" onclick="viewConsentTemplate('surgical')">View Template</button><button class="proto-toggle ${PROTO.consentSurg?'on':''}" onclick="PROTO.consentSurg=!PROTO.consentSurg;this.classList.toggle('on')"></button></div>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">Anesthesia Consent</div><div class="proto-detail">Anesthesia team consent form</div></div><button class="btn" style="font-size:10px;padding:2px 8px" onclick="viewConsentTemplate('anesthesia')">View Template</button><button class="proto-toggle ${PROTO.consentAnes?'on':''}" onclick="PROTO.consentAnes=!PROTO.consentAnes;this.classList.toggle('on')"></button></div>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">Hospital/Facility Consent</div><div class="proto-detail">Required for hospital cases only</div></div><button class="btn" style="font-size:10px;padding:2px 8px" onclick="viewConsentTemplate('hospital')">View Template</button><button class="proto-toggle ${PROTO.consentHosp?'on':''}" onclick="PROTO.consentHosp=!PROTO.consentHosp;this.classList.toggle('on')"></button></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button class="btn btn-p" onclick="showToast('Consent config saved','green');switchConfigTab('dashboard')">Save</button></div>`;
+}
+
+function renderHPConfig(){
+  const secs=PROTO.hpSections;
+  document.getElementById('hpConfig').innerHTML=`
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:4px">H&P Template Configuration</h3>
+    <p style="font-size:12px;color:var(--t3);margin-bottom:16px">Configure which sections appear in the auto-generated H&P document and auto-population rules.</p>
+    <div class="config-section"><h4>H&P Sections <span>(toggle to include/exclude)</span></h4>
+      ${secs.map((s,i)=>`<div class="proto-row"><div style="color:var(--t4);font-size:11px;font-weight:600;width:20px">${i+1}</div><div class="proto-label" style="flex:1">${s}</div><button class="proto-toggle on" onclick="this.classList.toggle('on')"></button></div>`).join('')}
+    </div>
+    <div class="config-section"><h4>Auto-Population Rules</h4>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">Pre-fill labs from dashboard data</div><div class="proto-detail">Automatically populate lab results section</div></div><button class="proto-toggle on"></button></div>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">Pre-fill medications from med list</div><div class="proto-detail">Pull current medications and actions</div></div><button class="proto-toggle on"></button></div>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">Auto-generate HPI from procedure data</div><div class="proto-detail">Create HPI narrative from age, sex, procedure, comorbidities</div></div><button class="proto-toggle on"></button></div>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">Default PE template by procedure</div><div class="proto-detail">TKA knee exam vs THA hip exam template</div></div><button class="proto-toggle on"></button></div>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">Auto-generate Assessment & Plan</div><div class="proto-detail">Generate A&P from procedure, allergies, DM status, DVT protocol, clearances, and surgical plan</div></div><button class="proto-toggle ${PROTO.autoPopAP?'on':''}" onclick="PROTO.autoPopAP=!PROTO.autoPopAP;this.classList.toggle('on')"></button></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button class="btn btn-p" onclick="showToast('H&P config saved','green');switchConfigTab('dashboard')">Save</button></div>`;
+}
+
+/* ═══ MEDICATION PROTOCOL CONFIG ═══ */
+function renderMedsConfig(){
+  let h=`<h3 style="font-size:16px;font-weight:700;margin-bottom:4px">Medication Protocol</h3>
+    <p style="font-size:12px;color:var(--t3);margin-bottom:16px">Hold, stop, continue, and restart rules for perioperative medications. Edit any field inline. Hold/stop dates are auto-calculated per patient from surgery date.</p>`;
+
+  MED_RULES.forEach((cat,ci)=>{
+    h+=`<div class="config-section"><h4>${cat.cat} <span>${cat.rules.length} rules</span></h4>`;
+    cat.rules.forEach((r,ri)=>{
+      const holdVal=r.holdHours?r.holdHours+' hrs':(r.holdDays>0?r.holdDays+' days':'N/A');
+      const actionColors={HOLD:'var(--yellowL)',STOP:'var(--redL)','MUST TAKE':'var(--priL)',CONTINUE:'var(--greenL)'};
+      const actionTextColors={HOLD:'var(--yellowT)',STOP:'var(--redT)','MUST TAKE':'var(--pri)',CONTINUE:'var(--greenT)'};
+      h+=`<div class="proto-row" style="flex-wrap:wrap;gap:8px">
+        <div style="flex:1;min-width:200px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:${actionColors[r.action]||'var(--greenL)'};color:${actionTextColors[r.action]||'var(--greenT)'}">${r.action}</span>
+            <input style="font-weight:600;font-size:12px;border:1px solid transparent;border-radius:4px;padding:2px 6px;flex:1;min-width:0;background:transparent;transition:all var(--tr)" value="${r.drug}" onfocus="this.style.borderColor='var(--pri)';this.style.background='var(--card)'" onblur="this.style.borderColor='transparent';this.style.background='transparent';MED_RULES[${ci}].rules[${ri}].drug=this.value">
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:2px">
+            <span style="font-size:10px;color:var(--t3);font-weight:600;white-space:nowrap">Pre-op:</span>
+            <input style="width:50px;padding:2px 4px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:center" value="${r.holdHours||r.holdDays||0}" onchange="if(${!!r.holdHours})MED_RULES[${ci}].rules[${ri}].holdHours=+this.value;else MED_RULES[${ci}].rules[${ri}].holdDays=+this.value">
+            <span style="font-size:10px;color:var(--t3)">${r.holdHours?'hours':'days'}</span>
+            <select style="font-size:10px;padding:2px 4px;border:1px solid var(--border);border-radius:4px;background:var(--card)" onchange="MED_RULES[${ci}].rules[${ri}].action=this.value;renderMedsConfig()">
+              <option value="HOLD" ${r.action==='HOLD'?'selected':''}>HOLD</option>
+              <option value="STOP" ${r.action==='STOP'?'selected':''}>STOP</option>
+              <option value="CONTINUE" ${r.action==='CONTINUE'?'selected':''}>CONTINUE</option>
+              <option value="MUST TAKE" ${r.action==='MUST TAKE'?'selected':''}>MUST TAKE</option>
+            </select>
+          </div>
+        </div>
+        <div style="flex:1;min-width:200px">
+          <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
+            <span style="font-size:10px;color:var(--t3);font-weight:600;white-space:nowrap">Note:</span>
+            <input style="flex:1;padding:2px 6px;border:1px solid var(--border);border-radius:4px;font-size:11px;color:var(--t2)" value="${r.note}" onchange="MED_RULES[${ci}].rules[${ri}].note=this.value">
+          </div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <span style="font-size:10px;color:var(--green);font-weight:600;white-space:nowrap">Restart:</span>
+            <input style="flex:1;padding:2px 6px;border:1px solid var(--border);border-radius:4px;font-size:11px;color:var(--greenT)" value="${r.resumePostOp}" onchange="MED_RULES[${ci}].rules[${ri}].resumePostOp=this.value">
+          </div>
+        </div>
+        <button style="background:none;border:none;color:var(--t4);font-size:14px;padding:2px 4px;border-radius:3px;align-self:flex-start;cursor:pointer" onclick="MED_RULES[${ci}].rules.splice(${ri},1);renderMedsConfig()" title="Remove rule">\u2715</button>
+      </div>`;
+    });
+    // Add new rule button
+    h+=`<div style="padding:8px 14px;display:flex;gap:6px;align-items:center">
+      <input id="newMedRule_${ci}" placeholder="Add medication rule..." style="flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px">
+      <button class="btn" style="font-size:10px;padding:3px 8px" onclick="addMedRule(${ci})">+ Add</button>
+    </div>`;
+    h+=`</div>`;
+  });
+  h+=`<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button class="btn btn-p" onclick="showToast('Medication protocol saved','green');switchConfigTab('dashboard');render()">Save Protocol</button></div>`;
+  document.getElementById('medsConfig').innerHTML=h;
+}
+function addMedRule(ci){
+  const inp=document.getElementById('newMedRule_'+ci);
+  if(!inp||!inp.value.trim())return;
+  MED_RULES[ci].rules.push({drug:inp.value.trim(),holdDays:0,action:'CONTINUE',resumePostOp:'Per surgeon',note:'Custom rule'});
+  renderMedsConfig();
+}
+
+function renderProtocolConfig(){
+  document.getElementById('protocolConfig').innerHTML=`
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:4px">Protocol Configuration</h3>
+    <p style="font-size:12px;color:var(--t3);margin-bottom:16px">Configure readiness rules, thresholds, and clinical requirements.</p>
+    <div class="config-section"><h4>Lab Requirements</h4>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">Lab validity window</div><div class="proto-detail">How many days labs are valid before surgery</div></div><input class="proto-input" type="number" value="${PROTO.labWindow}" onchange="PROTO.labWindow=+this.value"> <span style="font-size:11px;color:var(--t3)">days</span></div>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">Require Urinalysis</div></div><button class="proto-toggle ${PROTO.uaRequired?'on':''}" onclick="PROTO.uaRequired=!PROTO.uaRequired;this.classList.toggle('on')"></button></div>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">Require Type & Screen</div></div><button class="proto-toggle ${PROTO.tsRequired?'on':''}" onclick="PROTO.tsRequired=!PROTO.tsRequired;this.classList.toggle('on')"></button></div>
+    </div>
+    <div class="config-section"><h4>EKG & Cardiac</h4>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">Require EKG</div></div><button class="proto-toggle ${PROTO.ekgRequired?'on':''}" onclick="PROTO.ekgRequired=!PROTO.ekgRequired;this.classList.toggle('on')"></button></div>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">EKG minimum age</div><div class="proto-detail">Only require EKG for patients at or above this age</div></div><input class="proto-input" type="number" value="${PROTO.ekgAgeMin}" onchange="PROTO.ekgAgeMin=+this.value"> <span style="font-size:11px;color:var(--t3)">years</span></div>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">Auto-require Cardiology clearance for abnormal EKG</div></div><button class="proto-toggle ${PROTO.clrCardioForAbnEKG?'on':''}" onclick="PROTO.clrCardioForAbnEKG=!PROTO.clrCardioForAbnEKG;this.classList.toggle('on')"></button></div>
+    </div>
+    <div class="config-section"><h4>Medical Thresholds</h4>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">BMI surgery limit</div><div class="proto-detail">Patients at or above this BMI are flagged not-ready</div></div><input class="proto-input" type="number" value="${PROTO.bmiLimit}" onchange="PROTO.bmiLimit=+this.value"></div>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">HbA1c optimization threshold</div><div class="proto-detail">A1c above this requires endocrine clearance</div></div><input class="proto-input" type="number" step="0.1" value="${PROTO.hba1cThreshold}" onchange="PROTO.hba1cThreshold=+this.value"></div>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">Require PCP clearance</div></div><button class="proto-toggle ${PROTO.clrPcpRequired?'on':''}" onclick="PROTO.clrPcpRequired=!PROTO.clrPcpRequired;this.classList.toggle('on')"></button></div>
+    </div>
+    <div class="config-section"><h4>Antibiotics & Perioperative</h4>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">Default antibiotic</div></div><input class="proto-input" style="width:200px" value="${PROTO.abxDefault}" onchange="PROTO.abxDefault=this.value"></div>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">PCN allergy antibiotic</div></div><input class="proto-input" style="width:200px" value="${PROTO.abxPCNallergy}" onchange="PROTO.abxPCNallergy=this.value"></div>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">Use Tranexamic Acid (TXA)</div></div><button class="proto-toggle ${PROTO.txaEnabled?'on':''}" onclick="PROTO.txaEnabled=!PROTO.txaEnabled;this.classList.toggle('on')"></button></div>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">Use Dexamethasone</div></div><button class="proto-toggle ${PROTO.dexEnabled?'on':''}" onclick="PROTO.dexEnabled=!PROTO.dexEnabled;this.classList.toggle('on')"></button></div>
+    </div>
+    <div class="config-section"><h4>DVT Prophylaxis</h4>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">Primary DVT prophylaxis</div></div><input class="proto-input" style="width:250px" value="${PROTO.dvtProph}" onchange="PROTO.dvtProph=this.value"></div>
+      <div class="proto-row"><div style="flex:1"><div class="proto-label">Alternative (high-risk)</div></div><input class="proto-input" style="width:250px" value="${PROTO.dvtAlt}" onchange="PROTO.dvtAlt=this.value"></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button class="btn btn-p" onclick="showToast('Protocol saved — readiness recalculated','green');switchConfigTab('dashboard');render()">Save Protocol</button></div>`;
+}
+
+/* ═══ RENDER ═══ */
+function render(){
+  const q=document.getElementById('qInput').value.toLowerCase(),df=document.getElementById('dateFilter').value,lf=document.getElementById('locFilter').value,sf=document.getElementById('surgFilter').value;
+  let pts=P.filter(p=>{
+    if(q&&!`${p.f} ${p.l}`.toLowerCase().includes(q)&&!p.mrn.toLowerCase().includes(q))return false;
+    if(lf!=='all'&&p.loc!==lf)return false;if(sf!=='all'&&p.prov!==sf)return false;
+    if(df!=='all'){const d=daysUntil(p.surgDate);if(df==='today'&&d!==0)return false;if(df==='tomorrow'&&d!==1)return false;if(df==='week'&&(d<0||d>7))return false;}
+    if(activeFilter!=='all'){const r=readiness(p);if(r.st!==activeFilter)return false;}
+    return true;
+  }).sort((a,b)=>daysUntil(a.surgDate)-daysUntil(b.surgDate));
+  renderStats(pts);renderTable(pts);
+}
+function renderStats(pts){
+  const all=pts.length,ready=pts.filter(p=>readiness(p).st==='ready').length,pend=pts.filter(p=>readiness(p).st==='pending').length,nr=pts.filter(p=>readiness(p).st==='not-ready').length;
+  document.getElementById('statsRow').innerHTML=`
+    <div class="st-card c-total ${activeFilter==='all'?'act':''}" onclick="setFilter('all')"><div class="st-n">${all}</div><div class="st-l">Upcoming</div></div>
+    <div class="st-card c-ready ${activeFilter==='ready'?'act':''}" onclick="setFilter('ready')"><div class="st-n">${ready}</div><div class="st-l">Ready</div></div>
+    <div class="st-card c-pend ${activeFilter==='pending'?'act':''}" onclick="setFilter('pending')"><div class="st-n">${pend}</div><div class="st-l">Pending</div></div>
+    <div class="st-card c-nr ${activeFilter==='not-ready'?'act':''}" onclick="setFilter('not-ready')"><div class="st-n">${nr}</div><div class="st-l">Not Ready</div></div>`;
+}
+function setFilter(f){activeFilter=activeFilter===f?'all':f;render()}
+
+function renderTable(pts){
+  const tb=document.getElementById('ptBody');
+  if(!pts.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--t3)">No patients match filters</td></tr>';return;}
+  let h='';
+  pts.forEach(p=>{
+    const r=readiness(p),days=daysUntil(p.surgDate),cd=cdLabel(days),pi=procInfo(p),pl=pi.abbr,pc=p.proc;
+    const clinical=r.items.filter(i=>i.cat==='clinical'),surgeon=r.items.filter(i=>i.cat==='surgeon');
+    const procLabel=pi.abbr;
+    h+=`<tr class="ptr${selectedPt===p.id?' sel':''}" data-pid="${p.id}">
+      <td><div class="pc" onclick="openPanel(${p.id})"><div class="pi ${r.st}"></div><div style="min-width:0"><div class="pn">${p.l}, ${p.f}</div><div class="pm">
+        <span class="inline-edit" onclick="event.stopPropagation();showInlineEdit(${p.id},'proc',this,event)"><span class="pb ${pc}">${procLabel}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+        <span class="inline-edit" onclick="event.stopPropagation();showInlineEdit(${p.id},'side',this,event)">${p.side}${p.bilateral?' Bil':''}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+        &middot; Dr. ${p.prov}
+      </div></div></div></td>
+      <td><div class="surg-cell">
+        <div class="sd"><span class="inline-edit" onclick="event.stopPropagation();showInlineEdit(${p.id},'date',this,event)">${fmtDate(p.surgDate)}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span></div>
+        <div class="sd-meta"><span class="cd ${cd.c}">${cd.t}</span>
+          <span class="inline-edit" onclick="event.stopPropagation();showInlineEdit(${p.id},'loc',this,event)"><span class="site ${p.surgSite.type}">${p.surgSite.type==='hosp'?'H':'A'} ${p.surgSite.loc}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+        </div>
+      </div></td>
+      <td style="text-align:center"><span class="rp ${r.st==='ready'?'g':r.st==='pending'?'y':'r'}" style="font-size:13px;font-weight:700">${r.pct}%</span></td>
+      <td><div class="sg">${clinical.map(i=>{const cls=i.done?'sc-g':i.partial?'sc-y':'sc-r';const ic=i.done?'\u2713':i.warn?'\u26A0':i.partial?'\u25D0':'\u2715';const isExp=expandedChip&&expandedChip.pid===p.id&&expandedChip.itemId===i.id;return `<span class="sc ${cls}${isExp?' expanded':''}" onclick="event.stopPropagation();toggleChip(${p.id},'${i.id}')" title="${i.label}: ${i.detail}"><span class="ic">${ic}</span>${i.abbr}</span>`;}).join('')}</div></td>
+      <td><div class="sg">${surgeon.map(i=>{const cls=i.done?'sc-g':i.partial?'sc-y':'sc-r';const ic=i.done?'\u2713':i.partial?'\u25D0':'\u2715';const isExp=expandedChip&&expandedChip.pid===p.id&&expandedChip.itemId===i.id;return `<span class="sc ${cls}${isExp?' expanded':''}" onclick="event.stopPropagation();toggleChip(${p.id},'${i.id}')" title="${i.label}: ${i.detail}"><span class="ic">${ic}</span>${i.abbr}</span>`;}).join('')}</div></td>
+    </tr>`;
+    const isOpen=expandedChip&&expandedChip.pid===p.id;
+    h+=`<tr class="exp-row${isOpen?' open':''}" id="exp-${p.id}"><td colspan="5"><div class="exp-inner">${isOpen?getExpansionHTML(p,expandedChip.itemId):''}</div></td></tr>`;
+  });
+  tb.innerHTML=h;
+}
+
+/* ═══ CHIP EXPANSION ═══ */
+function toggleChip(pid,itemId){if(expandedChip&&expandedChip.pid===pid&&expandedChip.itemId===itemId)expandedChip=null;else expandedChip={pid,itemId};render();}
+
+function getExpansionHTML(p,itemId){
+  let title='',content='',actions='';
+  if(itemId==='labs'){
+    title='Labs';const lm={cbc:'CBC',bmp:'BMP',ptinr:'PT/INR',ua:'Urinalysis',ts:'Type & Screen',hba1c:'HbA1c'};
+    content='<div class="exp-grid">'+Object.entries(lm).map(([k,lb])=>{const l=p.labs[k];if(!l)return '';const d=l.done;const c=d?(l.abn?'warn':'done'):'miss';return `<div class="exp-item"><div class="ei-icon ${c}">${d?(l.abn?'\u26A0':'\u2713'):'\u2715'}</div><div class="ei-info"><div class="ei-label">${lb}</div><div class="ei-detail">${d?l.date+' \u2014 '+l.vals:'Not ordered'}</div></div></div>`;}).join('')+'</div>';
+  } else if(itemId==='ekg'){
+    title='EKG';const e=p.ekg;
+    if(e?.done){content=`<div class="exp-grid"><div class="exp-item"><div class="ei-icon ${e.abn?'warn':'done'}">${e.abn?'\u26A0':'\u2713'}</div><div class="ei-info"><div class="ei-label">${e.abn?'Abnormal':'Normal'}</div><div class="ei-detail">${e.note} \u00B7 ${e.date}${e.abn&&e.cardiacClr===null?' \u00B7 <strong style="color:var(--red)">Cardiac clearance needed</strong>':''}</div></div></div></div>`;}
+    else content='<div class="exp-grid"><div class="exp-item"><div class="ei-icon miss">\u2715</div><div class="ei-info"><div class="ei-label">EKG not done</div></div></div></div>';
+  } else if(itemId==='clr'){
+    title='Clearances';const cm={pcp:'PCP',cardio:'Cardiology',endo:'Endocrinology',pulm:'Pulmonology'};
+    const entries=Object.entries(p.clrs).filter(([,c])=>c.need);
+    content=entries.length?'<div class="exp-grid">'+entries.map(([k,c])=>`<div class="exp-item"><div class="ei-icon ${c.done?'done':'miss'}">${c.done?'\u2713':'\u2715'}</div><div class="ei-info"><div class="ei-label">${cm[k]||k}</div><div class="ei-detail">${c.done?c.doc+' \u2014 '+c.note+' ('+c.date+')':(c.doc?'Pending: '+c.doc:'Not obtained')}</div></div></div>`).join('')+'</div>':'<div style="color:var(--t3);font-size:12px">None needed</div>';
+  } else if(itemId==='meds'){
+    title='Medications ('+p.meds.length+')';
+    const medDates=computeMedDates(p);
+    const ac={HOLD:{bg:'var(--yellowL)',c:'var(--yellowT)',b:'var(--yellowB)'},STOP:{bg:'var(--redL)',c:'var(--redT)',b:'var(--redB)'},CONTINUE:{bg:'var(--greenL)',c:'var(--greenT)',b:'var(--greenB)'},'MUST TAKE':{bg:'var(--priL)',c:'var(--pri)',b:'var(--priB)'}};
+    content=p.meds.length?'<div class="exp-grid" style="grid-template-columns:1fr">'+medDates.map((d,i)=>{const m=p.meds[i];const a=ac[d.action]||ac.CONTINUE;const c=m.ack?'done':m.sent?'warn':'miss';
+      const dateInfo=d.holdDate?'<strong>'+fmtDate(d.holdDate)+'</strong>':'';
+      return `<div class="exp-item"><div class="ei-icon ${c}">${m.ack?'\u2713':m.sent?'\u25D0':'\u2715'}</div><div class="ei-info"><div class="ei-label">${m.name}</div><div class="ei-detail">${d.note||'\u2014'} ${dateInfo}${!m.sent?' \u00B7 Not sent':(!m.ack?' \u00B7 Unack':' \u00B7 Ack')}</div></div><span class="ei-badge" style="background:${a.bg};color:${a.c};border:1px solid ${a.b}">${d.action}</span></div>`;}).join('')+'</div>':'<div style="color:var(--t3);font-size:12px">No medications</div>';
+  } else if(itemId==='cons'){
+    title='Consents';const cm={tjs_surg:'Surgical',anes:'Anesthesia',nhs:'Hospital'};
+    content='<div class="exp-grid">'+Object.entries(p.cons).map(([k,c])=>`<div class="exp-item" style="cursor:pointer" onclick="event.stopPropagation();viewConsent(${p.id},'${k}')"><div class="ei-icon ${c.signed?'done':'miss'}">${c.signed?'\u2713':'\u2715'}</div><div class="ei-info"><div class="ei-label">${cm[k]||k}</div><div class="ei-detail">${c.signed?'Signed'+(c.date?' '+c.date:''):'Not signed'} \u00B7 <span style="color:var(--pri)">Click to view</span></div></div></div>`).join('')+'</div>';
+  } else if(itemId==='hp'){
+    title='H&P';const c=p.hp?.st==='signed'?'done':p.hp?.st==='draft'?'warn':'miss';
+    content=`<div class="exp-grid"><div class="exp-item" style="cursor:pointer" onclick="event.stopPropagation();viewHP(${p.id})"><div class="ei-icon ${c}">${p.hp?.st==='signed'?'\u2713':p.hp?.st==='draft'?'\u25D0':'\u2715'}</div><div class="ei-info"><div class="ei-label">History & Physical</div><div class="ei-detail">${p.hp?.st==='signed'?'Signed '+p.hp.date:(p.hp?.st==='draft'?'Draft \u2014 needs re-signing':'Not started')} \u00B7 <span style="color:var(--pri)">Click to view</span></div></div></div></div>`;
+    actions=`<button class="act-btn act-btn-blue" onclick="event.stopPropagation();viewHP(${p.id})">View H&P</button><button class="act-btn act-btn-blue" onclick="event.stopPropagation();openHP(${p.id})">Edit</button>`;
+    if(p.hp?.st!=='signed') actions+=`<button class="act-btn act-btn-green" onclick="event.stopPropagation();quickSignHP(${p.id})">Sign</button>`;
+  } else if(itemId==='ord'){
+    title='Orders';const preO=p.orders?.pre?.st==='signed',postO=p.orders?.post?.st==='signed';
+    content=`<div class="exp-grid"><div class="exp-item" style="cursor:pointer" onclick="event.stopPropagation();viewOrd(${p.id})"><div class="ei-icon ${preO?'done':'miss'}">${preO?'\u2713':'\u2715'}</div><div class="ei-info"><div class="ei-label">Pre-Op Orders</div><div class="ei-detail">${preO?'Signed '+p.orders.pre.date:'Not signed'} \u00B7 <span style="color:var(--pri)">Click to view</span></div></div></div><div class="exp-item" style="cursor:pointer" onclick="event.stopPropagation();viewOrd(${p.id})"><div class="ei-icon ${postO?'done':'miss'}">${postO?'\u2713':'\u2715'}</div><div class="ei-info"><div class="ei-label">Post-Op Orders</div><div class="ei-detail">${postO?'Signed '+p.orders.post.date:'Not signed'} \u00B7 <span style="color:var(--pri)">Click to view</span></div></div></div></div>`;
+    actions=`<button class="act-btn act-btn-blue" onclick="event.stopPropagation();viewOrd(${p.id})">View Orders</button><button class="act-btn act-btn-blue" onclick="event.stopPropagation();openOrd(${p.id})">Edit</button>`;
+    if(!preO||!postO) actions+=`<button class="act-btn act-btn-green" onclick="event.stopPropagation();quickSignOrd(${p.id})">Sign</button>`;
+  } else {
+    const r=readiness(p),item=r.items.find(i=>i.id===itemId);
+    if(item){title=item.label;const c=item.done?'done':item.partial?'warn':'miss';content=`<div class="exp-grid"><div class="exp-item"><div class="ei-icon ${c}">${item.done?'\u2713':item.partial?'\u25D0':'\u2715'}</div><div class="ei-info"><div class="ei-label">${item.label}</div><div class="ei-detail">${item.detail}</div></div></div></div>`;}
+  }
+  return `<div class="exp-title"><span>${title}</span><div class="exp-actions">${actions}<button class="exp-close" onclick="event.stopPropagation();expandedChip=null;render()">\u2715</button></div></div>${content}`;
+}
+
+/* ═══ QUICK SIGN (no edit) ═══ */
+function quickSignHP(pid){
+  const p=P.find(x=>x.id===pid);if(!p)return;
+  p.hp={st:'signed',date:'03/23'};
+  showToast('H&P auto-generated and signed for '+p.l+', '+p.f,'green');
+  render();if(selectedPt===pid)renderPanelBody(p);
+}
+function quickSignOrd(pid){
+  const p=P.find(x=>x.id===pid);if(!p)return;
+  p.orders={pre:{st:'signed',date:'03/23'},post:{st:'signed',date:'03/23'}};
+  showToast('Orders signed for '+p.l+', '+p.f,'green');
+  render();if(selectedPt===pid)renderPanelBody(p);
+}
+
+/* ═══ H&P MODAL (edit) ═══ */
+function openHP(pid){
+  const p=P.find(x=>x.id===pid);if(!p)return;
+  const b=bmi(p),pi=procInfo(p),pl=pi.full;
+  document.getElementById('hpTitle').textContent=`H&P \u2014 ${p.l}, ${p.f}`;
+  const labSum=Object.entries({cbc:'CBC',bmp:'BMP',ptinr:'PT/INR',ua:'UA',ts:'T&S',hba1c:'HbA1c'}).map(([k,lb])=>{const l=p.labs[k];return l?.done?`${lb}: ${l.vals} (${l.date})`:`${lb}: pending`;}).join('\n');
+  const ekgSum=p.ekg?.done?`${p.ekg.note} (${p.ekg.date})${p.ekg.abn?' \u2014 ABNORMAL':''}`:'Not performed';
+  const clrSum=Object.entries(p.clrs).filter(([,c])=>c.need).map(([k,c])=>{const n={pcp:'PCP',cardio:'Cardiology',endo:'Endocrinology'}[k]||k;return c.done?`${n}: Cleared by ${c.doc} (${c.date})`:`${n}: PENDING`;}).join('\n')||'None required';
+  const medList=p.meds.map(m=>`${m.name} \u2014 ${m.action}${m.note?' ('+m.note+')':''}`).join('\n')||'None';
+  const allTxt=p.allergies.length?p.allergies.map(a=>`${a.drug} (${a.rx})`).join(', '):'NKDA';
+
+  // Auto-generate A&P
+  let apText=`${p.age}yo ${p.sex==='M'?'male':'female'}, OA ${p.side.toLowerCase()} ${pi.joint}, optimized for ${pl.toLowerCase()}.
+- Proceed ${fmtDate(p.surgDate)} at ${p.surgSite.loc}
+- ${p.allergies.length?'Allergy: '+p.allergies.map(a=>a.drug).join(', ')+' \u2014 adjust abx to '+PROTO.abxPCNallergy:'Standard abx prophylaxis: '+PROTO.abxDefault}
+- DVT prophylaxis: ${PROTO.dvtProph}`;
+  if(p.a1c) apText+=`\n- DM: A1c ${p.a1c.val}%. Hold metformin ${PROTO.metforminHold}hrs pre-op. Monitor glucose peri-op.`;
+  // Add med hold dates to A&P
+  const medDates=computeMedDates(p).filter(d=>d.action==='HOLD'||d.action==='STOP');
+  if(medDates.length){apText+='\n- Medication holds:';medDates.forEach(d=>{apText+=`\n  \u2022 ${d.med}: ${d.action} ${d.holdDate?'starting '+fmtFullDate(d.holdDate):''}`});}
+  if(p.ekg?.abn) apText+=`\n- Abnormal EKG (${p.ekg.note}): ${p.clrs.cardio?.done?'Cardiology cleared':'Await cardiology clearance'}`;
+  apText+='\n- Consented, understands risks/benefits/alternatives';
+
+  document.getElementById('hpBody').innerHTML=`
+  <div class="hp-section"><div class="hp-section-title">Demographics</div>
+    <div class="hp-row"><div class="hp-field"><label>Patient</label><input class="hp-readonly" readonly value="${p.l}, ${p.f}"></div><div class="hp-field"><label>MRN</label><input class="hp-readonly" readonly value="${p.mrn}"></div><div class="hp-field"><label>DOB/Age</label><input class="hp-readonly" readonly value="${p.dob} (${p.age}yo ${p.sex})"></div></div>
+    <div class="hp-row"><div class="hp-field"><label>Procedure</label><input class="hp-readonly" readonly value="${p.side}${p.bilateral?' Bilateral':''} ${pl}"></div><div class="hp-field"><label>Surgeon</label><input class="hp-readonly" readonly value="Dr. ${p.prov}"></div><div class="hp-field"><label>Surgery</label><input class="hp-readonly" readonly value="${fmtDate(p.surgDate)} \u00B7 ${p.surgSite.loc}"></div></div>
+    <div class="hp-row"><div class="hp-field"><label>Ht</label><input class="hp-readonly" readonly value="${p.ht_in} in"></div><div class="hp-field"><label>Wt</label><input class="hp-readonly" readonly value="${p.wt_lb} lbs"></div><div class="hp-field"><label>BMI</label><input class="hp-readonly" readonly value="${b||'N/A'}"${b&&parseFloat(b)>=40?' style="background:var(--yellowL);border-color:var(--yellowB)"':''}></div></div>
+  </div>
+  <div class="hp-section"><div class="hp-section-title">Allergies</div><div class="hp-row"><div class="hp-field"><input value="${allTxt}"${p.allergies.length?' style="color:var(--red);font-weight:600"':''}></div></div></div>
+  <div class="hp-section"><div class="hp-section-title">History of Present Illness</div><div class="hp-row"><div class="hp-field"><textarea rows="3">${p.age}-year-old ${p.sex==='M'?'male':'female'} with end-stage osteoarthritis of the ${p.side.toLowerCase()} ${pi.joint} presenting for ${p.side.toLowerCase()}${p.bilateral?' bilateral':''} ${pl.toLowerCase()}. Failed conservative management including PT, NSAIDs, and injections. ${p.a1c?'DM managed, A1c '+p.a1c.val+'%.':''} ${p.ekg?.abn?'EKG: '+p.ekg.note+'.':''}</textarea></div></div></div>
+  <div class="hp-section"><div class="hp-section-title">Past Medical History</div><div class="hp-row"><div class="hp-field"><textarea rows="2">${p.a1c?'Type 2 DM (A1c '+p.a1c.val+'%)\n':''}${p.ekg?.abn?'Cardiac: '+p.ekg.note+'\n':''}Osteoarthritis\nHypertension</textarea></div></div></div>
+  <div class="hp-section"><div class="hp-section-title">Medications</div><div class="hp-row"><div class="hp-field"><textarea rows="${Math.max(2,p.meds.length)}">${medList}</textarea></div></div></div>
+  <div class="hp-section"><div class="hp-section-title">Review of Systems</div><div class="hp-row"><div class="hp-field"><textarea rows="2">Constitutional: No fever/chills/weight loss. CV: ${p.ekg?.abn?'Abnormal EKG \u2014 '+p.ekg.note:'No CP, palpitations. Normal EKG.'}. Resp: No SOB. Endo: ${p.a1c?'DM, A1c '+p.a1c.val+'%':'No DM.'}. All other systems negative.</textarea></div></div></div>
+  <div class="hp-section"><div class="hp-section-title">Physical Exam</div><div class="hp-row"><div class="hp-field"><textarea rows="3">General: Alert, oriented, NAD. BMI ${b||'N/A'}.
+${pi.joint==='knee'?'Knee':'Hip'}: ${p.side} ${pi.joint==='knee'?'knee \u2014 varus deformity, limited ROM, crepitus. Ligaments stable. No effusion.':'hip \u2014 limited ROM, pain with IR. Positive log roll. LLD noted.'}
+NV: Intact distally. Pulses 2+ bilaterally.</textarea></div></div></div>
+  <div class="hp-section"><div class="hp-section-title">Labs</div><div class="hp-row"><div class="hp-field"><textarea rows="${Math.max(2,labSum.split('\n').length)}">${labSum}</textarea></div></div></div>
+  <div class="hp-section"><div class="hp-section-title">EKG</div><div class="hp-row"><div class="hp-field"><input value="${ekgSum}"></div></div></div>
+  <div class="hp-section"><div class="hp-section-title">Clearances</div><div class="hp-row"><div class="hp-field"><textarea rows="2">${clrSum}</textarea></div></div></div>
+  <div class="hp-section"><div class="hp-section-title">Assessment & Plan</div><div class="hp-row"><div class="hp-field"><textarea rows="6">${apText}</textarea></div></div></div>`;
+
+  document.getElementById('hpFoot').innerHTML=`<button class="btn" onclick="closeHP()">Cancel</button><button class="btn btn-p" onclick="saveHP(${p.id})">Sign H&P</button>`;
+  document.getElementById('hpOv').classList.add('open');
+}
+function closeHP(){document.getElementById('hpOv').classList.remove('open')}
+function saveHP(pid){const p=P.find(x=>x.id===pid);if(!p)return;p.hp={st:'signed',date:'03/23'};closeHP();showToast('H&P signed for '+p.l+', '+p.f,'green');render();if(selectedPt===pid)renderPanelBody(p);}
+
+/* ═══ H&P VIEWER (read-only like consent) ═══ */
+function viewHP(pid){
+  const p=P.find(x=>x.id===pid);if(!p)return;
+  const b=bmi(p),pi=procInfo(p),pl=pi.full;
+  const labSum=Object.entries({cbc:'CBC',bmp:'BMP',ptinr:'PT/INR',ua:'Urinalysis',ts:'Type & Screen',hba1c:'HbA1c'}).map(([k,lb])=>{const l=p.labs[k];return l?.done?`<tr><td style="padding:2px 8px;font-weight:600">${lb}</td><td style="padding:2px 8px">${l.vals}</td><td style="padding:2px 8px;color:var(--t3)">${l.date}${l.abn?' <span style="color:var(--red);font-weight:600">ABNORMAL</span>':''}</td></tr>`:`<tr><td style="padding:2px 8px;font-weight:600">${lb}</td><td colspan="2" style="padding:2px 8px;color:var(--t4)">Pending</td></tr>`;}).join('');
+  const ekgSum=p.ekg?.done?`${p.ekg.note} (${p.ekg.date})${p.ekg.abn?' — <span style="color:var(--red);font-weight:600">ABNORMAL</span>':''}`:'Not performed';
+  const clrSum=Object.entries(p.clrs).filter(([,c])=>c.need).map(([k,c])=>{const n={pcp:'PCP',cardio:'Cardiology',endo:'Endocrinology',pulm:'Pulmonology'}[k]||k;return `<tr><td style="padding:2px 8px;font-weight:600">${n}</td><td style="padding:2px 8px">${c.done?'Cleared by '+c.doc+' ('+c.date+')':'<span style="color:var(--red)">PENDING</span>'+(c.doc?' — '+c.doc:'')}</td></tr>`;}).join('')||'<tr><td style="padding:2px 8px;color:var(--t3)" colspan="2">None required</td></tr>';
+  const allTxt=p.allergies.length?p.allergies.map(a=>`${a.drug} (${a.rx})`).join(', '):'NKDA';
+  const medDates=computeMedDates(p);
+  let apText=`${p.age}yo ${p.sex==='M'?'male':'female'}, OA ${p.side.toLowerCase()} ${pi.joint}, optimized for ${pl.toLowerCase()}.\n• Proceed ${fmtDate(p.surgDate)} at ${p.surgSite.loc}\n• ${p.allergies.length?'Allergy: '+p.allergies.map(a=>a.drug).join(', ')+' — adjust abx to '+PROTO.abxPCNallergy:'Standard abx prophylaxis: '+PROTO.abxDefault}\n• DVT prophylaxis: ${PROTO.dvtProph}`;
+  if(p.a1c) apText+=`\n• DM: A1c ${p.a1c.val}%. Hold metformin ${PROTO.metforminHold}hrs pre-op.`;
+  const holdMeds=medDates.filter(d=>d.action==='HOLD'||d.action==='STOP');
+  if(holdMeds.length){apText+='\n• Medication holds:';holdMeds.forEach(d=>{apText+=`\n  - ${d.med}: ${d.action} ${d.holdDate?'starting '+fmtFullDate(d.holdDate):''}`});}
+  if(p.ekg?.abn) apText+=`\n• Abnormal EKG (${p.ekg.note}): ${p.clrs.cardio?.done?'Cardiology cleared':'Await cardiology clearance'}`;
+  apText+='\n• Consented, understands risks/benefits/alternatives';
+
+  document.getElementById('consTitle').textContent='History & Physical';
+  document.getElementById('consBody').innerHTML=`<div class="consent-doc">
+    <div style="text-align:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--t1)">
+      <div style="font-size:16px;font-weight:700;letter-spacing:1px">TOTAL JOINT SPECIALISTS</div>
+      <div style="font-size:11px;color:var(--t3);margin-top:2px">Cumming · Gwinnett · Cherokee · Sandy Springs</div>
+      <div style="font-size:14px;font-weight:700;margin-top:10px;letter-spacing:.5px">HISTORY AND PHYSICAL EXAMINATION</div>
+    </div>
+    <table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:12px">
+      <tr><td style="padding:3px 0;width:25%"><strong>Patient Name:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${p.l}, ${p.f}</td><td style="padding:3px 0;padding-left:16px;width:15%"><strong>MRN:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${p.mrn}</td></tr>
+      <tr><td style="padding:3px 0"><strong>Date of Birth:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${p.dob} (${p.age} y/o)</td><td style="padding:3px 0;padding-left:16px"><strong>Sex:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${p.sex==='M'?'Male':'Female'}</td></tr>
+      <tr><td style="padding:3px 0"><strong>Surgeon:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">Dr. ${p.prov}</td><td style="padding:3px 0;padding-left:16px"><strong>Date:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${fmtFullDate(p.surgDate)}</td></tr>
+      <tr><td style="padding:3px 0"><strong>Facility:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${p.surgSite.type==='hosp'?'Northside Hospital':'TJS Centers'} — ${p.surgSite.loc}</td><td style="padding:3px 0;padding-left:16px"><strong>Ht/Wt/BMI:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${p.ht_in}" / ${p.wt_lb} lbs / ${b||'N/A'}${b&&parseFloat(b)>=40?' <span style="color:var(--red);font-weight:600">⚠</span>':''}</td></tr>
+      <tr><td style="padding:3px 0"><strong>Procedure:</strong></td><td colspan="3" style="border-bottom:1px solid var(--border);padding:3px 4px;font-weight:600">${p.side}${p.bilateral?' Bilateral':''} ${pl}</td></tr>
+    </table>
+    ${p.allergies.length?'<div style="background:var(--redL);border:1px solid var(--redB);border-radius:4px;padding:6px 10px;margin-bottom:12px;font-size:11px;color:var(--redT);font-weight:600">⚠ ALLERGIES: '+p.allergies.map(a=>a.drug+' ('+a.rx+')').join(', ')+'</div>':'<div style="background:var(--greenL);border:1px solid var(--greenB);border-radius:4px;padding:6px 10px;margin-bottom:12px;font-size:11px;color:var(--greenT);font-weight:600">NKDA (No Known Drug Allergies)</div>'}
+    <div style="margin-bottom:12px"><p style="margin:6px 0;font-weight:700;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:4px">HISTORY OF PRESENT ILLNESS</p><p style="margin:4px 0;font-size:12px">${p.age}-year-old ${p.sex==='M'?'male':'female'} with end-stage osteoarthritis of the ${p.side.toLowerCase()} ${pi.joint} presenting for ${p.side.toLowerCase()}${p.bilateral?' bilateral':''} ${pl.toLowerCase()}. Failed conservative management including physical therapy, NSAIDs, and injections.${p.a1c?' DM managed, A1c '+p.a1c.val+'%.':''}${p.ekg?.abn?' EKG: '+p.ekg.note+'.':''}</p></div>
+    <div style="margin-bottom:12px"><p style="margin:6px 0;font-weight:700;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:4px">PAST MEDICAL HISTORY</p><p style="margin:4px 0;font-size:12px">${p.a1c?'Type 2 Diabetes Mellitus (A1c '+p.a1c.val+'%)<br>':''}${p.ekg?.abn?'Cardiac: '+p.ekg.note+'<br>':''}Osteoarthritis<br>Hypertension</p></div>
+    <div style="margin-bottom:12px"><p style="margin:6px 0;font-weight:700;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:4px">MEDICATIONS</p><p style="margin:4px 0;font-size:12px">${p.meds.length?p.meds.map(m=>`${m.name} — <em>${m.action}</em>${m.note?' ('+m.note+')':''}`).join('<br>'):'None'}</p></div>
+    <div style="margin-bottom:12px"><p style="margin:6px 0;font-weight:700;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:4px">REVIEW OF SYSTEMS</p><p style="margin:4px 0;font-size:12px">Constitutional: No fever, chills, or weight loss. CV: ${p.ekg?.abn?'Abnormal EKG — '+p.ekg.note:'No chest pain, palpitations. Normal EKG.'}. Resp: No shortness of breath. Endo: ${p.a1c?'DM, A1c '+p.a1c.val+'%':'No diabetes.'}. All other systems reviewed and negative.</p></div>
+    <div style="margin-bottom:12px"><p style="margin:6px 0;font-weight:700;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:4px">PHYSICAL EXAMINATION</p><p style="margin:4px 0;font-size:12px">General: Alert, oriented, no acute distress. BMI ${b||'N/A'}.<br>${pi.joint==='knee'?'Knee':'Hip'}: ${p.side} ${pi.joint==='knee'?'knee — varus deformity, limited ROM, crepitus. Ligaments stable. No effusion.':'hip — limited ROM, pain with internal rotation. Positive log roll. Leg length discrepancy noted.'}<br>Neurovascular: Intact distally. Pulses 2+ bilaterally.</p></div>
+    <div style="margin-bottom:12px"><p style="margin:6px 0;font-weight:700;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:4px">LABORATORY DATA</p><table style="width:100%;font-size:12px;border-collapse:collapse">${labSum}</table></div>
+    <div style="margin-bottom:12px"><p style="margin:6px 0;font-weight:700;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:4px">EKG</p><p style="margin:4px 0;font-size:12px">${ekgSum}</p></div>
+    <div style="margin-bottom:12px"><p style="margin:6px 0;font-weight:700;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:4px">CLEARANCES</p><table style="width:100%;font-size:12px;border-collapse:collapse">${clrSum}</table></div>
+    <div style="margin-bottom:12px"><p style="margin:6px 0;font-weight:700;font-size:13px;border-bottom:1px solid var(--border);padding-bottom:4px">ASSESSMENT & PLAN</p><p style="margin:4px 0;font-size:12px;white-space:pre-line">${apText}</p></div>
+    <div class="sig-line">
+      <div><div style="font-size:10px;color:var(--t3)">Physician Signature</div><div class="sig-mark">${p.hp?.st==='signed'?'Dr. '+p.prov:''}</div><div style="font-size:10px;color:var(--t3);margin-top:2px">Date: ${p.hp?.date||'___________'}</div></div>
+      <div><div style="font-size:10px;color:var(--t3)">Attestation</div><div class="sig-mark">${p.hp?.st==='signed'?'Attested':'___________'}</div></div>
+    </div>
+  </div>`;
+  const signed=p.hp?.st==='signed';
+  document.getElementById('consFoot').innerHTML=`<button class="btn" onclick="closeCons()">Close</button><button class="btn btn-p" onclick="openHP(${pid});closeCons()">Edit H&P</button>${!signed?`<button class="btn btn-green" onclick="quickSignHP(${pid});closeCons()">Sign H&P</button>`:`<span style="color:var(--green);font-weight:600;font-size:12px">✓ Signed ${p.hp.date}</span>`}`;
+  document.getElementById('consOv').classList.add('open');
+}
+
+/* ═══ ORDERS VIEWER (read-only like consent) ═══ */
+function viewOrd(pid){
+  const p=P.find(x=>x.id===pid);if(!p)return;
+  const pi=procInfo(p),pl=pi.full;
+  const tPre=JSON.parse(JSON.stringify(PRE_ORD)),tPost=JSON.parse(JSON.stringify(POST_ORD));
+  // Patient-specific adjustments
+  if(p.allergies.some(a=>a.drug.toLowerCase().includes('penicillin'))){const g=tPre.find(g=>g.cat==='Pre-Op Medications');const it=g?.items.find(i=>i.name.includes('Cefazolin'));if(it){it.name=PROTO.abxPCNallergy;it.detail='PCN allergy — substitute';}}
+  if(pi.type==='tha'){const g=tPre.find(g=>g.cat==='Anesthesia');const it=g?.items.find(i=>i.name.includes('iPACK'));if(it){it.on=false;it.detail='Knee only';}}
+  if(p.a1c){const g=tPre.find(g=>g.cat==='Labs');const it=g?.items.find(i=>i.name==='HbA1c');if(it)it.on=true;}
+
+  function renderOrderGroup(groups){
+    return groups.map(g=>{
+      const active=g.items.filter(i=>i.on);
+      if(!active.length)return '';
+      return `<div style="margin-bottom:12px"><p style="margin:4px 0;font-weight:700;font-size:12px;color:var(--t2)">${g.cat}</p>${active.map(i=>`<div style="display:flex;align-items:flex-start;gap:6px;padding:3px 0;font-size:12px"><span style="color:var(--green);font-weight:700">☐</span><div><span style="font-weight:600">${i.name}</span><span style="color:var(--t3);margin-left:6px">${i.detail}</span></div></div>`).join('')}</div>`;
+    }).join('');
+  }
+
+  const preO=p.orders?.pre?.st==='signed',postO=p.orders?.post?.st==='signed';
+  document.getElementById('consTitle').textContent='Order Set';
+  document.getElementById('consBody').innerHTML=`<div class="consent-doc">
+    <div style="text-align:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--t1)">
+      <div style="font-size:16px;font-weight:700;letter-spacing:1px">TOTAL JOINT SPECIALISTS</div>
+      <div style="font-size:11px;color:var(--t3);margin-top:2px">Cumming · Gwinnett · Cherokee · Sandy Springs</div>
+      <div style="font-size:14px;font-weight:700;margin-top:10px;letter-spacing:.5px">PRE-OP & POST-OP ORDER SET</div>
+    </div>
+    <table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:12px">
+      <tr><td style="padding:3px 0;width:25%"><strong>Patient:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${p.l}, ${p.f}</td><td style="padding:3px 0;padding-left:16px;width:15%"><strong>MRN:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${p.mrn}</td></tr>
+      <tr><td style="padding:3px 0"><strong>Procedure:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px;font-weight:600">${p.side}${p.bilateral?' Bilateral':''} ${pl}</td><td style="padding:3px 0;padding-left:16px"><strong>Date:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${fmtFullDate(p.surgDate)}</td></tr>
+      <tr><td style="padding:3px 0"><strong>Surgeon:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">Dr. ${p.prov}</td><td style="padding:3px 0;padding-left:16px"><strong>Facility:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${p.surgSite.type==='hosp'?'Northside Hospital':'TJS Centers'} — ${p.surgSite.loc}</td></tr>
+    </table>
+    ${p.allergies.length?'<div style="background:var(--redL);border:1px solid var(--redB);border-radius:4px;padding:6px 10px;margin-bottom:12px;font-size:11px;color:var(--redT);font-weight:600">⚠ ALLERGIES: '+p.allergies.map(a=>a.drug+' ('+a.rx+')').join(', ')+'</div>':''}
+    <div style="margin-bottom:16px"><p style="margin:6px 0;font-weight:700;font-size:14px;border-bottom:2px solid var(--pri);padding-bottom:4px;color:var(--pri)">PRE-OPERATIVE ORDERS</p><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:11px;padding:2px 8px;border-radius:3px;font-weight:600;background:${preO?'var(--greenL)':'var(--redL)'};color:${preO?'var(--greenT)':'var(--redT)'}">${preO?'✓ Signed '+p.orders.pre.date:'Not signed'}</span></div>${renderOrderGroup(tPre)}</div>
+    <div style="margin-bottom:16px"><p style="margin:6px 0;font-weight:700;font-size:14px;border-bottom:2px solid var(--pri);padding-bottom:4px;color:var(--pri)">POST-OPERATIVE ORDERS</p><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:11px;padding:2px 8px;border-radius:3px;font-weight:600;background:${postO?'var(--greenL)':'var(--redL)'};color:${postO?'var(--greenT)':'var(--redT)'}">${postO?'✓ Signed '+p.orders.post.date:'Not signed'}</span></div>${renderOrderGroup(tPost)}</div>
+    <div class="sig-line">
+      <div><div style="font-size:10px;color:var(--t3)">Ordering Physician</div><div class="sig-mark">${preO&&postO?'Dr. '+p.prov:''}</div><div style="font-size:10px;color:var(--t3);margin-top:2px">Date: ${preO?p.orders.pre.date:'___________'}</div></div>
+    </div>
+  </div>`;
+  document.getElementById('consFoot').innerHTML=`<button class="btn" onclick="closeCons()">Close</button><button class="btn btn-p" onclick="openOrd(${pid});closeCons()">Edit Orders</button>${(!preO||!postO)?`<button class="btn btn-green" onclick="quickSignOrd(${pid});closeCons()">Sign Orders</button>`:`<span style="color:var(--green);font-weight:600;font-size:12px">✓ All Orders Signed</span>`}`;
+  document.getElementById('consOv').classList.add('open');
+}
+
+/* ═══ ORDERS MODAL (edit + add/remove) ═══ */
+function openOrd(pid){
+  const p=P.find(x=>x.id===pid);if(!p)return;
+  currentOrdPid=pid;
+  const pi=procInfo(p);
+  document.getElementById('ordTitle').textContent=`Orders \u2014 ${p.l}, ${p.f} (${p.side} ${pi.abbr})`;
+  tempPreOrd=JSON.parse(JSON.stringify(PRE_ORD));
+  tempPostOrd=JSON.parse(JSON.stringify(POST_ORD));
+  // Patient-specific adjustments
+  if(p.allergies.some(a=>a.drug.toLowerCase().includes('penicillin'))){const g=tempPreOrd.find(g=>g.cat==='Pre-Op Medications');const it=g?.items.find(i=>i.name.includes('Cefazolin'));if(it){it.name=PROTO.abxPCNallergy;it.detail='PCN allergy \u2014 substitute';}}
+  if(pi.type==='tha'){const g=tempPreOrd.find(g=>g.cat==='Anesthesia');const it=g?.items.find(i=>i.name.includes('iPACK'));if(it){it.on=false;it.detail='Knee only';}}
+  if(p.a1c){const g=tempPreOrd.find(g=>g.cat==='Labs');const it=g?.items.find(i=>i.name==='HbA1c');if(it)it.on=true;}
+  renderOrdModalBody();
+  document.getElementById('ordFoot').innerHTML=`<button class="btn" onclick="closeOrd()">Cancel</button><button class="btn btn-p" onclick="saveOrd(${p.id})">Sign Orders</button>`;
+  document.getElementById('ordOv').classList.add('open');
+}
+function renderOrdModalBody(){
+  function rg(groups,pfx){
+    return groups.map((g,gi)=>`<div class="ord-group"><div class="ord-group-title">${g.cat} <span style="font-size:10px;color:var(--t4)">${g.items.filter(i=>i.on).length}/${g.items.length} active</span></div>${g.items.map((it,ii)=>`<div class="ord-item"><input type="checkbox" ${it.on?'checked':''} onchange="${pfx}[${gi}].items[${ii}].on=this.checked"><div class="ord-item-info"><div class="ord-item-name">${it.name}</div><div class="ord-item-detail">${it.detail}</div></div><button class="ord-remove" onclick="removeOrdItem('${pfx}',${gi},${ii})" title="Remove">\u2715</button></div>`).join('')}
+      <div class="add-order-row"><input id="addOrdM_${pfx}_${gi}" placeholder="Add order to ${g.cat}..." onkeydown="if(event.key==='Enter')addOrdItem('${pfx}',${gi})"><button class="btn" style="font-size:10px;padding:2px 6px" onclick="addOrdItem('${pfx}',${gi})">+</button></div>
+    </div>`).join('');
+  }
+  document.getElementById('ordBody').innerHTML=`
+    <div class="msg-type" style="margin-bottom:16px"><div class="msg-type-btn active" id="oTabPre" onclick="document.getElementById('oPre').style.display='';document.getElementById('oPost').style.display='none';this.classList.add('active');document.getElementById('oTabPost').classList.remove('active')">Pre-Op Orders</div><div class="msg-type-btn" id="oTabPost" onclick="document.getElementById('oPost').style.display='';document.getElementById('oPre').style.display='none';this.classList.add('active');document.getElementById('oTabPre').classList.remove('active')">Post-Op Orders</div></div>
+    <div id="oPre">${rg(tempPreOrd,'tempPreOrd')}</div><div id="oPost" style="display:none">${rg(tempPostOrd,'tempPostOrd')}</div>`;
+}
+function addOrdItem(pfx,gi){
+  const arr=pfx==='tempPreOrd'?tempPreOrd:tempPostOrd;
+  const inp=document.getElementById('addOrdM_'+pfx+'_'+gi);
+  if(!inp||!inp.value.trim())return;
+  arr[gi].items.push({name:inp.value.trim(),on:true,detail:'Custom order'});
+  renderOrdModalBody();
+}
+function removeOrdItem(pfx,gi,ii){
+  const arr=pfx==='tempPreOrd'?tempPreOrd:tempPostOrd;
+  arr[gi].items.splice(ii,1);
+  renderOrdModalBody();
+}
+function closeOrd(){document.getElementById('ordOv').classList.remove('open');tempPreOrd=null;tempPostOrd=null;currentOrdPid=null;}
+function saveOrd(pid){const p=P.find(x=>x.id===pid);if(!p)return;p.orders={pre:{st:'signed',date:'03/23'},post:{st:'signed',date:'03/23'}};closeOrd();showToast('Orders signed for '+p.l+', '+p.f,'green');render();if(selectedPt===pid)renderPanelBody(p);}
+
+/* ═══ CONSENT VIEWER ═══ */
+function viewConsent(pid,consentKey){
+  const p=P.find(x=>x.id===pid);if(!p)return;
+  const pi=procInfo(p),pl=pi.full;
+  const procDesc=pi.joint==='knee'?'total knee replacement (arthroplasty)':'total hip replacement (arthroplasty)';
+  const jointSide=p.side.toLowerCase();
+  const names={tjs_surg:'Informed Consent for Surgery',anes:'Consent for Anesthesia Services',nhs:'Hospital/Facility Consent'};
+  document.getElementById('consTitle').textContent=names[consentKey]||'Consent';
+  const abx=p.allergies.some(a=>a.drug.toLowerCase().includes('penicillin'))?PROTO.abxPCNallergy:PROTO.abxDefault;
+
+  let doc='';
+  if(consentKey==='tjs_surg'){
+    doc=`<div class="consent-doc">
+      <div style="text-align:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--t1)">
+        <div style="font-size:16px;font-weight:700;letter-spacing:1px">TOTAL JOINT SPECIALISTS</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:2px">Cumming \u00B7 Gwinnett \u00B7 Cherokee \u00B7 Sandy Springs</div>
+        <div style="font-size:14px;font-weight:700;margin-top:10px;letter-spacing:.5px">INFORMED CONSENT FOR SURGICAL PROCEDURE</div>
+      </div>
+      <table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:12px">
+        <tr><td style="padding:3px 0;width:25%"><strong>Patient Name:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${p.l}, ${p.f}</td><td style="padding:3px 0;padding-left:16px;width:15%"><strong>MRN:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${p.mrn}</td></tr>
+        <tr><td style="padding:3px 0"><strong>Date of Birth:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${p.dob} (${p.age} y/o)</td><td style="padding:3px 0;padding-left:16px"><strong>Sex:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${p.sex==='M'?'Male':'Female'}</td></tr>
+        <tr><td style="padding:3px 0"><strong>Surgeon:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">Dr. ${p.prov}</td><td style="padding:3px 0;padding-left:16px"><strong>Date:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${fmtFullDate(p.surgDate)}</td></tr>
+        <tr><td style="padding:3px 0"><strong>Facility:</strong></td><td colspan="3" style="border-bottom:1px solid var(--border);padding:3px 4px">${p.surgSite.type==='hosp'?'Northside Hospital':'TJS Centers'} \u2014 ${p.surgSite.loc}</td></tr>
+        <tr><td style="padding:3px 0"><strong>Procedure:</strong></td><td colspan="3" style="border-bottom:1px solid var(--border);padding:3px 4px;font-weight:600">${p.side}${p.bilateral?' Bilateral':''} ${pl}</td></tr>
+      </table>
+      ${p.allergies.length?'<div style="background:var(--redL);border:1px solid var(--redB);border-radius:4px;padding:6px 10px;margin-bottom:12px;font-size:11px;color:var(--redT);font-weight:600">ALLERGIES: '+p.allergies.map(a=>a.drug+' ('+a.rx+')').join(', ')+'</div>':'<div style="background:var(--greenL);border:1px solid var(--greenB);border-radius:4px;padding:6px 10px;margin-bottom:12px;font-size:11px;color:var(--greenT);font-weight:600">NKDA (No Known Drug Allergies)</div>'}
+      <p style="margin:8px 0"><strong>1. NATURE OF PROCEDURE:</strong> I, <strong>${p.f} ${p.l}</strong>, hereby authorize <strong>Dr. ${p.prov}</strong> and such assistants as may be selected, to perform the following surgical procedure: <strong>${p.side.toLowerCase()}${p.bilateral?' bilateral':''} ${procDesc}</strong>. This involves removing the damaged surfaces of the ${pi.joint==='knee'?'knee joint (femoral condyles, tibial plateau, and patella)':'hip joint (femoral head and acetabulum)'} and replacing them with prosthetic implant components.</p>
+      <p style="margin:8px 0"><strong>2. RISKS OF SURGERY:</strong> The risks, potential complications, and possible consequences of this procedure have been fully explained to me, including but not limited to:</p>
+      <ul style="margin:4px 0 8px 24px;font-size:12px;line-height:1.8">
+        <li>Infection (superficial or deep/periprosthetic joint infection)</li>
+        <li>Blood loss requiring transfusion; hematoma formation</li>
+        <li>Deep vein thrombosis (DVT) and pulmonary embolism (PE)</li>
+        <li>Nerve injury (peroneal nerve palsy${pi.joint==='knee'?'':', sciatic nerve injury'}) causing numbness, weakness, or foot drop</li>
+        <li>Vascular injury requiring repair</li>
+        <li>Implant loosening, failure, wear, or dislocation${pi.type==='tha'?' (hip dislocation precautions required)':''}</li>
+        <li>${pi.joint==='knee'?'Stiffness, limited range of motion, need for manipulation under anesthesia':'Leg length discrepancy'}</li>
+        <li>Periprosthetic fracture during or after surgery</li>
+        <li>Continued or worsening pain; complex regional pain syndrome (CRPS)</li>
+        <li>Need for future revision surgery</li>
+        <li>Adverse reaction to anesthesia, medications, or implant materials</li>
+        <li>Medical complications: stroke, myocardial infarction, pneumonia, urinary retention</li>
+        <li>Death (rare)</li>
+      </ul>
+      <p style="margin:8px 0"><strong>3. BENEFITS:</strong> Relief of pain and disability, improved joint function and mobility, improved quality of life, and ability to return to daily activities with a functional ${pi.joint} joint.</p>
+      <p style="margin:8px 0"><strong>4. ALTERNATIVES:</strong> I understand that alternatives to the proposed surgery include: continued conservative management (physical therapy, weight management, activity modification, assistive devices), medication management (NSAIDs, intra-articular corticosteroid or hyaluronic acid injections), bracing, or choosing no treatment. These alternatives have been discussed with me, and I have chosen to proceed with surgery.</p>
+      <p style="margin:8px 0"><strong>5. PERIOPERATIVE PROTOCOL:</strong> I understand the following perioperative plan:</p>
+      <ul style="margin:4px 0 8px 24px;font-size:12px;line-height:1.8">
+        <li>Antibiotic prophylaxis: ${abx} within 60 minutes of incision</li>
+        <li>DVT prophylaxis: ${PROTO.dvtProph}</li>
+        <li>Anesthesia: Spinal preferred with regional nerve block (separate consent)</li>
+        ${pi.joint==='knee'?'<li>Multimodal pain protocol: Adductor Canal Block, iPACK Block, periarticular injection</li>':'<li>Multimodal pain protocol: Regional nerve block, periarticular injection</li>'}
+        <li>Expected ambulation day of surgery with physical therapy</li>
+      </ul>
+      <p style="margin:8px 0"><strong>6. ADDITIONAL PROCEDURES:</strong> I authorize Dr. ${p.prov} to perform any additional procedures deemed necessary during the course of surgery based on intraoperative findings, including but not limited to: hardware removal, bone grafting, ligament repair, or conversion to a different implant system.</p>
+      <p style="margin:8px 0"><strong>7. ACKNOWLEDGMENT:</strong> I acknowledge that I have had sufficient opportunity to discuss the procedure, ask questions, and have received satisfactory answers. I understand that no guarantees have been made regarding the outcome. I have read, or had read to me, this consent form and understand its contents.</p>
+      <div class="sig-line">
+        <div><div style="font-size:10px;color:var(--t3)">Patient Signature</div><div class="sig-mark">${p.cons[consentKey]?.signed?p.f+' '+p.l:''}</div><div style="font-size:10px;color:var(--t3);margin-top:2px">Date: ${p.cons[consentKey]?.date||'___________'}</div></div>
+        <div><div style="font-size:10px;color:var(--t3)">Witness Signature</div><div class="sig-mark">${p.cons[consentKey]?.signed?'Witnessed':''}</div><div style="font-size:10px;color:var(--t3);margin-top:2px">Date: ${p.cons[consentKey]?.date||'___________'}</div></div>
+        <div><div style="font-size:10px;color:var(--t3)">Surgeon Signature</div><div class="sig-mark">${p.cons[consentKey]?.signed?'Dr. '+p.prov:''}</div><div style="font-size:10px;color:var(--t3);margin-top:2px">Date: ${p.cons[consentKey]?.date||'___________'}</div></div>
+      </div>
+    </div>`;
+  } else if(consentKey==='anes'){
+    doc=`<div class="consent-doc">
+      <div style="text-align:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--t1)">
+        <div style="font-size:16px;font-weight:700;letter-spacing:1px">TOTAL JOINT SPECIALISTS</div>
+        <div style="font-size:14px;font-weight:700;margin-top:6px;letter-spacing:.5px">CONSENT FOR ANESTHESIA SERVICES</div>
+      </div>
+      <table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:12px">
+        <tr><td style="padding:3px 0;width:25%"><strong>Patient:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${p.l}, ${p.f}</td><td style="padding:3px 0;padding-left:16px;width:15%"><strong>MRN:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${p.mrn}</td></tr>
+        <tr><td style="padding:3px 0"><strong>Procedure:</strong></td><td colspan="3" style="border-bottom:1px solid var(--border);padding:3px 4px">${p.side}${p.bilateral?' Bilateral':''} ${pl}</td></tr>
+        <tr><td style="padding:3px 0"><strong>Surgeon:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">Dr. ${p.prov}</td><td style="padding:3px 0;padding-left:16px"><strong>Date:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${fmtFullDate(p.surgDate)}</td></tr>
+      </table>
+      ${p.allergies.length?'<div style="background:var(--redL);border:1px solid var(--redB);border-radius:4px;padding:6px 10px;margin-bottom:12px;font-size:11px;color:var(--redT);font-weight:600">ALLERGIES: '+p.allergies.map(a=>a.drug+' ('+a.rx+')').join(', ')+'</div>':''}
+      <p style="margin:8px 0"><strong>1. PLANNED ANESTHESIA:</strong></p>
+      <ul style="margin:4px 0 8px 24px;font-size:12px;line-height:1.8">
+        <li><strong>Primary:</strong> Spinal anesthesia (hyperbaric bupivacaine 0.75%) \u2014 preferred for ${procDesc}</li>
+        <li><strong>Regional nerve block:</strong> Adductor Canal Block (20mL 0.25% bupivacaine) for postoperative pain control</li>
+        ${pi.joint==='knee'?'<li><strong>iPACK Block:</strong> Interspace between Popliteal Artery and Capsule of posterior Knee (20mL 0.25% bupivacaine) for posterior knee pain</li>':''}
+        <li><strong>Periarticular injection:</strong> Multimodal cocktail injected intraoperatively by surgeon</li>
+        <li><strong>Alternative:</strong> General anesthesia if spinal contraindicated or technically unsuccessful</li>
+      </ul>
+      <p style="margin:8px 0"><strong>2. PERIOPERATIVE MEDICATIONS:</strong></p>
+      <ul style="margin:4px 0 8px 24px;font-size:12px;line-height:1.8">
+        <li>${abx} \u2014 antibiotic prophylaxis within 60 minutes of incision</li>
+        ${PROTO.txaEnabled?'<li>Tranexamic Acid (TXA) 1g IV \u2014 to reduce blood loss</li>':''}
+        ${PROTO.dexEnabled?'<li>Dexamethasone 10mg IV \u2014 anti-emetic/anti-inflammatory at induction</li>':''}
+        <li>Acetaminophen 1000mg PO \u2014 2 hours pre-op (multimodal analgesia)</li>
+        <li>Celecoxib 400mg PO \u2014 2 hours pre-op (multimodal analgesia)</li>
+      </ul>
+      <p style="margin:8px 0"><strong>3. RISKS OF ANESTHESIA:</strong> I understand that all forms of anesthesia involve risks, including but not limited to:</p>
+      <ul style="margin:4px 0 8px 24px;font-size:12px;line-height:1.8">
+        <li>Post-dural puncture headache (spinal headache) \u2014 may require epidural blood patch</li>
+        <li>Temporary or permanent nerve damage, including cauda equina syndrome (rare)</li>
+        <li>Urinary retention requiring catheterization</li>
+        <li>Nausea, vomiting, pruritus from spinal opioids</li>
+        <li>Failed spinal requiring conversion to general anesthesia</li>
+        <li>Allergic reaction to anesthetic agents</li>
+        <li>Respiratory depression, aspiration pneumonia</li>
+        <li>Cardiovascular events: hypotension, bradycardia, cardiac arrest</li>
+        <li>Nerve block complications: local anesthetic systemic toxicity (LAST), prolonged numbness, fall risk</li>
+        <li>Awareness under anesthesia (if general anesthesia is used)</li>
+        <li>Death (extremely rare)</li>
+      </ul>
+      <p style="margin:8px 0"><strong>4. ACKNOWLEDGMENT:</strong> The anesthesia plan has been discussed with me by the anesthesia team. I have had the opportunity to ask questions and receive satisfactory answers. I consent to the administration of anesthesia and related medications as deemed appropriate by the anesthesia provider.</p>
+      <div class="sig-line">
+        <div><div style="font-size:10px;color:var(--t3)">Patient Signature</div><div class="sig-mark">${p.cons[consentKey]?.signed?p.f+' '+p.l:''}</div><div style="font-size:10px;color:var(--t3);margin-top:2px">Date: ${p.cons[consentKey]?.date||'___________'}</div></div>
+        <div><div style="font-size:10px;color:var(--t3)">Anesthesia Provider</div><div class="sig-mark">${p.cons[consentKey]?.signed?'Anesthesia Team':''}</div><div style="font-size:10px;color:var(--t3);margin-top:2px">Date: ${p.cons[consentKey]?.date||'___________'}</div></div>
+        <div><div style="font-size:10px;color:var(--t3)">Witness Signature</div><div class="sig-mark">${p.cons[consentKey]?.signed?'Witnessed':''}</div><div style="font-size:10px;color:var(--t3);margin-top:2px">Date: ${p.cons[consentKey]?.date||'___________'}</div></div>
+      </div>
+    </div>`;
+  } else {
+    doc=`<div class="consent-doc">
+      <div style="text-align:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--t1)">
+        <div style="font-size:16px;font-weight:700;letter-spacing:1px">${p.surgSite.type==='hosp'?'NORTHSIDE HOSPITAL':'TJS CENTERS'} \u2014 ${p.surgSite.loc.toUpperCase()}</div>
+        <div style="font-size:14px;font-weight:700;margin-top:6px;letter-spacing:.5px">GENERAL CONSENT FOR TREATMENT</div>
+      </div>
+      <table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:12px">
+        <tr><td style="padding:3px 0;width:25%"><strong>Patient:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${p.l}, ${p.f}</td><td style="padding:3px 0;padding-left:16px;width:15%"><strong>MRN:</strong></td><td style="border-bottom:1px solid var(--border);padding:3px 4px">${p.mrn}</td></tr>
+        <tr><td style="padding:3px 0"><strong>Admission Date:</strong></td><td colspan="3" style="border-bottom:1px solid var(--border);padding:3px 4px">${fmtFullDate(p.surgDate)}</td></tr>
+      </table>
+      <p style="margin:8px 0"><strong>1.</strong> I consent to care, treatment, and procedures as ordered by my physicians during my stay at this facility. I understand that physicians and other providers who treat me are not employees of the facility and are independent practitioners.</p>
+      <p style="margin:8px 0"><strong>2.</strong> I consent to the facility's standard infection control procedures, blood-borne pathogen protocols, and fall prevention measures.</p>
+      <p style="margin:8px 0"><strong>3.</strong> I authorize the release of medical information necessary for insurance processing, quality review, and continuity of care.</p>
+      <p style="margin:8px 0"><strong>4.</strong> I have received a copy of the facility's Notice of Privacy Practices (HIPAA).</p>
+      <p style="margin:8px 0"><strong>5.</strong> I understand my rights as a patient and have received the Patient Rights and Responsibilities document.</p>
+      <p style="margin:8px 0"><strong>6. FINANCIAL RESPONSIBILITY:</strong> I agree to be financially responsible for charges not covered by my insurance plan. I assign insurance benefits directly to the facility.</p>
+      <div class="sig-line">
+        <div><div style="font-size:10px;color:var(--t3)">Patient Signature</div><div class="sig-mark">${p.cons[consentKey]?.signed?p.f+' '+p.l:''}</div><div style="font-size:10px;color:var(--t3);margin-top:2px">Date: ${p.cons[consentKey]?.date||'___________'}</div></div>
+        <div><div style="font-size:10px;color:var(--t3)">Witness</div><div class="sig-mark">${p.cons[consentKey]?.signed?'Witnessed':''}</div><div style="font-size:10px;color:var(--t3);margin-top:2px">Date: ${p.cons[consentKey]?.date||'___________'}</div></div>
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('consBody').innerHTML=doc;
+  const signed=p.cons[consentKey]?.signed;
+  document.getElementById('consFoot').innerHTML=`<button class="btn" onclick="closeCons()">Close</button>${!signed?`<button class="btn btn-p" onclick="signConsent(${pid},'${consentKey}')">Mark as Signed</button>`:`<span style="color:var(--green);font-weight:600;font-size:12px">\u2713 Signed ${p.cons[consentKey].date}</span>`}`;
+  document.getElementById('consOv').classList.add('open');
+}
+function viewConsentTemplate(type){
+  const fakeP={l:'________',f:'________',mrn:'________',dob:'__/__/____',age:'__',sex:'_',proc:'ptk',side:'________',bilateral:false,prov:'________',surgDate:'2026-01-01',surgSite:{type:'asc',loc:'________'},allergies:[],cons:{tjs_surg:{},anes:{},nhs:{}}};
+  const key=type==='surgical'?'tjs_surg':type==='anesthesia'?'anes':'nhs';
+  // Temporarily add fakeP to find array
+  fakeP.id=-99;P.push(fakeP);
+  viewConsent(-99,key);
+  P.pop();
+  const names={tjs_surg:'Surgical Consent \u2014 Blank Template',anes:'Anesthesia Consent \u2014 Blank Template',nhs:'Facility Consent \u2014 Blank Template'};
+  document.getElementById('consTitle').textContent=names[key];
+  document.getElementById('consFoot').innerHTML=`<button class="btn" onclick="closeCons()">Close</button>`;
+}
+function closeCons(){document.getElementById('consOv').classList.remove('open')}
+function signConsent(pid,key){
+  const p=P.find(x=>x.id===pid);if(!p)return;
+  p.cons[key]={signed:true,date:'03/23'};
+  closeCons();showToast('Consent signed','green');render();if(selectedPt===pid)renderPanelBody(p);
+}
+
+/* ═══ TOAST ═══ */
+function showToast(msg,color){const t=document.getElementById('toast');t.style.background=color==='green'?'var(--green)':color==='red'?'var(--red)':color==='yellow'?'var(--yellow)':'var(--pri)';t.innerHTML=(color==='green'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>')+msg;t.classList.add('show');clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),3000);}
+
+/* ═══ AGENT ═══ */
+function openAgent(){agentSelected=new Set();P.filter(p=>readiness(p).st!=='ready').forEach(p=>agentSelected.add(p.id));renderAgentBody();document.getElementById('agentOv').classList.add('open');}
+function closeAgent(){document.getElementById('agentOv').classList.remove('open')}
+function renderAgentBody(){
+  const body=document.getElementById('agentBody'),foot=document.getElementById('agentFoot'),inc=P.filter(p=>readiness(p).st!=='ready');
+  let h='<div style="font-size:12px;color:var(--t3);margin-bottom:12px">Send automated readiness notifications.</div>';
+  h+='<div class="msg-type"><div class="msg-type-btn active" onclick="this.parentElement.querySelectorAll(\'.msg-type-btn\').forEach(b=>b.classList.remove(\'active\'));this.classList.add(\'active\')">SMS</div><div class="msg-type-btn" onclick="this.parentElement.querySelectorAll(\'.msg-type-btn\').forEach(b=>b.classList.remove(\'active\'));this.classList.add(\'active\')">Email</div><div class="msg-type-btn" onclick="this.parentElement.querySelectorAll(\'.msg-type-btn\').forEach(b=>b.classList.remove(\'active\'));this.classList.add(\'active\')">Portal</div></div>';
+  if(!inc.length)h+='<div style="text-align:center;padding:20px;color:var(--green);font-weight:600">All patients ready!</div>';
+  else{inc.forEach(p=>{const m=getMissing(p),sel=agentSelected.has(p.id);h+=`<div class="agent-pt ${sel?'selected':''}" onclick="toggleAgentPt(${p.id})"><input type="checkbox" ${sel?'checked':''} style="pointer-events:none;accent-color:var(--accent)"/><div style="flex:1"><div class="agent-pt-name">${p.l}, ${p.f}</div><div class="agent-pt-detail">${procInfo(p).abbr} \u00B7 ${fmtDate(p.surgDate)}</div><div class="agent-missing">${m.map(x=>`<span class="agent-tag">${x}</span>`).join('')}</div></div></div>`;});
+  if(agentSelected.size){const s=P.find(x=>agentSelected.has(x.id)),sm=getMissing(s);h+=`<div style="margin-top:12px;font-size:11px;font-weight:600;color:var(--t3)">PREVIEW</div><div class="msg-preview">Hi ${s.f},\n\nReminder re: your surgery on ${fmtDate(s.surgDate)}.\n\nStill needed:\n${sm.map(x=>'  \u2022 '+x).join('\n')}\n\nCall (770) 555-0100 with questions.\n\n\u2014 TJS PAC Team</div>`;}}
+  body.innerHTML=h;
+  foot.innerHTML=`<button class="btn" onclick="closeAgent()">Cancel</button><button class="btn btn-p" onclick="sendAgent()" ${agentSelected.size===0?'disabled style="opacity:.5;pointer-events:none"':''}>Send to ${agentSelected.size}</button>`;
+}
+function toggleAgentPt(pid){if(agentSelected.has(pid))agentSelected.delete(pid);else agentSelected.add(pid);renderAgentBody();}
+function sendAgent(){const n=agentSelected.size;closeAgent();showToast(`Sending to ${n} patient${n!==1?'s':''}...`,'blue');setTimeout(()=>showToast(`${n} notification${n!==1?'s':''} sent`,'green'),2000);}
+
+/* ═══ SLIDE-OVER ═══ */
+function openPanel(pid){const p=P.find(x=>x.id===pid);if(!p)return;selectedPt=pid;expandedChip=null;document.getElementById('panelOv').classList.add('open');document.getElementById('panel').classList.add('open');document.getElementById('mainArea').classList.add('po');renderPanelHd(p);renderPanelTabs();renderPanelBody(p);render();}
+function closePanel(){selectedPt=null;document.getElementById('panelOv').classList.remove('open');document.getElementById('panel').classList.remove('open');document.getElementById('mainArea').classList.remove('po');render();}
+
+function renderPanelHd(p){
+  const pl=procInfo(p).abbr;let flags='';
+  if(p.allergies.length)flags+=p.allergies.map(a=>`<span class="p-flag alert">\u26A0 ${a.drug}</span>`).join('');
+  const b=bmi(p);if(b&&parseFloat(b)>=40)flags+=`<span class="p-flag warn">BMI ${b}</span>`;
+  if(p.a1c&&p.a1c.val>=7.5)flags+=`<span class="p-flag warn">A1c ${p.a1c.val}</span>`;
+  flags+=`<span class="p-flag info">${p.side} ${pl}</span><span class="p-flag info">${fmtDate(p.surgDate)}</span><span class="p-flag info">Dr. ${p.prov}</span><span class="p-flag info">${p.ins}</span>`;
+  document.getElementById('panelHd').innerHTML=`<div><div class="p-name">${p.l}, ${p.f}</div><div class="p-meta">${p.mrn} \u00B7 ${p.age}yo ${p.sex} \u00B7 DOB ${p.dob} \u00B7 ${p.surgSite.type==='hosp'?'HOSP':'ASC'} ${p.surgSite.loc}</div><div class="p-flags">${flags}</div></div><button class="p-close" onclick="closePanel()">\u2715</button>`;
+}
+function renderPanelTabs(){
+  const tabs=[{id:'overview',lb:'Overview'},{id:'labs',lb:'Labs & EKG'},{id:'meds',lb:'Medications'},{id:'docs',lb:'Documents'}];
+  document.getElementById('panelTabs').innerHTML=tabs.map(t=>`<div class="p-tab${panelTab===t.id?' act':''}" onclick="setPanelTab('${t.id}')">${t.lb}</div>`).join('');
+}
+function setPanelTab(t){panelTab=t;const p=P.find(x=>x.id===selectedPt);if(p){renderPanelTabs();renderPanelBody(p);}}
+
+function renderPanelBody(p){
+  const body=document.getElementById('panelBody'),r=readiness(p);let h='';
+  if(panelTab==='overview'){
+    if(p.allergies.length)h+=`<div class="allergy-ban"><strong>\u26A0 ALLERGIES:</strong> ${p.allergies.map(a=>a.drug+' ('+a.rx+')').join(' \u00B7 ')}</div>`;
+    h+=`<div class="p-sec"><div class="p-sec-t">Readiness <span class="cnt">${r.dc}/${r.total}</span></div>`;
+    r.items.forEach(i=>{const c=i.done?'done':i.partial?'pend':'miss';h+=`<div class="pcl"><div class="pcl-i ${c}">${i.done?'\u2713':i.partial?'\u25D0':'\u2715'}</div><div class="pcl-txt"><div class="pcl-lb">${i.label}</div><div class="pcl-dt">${i.detail}</div></div></div>`;});
+    h+='</div>';
+    h+=`<div class="p-sec"><div class="p-sec-t">Caregiver</div>`;
+    if(p.cg)h+=`<div class="pcl"><div class="pcl-i ${p.cg.conf?'done':'pend'}">${p.cg.conf?'\u2713':'\u25D0'}</div><div class="pcl-txt"><div class="pcl-lb">${p.cg.name}</div><div class="pcl-dt">${p.cg.rel} \u00B7 ${p.cg.phone} \u00B7 ${p.cg.conf?'Confirmed':'Unconfirmed'}</div></div></div>`;
+    else h+=`<div class="pcl"><div class="pcl-i miss">\u2715</div><div class="pcl-txt"><div class="pcl-lb">None assigned</div><div class="pcl-dt">Required for discharge</div></div></div>`;
+    h+='</div>';
+    h+=`<div class="p-sec"><div class="p-sec-t">Instructions & NPO</div>`;
+    h+=`<div class="pcl"><div class="pcl-i ${p.instr?.sent&&p.instr?.conf?'done':p.instr?.sent?'pend':'miss'}">${p.instr?.sent&&p.instr?.conf?'\u2713':p.instr?.sent?'\u25D0':'\u2715'}</div><div class="pcl-txt"><div class="pcl-lb">Pre-Surgery Instructions</div><div class="pcl-dt">${!p.instr?.sent?'Not sent':(p.instr.conf?'Sent '+p.instr.date+' \u00B7 Confirmed':'Sent \u00B7 Unconfirmed')}</div></div></div>`;
+    h+=`<div class="pcl"><div class="pcl-i ${p.npo?.conf?'done':p.npo?.sent?'pend':'miss'}">${p.npo?.conf?'\u2713':p.npo?.sent?'\u25D0':'\u2715'}</div><div class="pcl-txt"><div class="pcl-lb">NPO After Midnight</div><div class="pcl-dt">${!p.npo?.sent?'Not sent':(p.npo.conf?'Confirmed':'Unconfirmed')}</div></div></div></div>`;
+  } else if(panelTab==='labs'){
+    h+='<div class="p-sec"><div class="p-sec-t">Lab Results</div>';
+    Object.entries({cbc:'CBC',bmp:'BMP',ptinr:'PT/INR',ua:'Urinalysis',ts:'Type & Screen',hba1c:'HbA1c'}).forEach(([k,lb])=>{const l=p.labs[k];if(!l)return;const d=l.done;h+=`<div class="pcl"><div class="pcl-i ${d?(l.abn?'pend':'done'):'miss'}">${d?(l.abn?'\u26A0':'\u2713'):'\u2715'}</div><div class="pcl-txt"><div class="pcl-lb">${lb}</div><div class="pcl-dt">${d?l.date+' \u2014 '+l.vals:'Not ordered'}</div></div></div>`;});
+    h+='</div><div class="p-sec"><div class="p-sec-t">EKG</div>';
+    if(p.ekg?.done)h+=`<div class="pcl"><div class="pcl-i ${p.ekg.abn?'pend':'done'}">${p.ekg.abn?'\u26A0':'\u2713'}</div><div class="pcl-txt"><div class="pcl-lb">${p.ekg.abn?'Abnormal':'Normal'} \u2014 ${p.ekg.note}</div><div class="pcl-dt">${p.ekg.date}${p.ekg.abn&&p.ekg.cardiacClr===null?' \u00B7 Cardiac clearance needed':''}</div></div></div>`;
+    else h+=`<div class="pcl"><div class="pcl-i miss">\u2715</div><div class="pcl-txt"><div class="pcl-lb">Not done</div></div></div>`;
+    h+='</div><div class="p-sec"><div class="p-sec-t">Clearances</div>';
+    Object.entries(p.clrs).forEach(([k,c])=>{if(!c.need)return;const n={pcp:'PCP',cardio:'Cardiology',endo:'Endocrinology'}[k]||k;h+=`<div class="pcl"><div class="pcl-i ${c.done?'done':'miss'}">${c.done?'\u2713':'\u2715'}</div><div class="pcl-txt"><div class="pcl-lb">${n}</div><div class="pcl-dt">${c.done?c.doc+' \u2014 '+c.note+' ('+c.date+')':(c.doc?'Pending: '+c.doc:'Not obtained')}</div></div></div>`;});
+    h+='</div>';
+  } else if(panelTab==='meds'){
+    const medDates=computeMedDates(p);
+    h+='<div class="p-sec"><div class="p-sec-t">Medication Schedule <span class="cnt">'+p.meds.length+'</span></div>';
+    h+=`<div style="font-size:10px;color:var(--t3);margin-bottom:8px">Surgery: ${fmtFullDate(p.surgDate)} \u2014 Dates auto-calculated from protocol</div>`;
+    const ac={HOLD:{bg:'var(--yellowL)',c:'var(--yellowT)',b:'var(--yellowB)'},STOP:{bg:'var(--redL)',c:'var(--redT)',b:'var(--redB)'},CONTINUE:{bg:'var(--greenL)',c:'var(--greenT)',b:'var(--greenB)'},'MUST TAKE':{bg:'var(--priL)',c:'var(--pri)',b:'var(--priB)'}};
+    medDates.forEach((d,i)=>{const m=p.meds[i];const a=ac[d.action]||ac.CONTINUE;
+      const dateStr=d.holdDate?fmtFullDate(d.holdDate):(d.action==='CONTINUE'?'No change':'Surgery day');
+      h+=`<div class="pcl"><div class="pcl-i ${m.ack?'done':m.sent?'pend':'miss'}">${m.ack?'\u2713':m.sent?'\u25D0':'\u2715'}</div><div class="pcl-txt"><div class="pcl-lb">${m.name}</div><div class="pcl-dt">${d.action}: ${dateStr}${d.note?' \u2014 '+d.note:''}${!m.sent?' \u00B7 Not sent':(!m.ack?' \u00B7 Unack':' \u00B7 Ack')}</div></div><span class="pcl-badge" style="background:${a.bg};color:${a.c};border:1px solid ${a.b}">${d.action}</span></div>`;});
+    h+='</div>';
+  } else if(panelTab==='docs'){
+    // H&P
+    h+='<div class="p-sec"><div class="p-sec-t">H&P<span class="sec-actions"><button class="act-btn act-btn-blue" onclick="viewHP('+p.id+')" style="font-size:10px;padding:2px 8px">View</button><button class="act-btn act-btn-blue" onclick="openHP('+p.id+')" style="font-size:10px;padding:2px 8px">Edit</button>';
+    if(p.hp?.st!=='signed') h+=`<button class="act-btn act-btn-green" onclick="quickSignHP(${p.id})" style="font-size:10px;padding:2px 8px">Sign</button>`;
+    h+='</span></div>';
+    h+=`<div class="pcl" style="cursor:pointer" onclick="viewHP(${p.id})"><div class="pcl-i ${p.hp?.st==='signed'?'done':p.hp?.st==='draft'?'pend':'miss'}">${p.hp?.st==='signed'?'\u2713':p.hp?.st==='draft'?'\u25D0':'\u2715'}</div><div class="pcl-txt"><div class="pcl-lb">History & Physical</div><div class="pcl-dt">${p.hp?.st==='signed'?'Signed '+p.hp.date:(p.hp?.st==='draft'?'Draft \u2014 needs re-signing':'Not completed')} \u00B7 <span style="color:var(--pri)">Click to view</span></div></div></div></div>`;
+    // Orders
+    const preO=p.orders?.pre?.st==='signed',postO=p.orders?.post?.st==='signed';
+    h+='<div class="p-sec"><div class="p-sec-t">Orders<span class="sec-actions"><button class="act-btn act-btn-blue" onclick="viewOrd('+p.id+')" style="font-size:10px;padding:2px 8px">View</button><button class="act-btn act-btn-blue" onclick="openOrd('+p.id+')" style="font-size:10px;padding:2px 8px">Edit</button>';
+    if(!preO||!postO) h+=`<button class="act-btn act-btn-green" onclick="quickSignOrd(${p.id})" style="font-size:10px;padding:2px 8px">Sign</button>`;
+    h+='</span></div>';
+    h+=`<div class="pcl" style="cursor:pointer" onclick="viewOrd(${p.id})"><div class="pcl-i ${preO?'done':'miss'}">${preO?'\u2713':'\u2715'}</div><div class="pcl-txt"><div class="pcl-lb">Pre-Op Orders</div><div class="pcl-dt">${preO?'Signed '+p.orders.pre.date:'Not signed'} \u00B7 <span style="color:var(--pri)">Click to view</span></div></div></div>`;
+    h+=`<div class="pcl" style="cursor:pointer" onclick="viewOrd(${p.id})"><div class="pcl-i ${postO?'done':'miss'}">${postO?'\u2713':'\u2715'}</div><div class="pcl-txt"><div class="pcl-lb">Post-Op Orders</div><div class="pcl-dt">${postO?'Signed '+p.orders.post.date:'Not signed'} \u00B7 <span style="color:var(--pri)">Click to view</span></div></div></div></div>`;
+    // Consents — clickable to view
+    h+='<div class="p-sec"><div class="p-sec-t">Consents</div>';
+    Object.entries(p.cons).forEach(([k,c])=>{const n={tjs_surg:'Surgical',anes:'Anesthesia',nhs:'Hospital'}[k]||k;h+=`<div class="pcl" style="cursor:pointer" onclick="viewConsent(${p.id},'${k}')"><div class="pcl-i ${c.signed?'done':'miss'}">${c.signed?'\u2713':'\u2715'}</div><div class="pcl-txt"><div class="pcl-lb">${n}</div><div class="pcl-dt">${c.signed?'Signed'+(c.date?' '+c.date:''):'Not signed'} \u00B7 <span style="color:var(--pri)">Click to view</span></div></div></div>`;});
+    h+='</div>';
+  }
+  body.innerHTML=h;
+}
+
+/* ═══ KEYS ═══ */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(document.getElementById('consOv').classList.contains('open')){closeCons();return;}
+    if(document.getElementById('hpOv').classList.contains('open')){closeHP();return;}
+    if(document.getElementById('ordOv').classList.contains('open')){closeOrd();return;}
+    if(document.getElementById('agentOv').classList.contains('open')){closeAgent();return;}
+    if(expandedChip){expandedChip=null;render();}else closePanel();
+  }
+  if(e.key==='/'&&document.activeElement.tagName!=='INPUT'&&document.activeElement.tagName!=='TEXTAREA'){e.preventDefault();document.getElementById('qInput').focus();}
+});
+
+render();
+</script>
+</body>
+</html>
