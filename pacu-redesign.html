@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TotalEMR — Post-Op</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f0f4f8; --card:#ffffff; --card2:#f8fafc; --border:#d2d6dc; --border2:#e8ecf1;
+  --t1:#1a2332; --t2:#374151; --t3:#5a6577; --t4:#8b95a5;
+  --blue:#0f4c81; --blueL:#e8f0f8; --blueB:#b3cfe6; --accent:#2d6a8a;
+  --green:#0d7a5f; --greenL:#e6f5f0; --greenB:#9dd4c0; --greenT:#065040;
+  --yellow:#b8860b; --yellowL:#fdf6e3; --yellowB:#ecd8a0; --yellowD:#7a5a07;
+  --red:#c0392b; --redL:#fbeae8; --redB:#e6b3ad; --redT:#7b241c;
+  --purple:#6d28d9; --purpleL:#ede9fe;
+  --r:6px; --rl:10px;
+  --sh:0 1px 3px rgba(15,30,50,.08),0 1px 2px rgba(15,30,50,.04);
+  --sh2:0 4px 12px rgba(15,30,50,.08);
+  --tr:150ms ease;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg);color:var(--t1);font-size:13px;line-height:1.5;min-height:100vh}
+::selection{background:var(--blue);color:#fff}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+button{cursor:pointer;font-family:inherit}
+input,select,textarea{font-family:inherit}
+
+.app{display:flex;min-height:100vh}
+.sb{width:56px;background:#1a2332;display:flex;flex-direction:column;align-items:center;position:fixed;top:0;left:0;bottom:0;z-index:100;padding:10px 0;gap:2px;transition:width .2s ease;overflow:hidden}
+.sb:hover{width:180px}
+.sb-logo{width:36px;height:36px;border-radius:var(--r);background:linear-gradient(135deg,var(--blue),var(--accent));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0;margin-bottom:12px}
+.sb-label{font-size:11px;font-weight:600;color:#cbd5e1;white-space:nowrap;opacity:0;transition:opacity .15s;margin-left:8px}
+.sb:hover .sb-label{opacity:1}
+.sb a{display:flex;align-items:center;gap:0;width:100%;padding:10px 0;justify-content:center;color:#8b95a5;text-decoration:none;cursor:pointer;border-left:3px solid transparent;transition:all var(--tr)}
+.sb:hover a{justify-content:flex-start;padding-left:14px}
+.sb a:hover{color:#e2e8f0;background:rgba(255,255,255,.06)}
+.sb a.act{color:#fff;border-left-color:#4a9aca;background:rgba(74,154,202,.15)}
+.sb a svg{width:18px;height:18px;flex-shrink:0}
+.sb-div{width:30px;height:1px;background:rgba(255,255,255,.1);margin:6px 0}
+.sb:hover .sb-div{width:calc(100% - 28px)}
+
+.main{margin-left:56px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.top{background:var(--card);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.top-l{display:flex;align-items:center;gap:12px}
+.top-badge{display:inline-flex;padding:4px 12px;background:linear-gradient(135deg,var(--green),#0a6b52);color:#fff;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.5px}
+.top-h{font-size:15px;font-weight:700}
+.top-s{font-size:11px;color:var(--t3)}
+.top-r{display:flex;align-items:center;gap:10px}
+.stat-pill{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid var(--border)}
+.stat-pill .n{font-weight:800;font-size:14px}
+
+/* Status badges */
+.pt-status-badge{display:inline-flex;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-top:4px}
+.pt-status-badge.arr{background:var(--yellowL);color:var(--yellowD);border:1px solid var(--yellowB)}
+.pt-status-badge.chr{background:var(--blueL);color:var(--blue);border:1px solid var(--blueB)}
+.pt-status-badge.rdy{background:var(--purpleL);color:var(--purple);border:1px solid #c4b5fd}
+.pt-status-badge.dc{background:var(--greenL);color:var(--green);border:1px solid var(--greenB)}
+
+.container{display:flex;flex:1;overflow:hidden}
+.patient-list{width:250px;background:var(--card);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.patient-list-header{padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.patient-list-header h3{font-size:12px;font-weight:700;color:var(--t1);text-transform:uppercase;letter-spacing:.04em}
+.patient-cards{flex:1;overflow-y:auto;padding:8px}
+.pt-card{padding:12px;margin-bottom:6px;background:var(--card2);border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;transition:all .2s}
+.pt-card:hover{border-color:var(--border);box-shadow:var(--sh)}
+.pt-card.sel{border-color:var(--blue);background:var(--blueL);box-shadow:0 0 0 1px var(--blueB)}
+.pt-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.pt-card-name{font-weight:600;font-size:12px;color:var(--t1)}
+.pt-card-time{font-size:10px;color:var(--t3);font-weight:500}
+.pt-card-joint{display:inline-flex;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:700;margin-bottom:6px}
+.pt-card-joint.knee{background:var(--blueL);color:var(--blue);border:1px solid var(--blueB)}
+.pt-card-joint.hip{background:var(--purpleL);color:var(--purple)}
+.pt-card-phase{font-size:9px;font-weight:700;padding:3px 8px;border-radius:3px;background:var(--bg);color:var(--t3);margin-bottom:6px;display:inline-block}
+
+.content{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.tab-bar{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--card);padding:0 20px}
+.tab-btn{padding:10px 20px;font-size:12px;font-weight:600;color:var(--t3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.tab-btn:hover{color:var(--t1)}
+.tab-btn.sel{color:var(--blue);border-bottom-color:var(--blue)}
+
+.content-inner{flex:1;overflow-y:auto;padding:16px 20px}
+
+/* Phase headers */
+.phase-hd{display:flex;align-items:center;justify-content:space-between;padding:8px 0 4px;margin-top:10px;border-bottom:1px solid var(--border2)}
+.phase-label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.phase-label.complete{color:var(--green)}
+.phase-right{display:flex;align-items:center;gap:6px}
+.phase-ts{font-size:9px;color:var(--green);font-weight:600;padding:2px 6px;border-radius:4px;background:var(--greenL)}
+.phase-count{font-size:9px;font-weight:600;color:var(--t3)}
+.phase-count.complete{color:var(--green)}
+
+/* Checklist items */
+.ck{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:var(--r);transition:background .1s;user-select:none;min-height:48px}
+.ck.tap{cursor:pointer}.ck.tap:hover{background:var(--bg)}.ck.tap:active{background:var(--border2)}
+.ck.expand{background:var(--card2)}
+.ck-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;border:2px solid transparent}
+.ck-icon.g{background:var(--greenL);color:var(--green);border-color:var(--greenB)}
+.ck-icon.y{background:var(--yellowL);color:var(--yellow);border-color:var(--yellowB)}
+.ck-icon.p{background:var(--bg);color:var(--t4);border-color:var(--border)}
+.ck-body{flex:1;min-width:0}
+.ck-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ck-label{font-size:14px;font-weight:600}.ck-label.done{color:var(--t3)}
+.ck-badge{font-size:10px;padding:4px 10px;border-radius:10px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.ck-badge.g{background:var(--greenL);color:var(--green);border:1px solid var(--greenB)}
+.ck-badge.y{background:var(--yellowL);color:var(--yellow);border:1px solid var(--yellowB)}
+.ck-badge.p{background:var(--bg);color:var(--t4);border:1px solid var(--border)}
+.ck-sub{font-size:10px;color:var(--t3);margin-top:2px;line-height:1.4}
+.ck-result{font-size:10px;color:var(--t2);margin-top:2px}
+.ck-undo{font-size:10px;color:var(--redT);font-weight:700;cursor:pointer;padding:4px 10px;border:1px solid var(--redB);border-radius:4px;background:var(--redL);display:inline-block;margin-top:4px}
+.ck-undo:hover{background:var(--redB)}
+
+/* Input panels */
+.inp-panel{padding:4px 0 8px 34px}
+.inp-grid{display:grid;gap:6px;margin-top:6px}
+.inp-grid.g2{grid-template-columns:1fr 1fr}.inp-grid.g3{grid-template-columns:1fr 1fr 1fr}
+.inp-label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;font-weight:600}
+.inp-field{width:100%;padding:7px 10px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);color:var(--t1);font-size:13px;font-weight:600;outline:none}
+.inp-field:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blueL)}
+select.inp-field{padding-right:24px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a6577'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+.opt-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.opt-btn{padding:10px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--card);color:var(--t2);font-size:13px;font-weight:600;cursor:pointer;transition:all .12s;flex:1;text-align:center;min-width:0}
+.opt-btn:hover{border-color:var(--blue);background:var(--blueL)}
+.opt-btn.sel{border-color:var(--greenB);background:var(--greenL);color:var(--green)}
+.opt-btn.sel-warn{border-color:var(--redB);background:var(--redL);color:var(--redT)}
+.submit-btn{width:100%;padding:10px;border-radius:var(--r);font-size:12px;font-weight:700;cursor:default;border:1px solid var(--border);background:var(--bg);color:var(--t4);transition:all .15s;margin-top:8px;text-transform:uppercase;letter-spacing:.04em}
+.submit-btn.ready{background:var(--green);color:#fff;border-color:var(--green);cursor:pointer}
+.submit-btn.ready:hover{background:#0a6b52}
+.complete-all-btn{width:100%;padding:8px;border-radius:var(--r);font-size:11px;font-weight:700;background:var(--green);color:#fff;border-color:var(--green);cursor:pointer;border:1px solid var(--green);transition:all .15s;margin-top:8px;text-transform:uppercase;letter-spacing:.04em}
+.complete-all-btn:hover{background:#0a6b52}
+
+/* Vitals grid */
+.vitals-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0;padding:12px;background:var(--card2);border-radius:var(--r)}
+.vital-value{text-align:center}
+.vital-label{font-size:9px;color:var(--t3);text-transform:uppercase;font-weight:600;margin-bottom:2px}
+.vital-number{font-size:18px;font-weight:700;color:var(--t1)}
+
+/* Orders */
+.orders-section{margin:12px 0;padding:14px;border-radius:var(--r);border:1px solid var(--border);background:var(--card2)}
+.orders-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:pointer;user-select:none}
+.orders-title{font-size:11px;font-weight:700;color:var(--t3);letter-spacing:.06em;text-transform:uppercase}
+.orders-arrow{font-size:10px;color:var(--t4);transition:transform .2s}.orders-arrow.open{transform:rotate(180deg)}
+.orders-body{display:none}.orders-body.open{display:block}
+.order-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border2);font-size:11px}
+.order-item:last-child{border-bottom:none}
+.order-check{width:28px;height:28px;border-radius:4px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--card);transition:all .2s;flex-shrink:0;font-size:14px}
+.order-check:hover{border-color:var(--blue)}
+.order-check.done{background:var(--greenL);border-color:var(--greenB);color:var(--green)}
+.order-text{flex:1}
+.order-text-drug{font-weight:600;color:var(--t1)}
+.order-text-dose{color:var(--t3);font-size:10px}
+.order-time{font-size:9px;color:var(--green);font-weight:700}
+
+/* Handoff card */
+.handoff{margin-top:12px;padding:14px;background:var(--greenL);border:1px solid var(--greenB);border-radius:var(--r)}
+.handoff-title{font-size:11px;font-weight:700;color:var(--green);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.handoff-body{font-size:11px;color:var(--t2);line-height:1.8}
+.handoff-body b{color:var(--t3);font-weight:500}
+
+/* Abx */
+.abx-entry{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border2);font-size:11px}
+.abx-entry:last-child{border-bottom:none}
+.abx-given{font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;background:var(--greenL);color:var(--green)}
+.abx-pending{font-size:9px;font-weight:700;padding:4px 12px;border-radius:4px;background:var(--yellowL);color:var(--yellowD);cursor:pointer;border:1px solid var(--yellowB)}
+.abx-pending:hover{background:var(--yellowB)}
+
+/* Arrive button */
+.arrive-btn{width:100%;padding:14px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;margin-bottom:12px}
+.arrive-btn:hover{background:var(--accent)}
+
+/* DC blocker */
+.dc-blocker{padding:12px 14px;background:var(--redL);border:1px solid var(--redB);border-radius:var(--r);margin:12px 0;color:var(--redT);font-size:11px;line-height:1.6;font-weight:600}
+.dc-blocker-title{font-weight:700;margin-bottom:6px}
+.dc-blocker-list{margin-top:6px;padding-left:12px}
+.dc-blocker-list li{margin:2px 0}
+
+/* DC summary */
+.dc-summary{padding:14px;background:var(--greenL);border:1px solid var(--greenB);border-radius:var(--r);margin:12px 0}
+.dc-summary-title{font-size:11px;font-weight:700;color:var(--green);margin-bottom:8px}
+.dc-summary-row{display:flex;justify-content:space-between;padding:4px 0;font-size:11px}
+.dc-discharge-btn{width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;margin-top:8px}
+.dc-discharge-btn:hover{background:#0a6b52}
+
+/* Detail panels */
+.detail-panel{padding:8px 14px;margin:4px 0;border-radius:var(--r);border:1px solid var(--border2);background:var(--card2)}
+.cg-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0}
+.cg-k{font-size:9px;color:var(--t3);text-transform:uppercase;font-weight:600}
+.cg-v{font-size:12px;font-weight:600}
+
+/* Supply grid */
+.supply-grid{display:grid;gap:12px;margin-top:8px}
+.supply-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card2);border-radius:var(--r);border:1px solid var(--border2)}
+.supply-name{flex:1;font-size:12px;font-weight:600;color:var(--t1)}
+.supply-controls{display:flex;align-items:center;gap:12px}
+.supply-count{display:flex;align-items:center;gap:8px}
+.supply-label{font-size:9px;color:var(--t3);text-transform:uppercase;font-weight:600}
+.supply-pm{padding:4px 8px;background:var(--card);border:1px solid var(--border);border-radius:4px;cursor:pointer;font-size:12px;font-weight:700}
+.supply-pm:hover{background:var(--blueL)}
+
+/* Mobile */
+.mob-toggle{display:none;padding:8px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--card);color:var(--t1);font-size:12px;font-weight:600;cursor:pointer;align-items:center;gap:6px}
+.mob-toggle svg{width:16px;height:16px}
+.mob-back{display:none;padding:8px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--card);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;align-items:center;gap:4px;margin-bottom:8px}
+
+/* ===== MOBILE: up to 768px ===== */
+@media(max-width:768px){
+  .sb{display:none}
+  .main{margin-left:0}
+  .top{padding:10px 12px;gap:8px}
+  .top-h{font-size:14px}
+  .top-s{font-size:10px}
+  .stat-pill{padding:3px 8px;font-size:10px}
+  .stat-pill .n{font-size:12px}
+  .mob-toggle{display:inline-flex}
+  .container{flex-direction:column;overflow:visible}
+  .patient-list{width:100%;border-right:none;border-bottom:1px solid var(--border);max-height:none;display:none;flex-shrink:0}
+  .patient-list.mob-show{display:flex;max-height:50vh;overflow-y:auto}
+  .patient-cards{display:flex;flex-direction:column;padding:6px}
+  .pt-card{margin-bottom:4px;padding:10px}
+  .pt-card-name{font-size:13px}
+  .content{width:100%;overflow:visible}
+  .content-inner{padding:12px}
+  .tab-bar{padding:0 12px}
+  .tab-btn{padding:8px 14px;font-size:11px}
+  .mob-back.mob-show{display:inline-flex}
+  .ck{padding:14px 12px;min-height:52px;gap:12px}
+  .ck-icon{width:36px;height:36px;font-size:17px}
+  .ck-label{font-size:14px}
+  .ck-badge{font-size:11px;padding:5px 12px}
+  .ck-undo{font-size:11px;padding:6px 12px}
+  .ck-sub{font-size:11px}
+  .phase-hd{padding:10px 0 6px;flex-wrap:wrap;gap:4px}
+  .phase-label{font-size:11px}
+  .phase-right{flex-wrap:wrap;gap:4px}
+  .opt-btn{padding:12px 10px;font-size:13px;min-height:44px}
+  .opt-row{gap:6px}
+  .submit-btn{padding:12px;font-size:13px}
+  .inp-field{padding:10px 12px;font-size:14px}
+  .inp-label{font-size:10px}
+  .inp-grid.g3{grid-template-columns:1fr 1fr}
+  .inp-grid.g2{grid-template-columns:1fr 1fr}
+  .orders-section{padding:12px}
+  .vitals-grid{grid-template-columns:1fr 1fr 1fr;gap:6px;padding:10px}
+  .vital-number{font-size:16px}
+  .supply-row{flex-direction:column;align-items:flex-start}
+  .supply-controls{width:100%;gap:20px;margin-top:8px}
+}
+
+/* ===== TABLET: 769–1024px ===== */
+@media(min-width:769px) and (max-width:1024px){
+  .sb{width:48px}.sb:hover{width:160px}
+  .main{margin-left:48px}
+  .patient-list{width:200px}
+  .content-inner{padding:14px 16px}
+  .ck{padding:12px}
+  .ck-icon{width:30px;height:30px;font-size:14px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<!-- SIDEBAR -->
+<nav class="sb">
+  <div class="sb-logo">TJS</div>
+  <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="sb-label">Dashboard</span></a>
+  <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg><span class="sb-label">PAC</span></a>
+  <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg><span class="sb-label">Pre-Op</span></a>
+  <a class="act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg><span class="sb-label">Post-Op</span></a>
+  <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4m-8.66-3.34 2.83-2.83m11.66-5.66 2.83-2.83M1 12h4m14 0h4m-3.34 8.66-2.83-2.83M6.17 6.17 3.34 3.34"/></svg><span class="sb-label">OR</span></a>
+  <div class="sb-div"></div>
+  <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span class="sb-label">Settings</span></a>
+</nav>
+
+<div class="main">
+<!-- TOP BAR -->
+<div class="top">
+  <div class="top-l">
+    <div><div class="top-h">Post-Op</div><div class="top-s" id="topDate"></div></div>
+  </div>
+  <div class="top-r">
+    <button class="mob-toggle" id="mobToggle" onclick="toggleMobList()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4-4v-2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span id="mobPtLabel">Patients</span></button>
+    <div class="stat-pill"><span class="n" id="totalCount">4</span> Patients</div>
+    <div class="stat-pill" style="border-color:var(--greenB);color:var(--green)"><span class="n" id="readyCount">0</span> Ready DC</div>
+  </div>
+</div>
+
+<!-- MAIN CONTAINER -->
+<div class="container">
+  <!-- PATIENT LIST SIDEBAR -->
+  <div class="patient-list">
+    <div class="patient-list-header">
+      <h3>Patients</h3>
+    </div>
+    <div class="patient-cards" id="ptCards"></div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="content">
+    <div class="tab-bar" id="tabBar"></div>
+    <div class="content-inner" id="contentArea"></div>
+  </div>
+</div>
+</div>
+</div>
+
+<script>
+const NOW = new Date(2026, 2, 23, 10, 45);
+const ft = d => d.toLocaleTimeString("en-US", {hour:"numeric", minute:"2-digit"});
+const fd = d => d.toLocaleDateString("en-US", {weekday:"long", month:"long", day:"numeric"});
+let mobListOpen = false;
+function isMob(){return window.innerWidth <= 768}
+function toggleMobList(){mobListOpen = !mobListOpen; const pl = document.querySelector('.patient-list'); if(pl) mobListOpen ? pl.classList.add('mob-show') : pl.classList.remove('mob-show'); updateMobLabel()}
+function updateMobLabel(){const lb = document.getElementById('mobPtLabel'); if(lb) {const pt = PTS.find(p => p.id === S.active); lb.textContent = pt ? pt.ln + ', ' + pt.fn : 'Patients'}}
+function mobSelPt(id){S.active = id; mobListOpen = false; const pl = document.querySelector('.patient-list'); if(pl) pl.classList.remove('mob-show'); S.render()}
+
+const PTS = [
+  {id:1, fn:"Margaret", ln:"Thompson", age:68, sex:"F", mrn:"TJR-20241", joint:"Knee", lat:"Right", proc:"Right TKA", surgeon:"Dr. Henderson", or_out:"09:12", ebl:180, anes:"Spinal", isDiabetic:true},
+  {id:2, fn:"James", ln:"Rodriguez", age:72, sex:"M", mrn:"TJR-20242", joint:"Hip", lat:"Left", proc:"Left THA", surgeon:"Dr. Patel", or_out:"11:05", ebl:250, anes:"Spinal", isDiabetic:false},
+  {id:3, fn:"Dorothy", ln:"Chen", age:65, sex:"F", mrn:"TJR-20243", joint:"Knee", lat:"Left", proc:"Left TKA", surgeon:"Dr. Henderson", or_out:"12:38", ebl:220, anes:"General", isDiabetic:true, latex_allergy:true},
+  {id:4, fn:"William", ln:"Foster", age:58, sex:"M", mrn:"TJR-20244", joint:"Hip", lat:"Right", proc:"Right THA", surgeon:"Dr. Patel", or_out:"14:50", ebl:190, anes:"Spinal", isDiabetic:false}
+];
+
+const S = {
+  active: 1,
+  tab: 'assess',
+  pts: {},
+  elapsed_interval: null
+};
+
+PTS.forEach(pt => {
+  S.pts[pt.id] = {
+    state: {
+      arrived: pt.id === 1 ? true : false,
+      toChair: pt.id === 1 ? true : false,
+      readyDC: false,
+      discharged: false,
+      pacu_start: pt.id === 1 ? new Date(NOW.getTime() - 45*60000) : null,
+      admitting_nurse: '',
+      or_nurse: '',
+      pt_confirmed: true,
+      siderails: true,
+      vitals: [],
+      pain_logs: [],
+      aldrete_logs: [],
+      o2_logs: [],
+      dress_logs: [],
+      nv_logs: [],
+      nausea_logs: [],
+      cryo_logs: [],
+      airway_logs: [],
+      voided: false,
+      ambulated: false,
+      pt_cleared: false,
+      iv_in: 0,
+      urine_out: 0,
+      drain_out: 0,
+      dvt_prophy: 'N/A',
+      urination_logs: [],
+      nursing_note: '',
+      dc_criteria: {teaching:false, swallow:false, nausea:false, pain:false, skin_color:false, motor:false, dc_instr:false},
+      education: {wound:false, meds:false, activity:false, warnings:false, cryo_or_precautions:false, pt_ex:false, followup:false, dvt:false},
+      logistics: {rx_confirmed:false, adult_present:false},
+      med_log: [],
+      supply: {
+        'Thigh High Stockings': {pulled:0, used:0},
+        'Dura Kold': {pulled:0, used:0},
+        'Ice Machine': {pulled:0, used:0},
+        'TED Stockings': {pulled:0, used:0},
+        'Sequential Compressor': {pulled:0, used:0},
+        'Pillow/Wedge': {pulled:0, used:0},
+        'Antiembolism Sleeve': {pulled:0, used:0},
+        'Sling/Immobilizer': {pulled:0, used:0},
+        'Drain Bulb': {pulled:0, used:0},
+        'Gauze Pads': {pulled:0, used:0},
+        'Dressing Supplies': {pulled:0, used:0},
+        '4x4 Sterile': {pulled:0, used:0}
+      }
+    },
+    expanded_logs: {},
+    vitals_mode: 'monitor',
+    open_orders: {anes:true, surg:true, 'Anesthesia PRNs':true, 'Surgical PRNs':true, 'DC Medications':true},
+    pt_progress: '',
+    pt_progress_log: [],
+    med_notes: ''
+  };
+});
+
+function getStatus(pt_state) {
+  if (pt_state.discharged) return {badge:'dc', label:'Discharged'};
+  if (pt_state.readyDC) return {badge:'rdy', label:'Ready to DC'};
+  if (pt_state.toChair) return {badge:'chr', label:'Chair'};
+  if (pt_state.arrived) return {badge:'arr', label:'Arrived'};
+  return {badge:'', label:''};
+}
+
+S.render = function() {
+  renderNav();
+  renderTop();
+  renderPtCards();
+  renderTabBar();
+  renderContent();
+};
+function render() { S.render(); }
+
+function renderNav() {}
+
+function renderTop() {
+  document.getElementById('topDate').textContent = fd(NOW);
+}
+
+function renderPtCards() {
+  const html = PTS.map(pt => {
+    const state = S.pts[pt.id].state;
+    const sts = getStatus(state);
+    const card_html = `
+    <div class="pt-card ${S.active === pt.id ? 'sel' : ''}" onclick="S.active=${pt.id};S.render()">
+      <div class="pt-card-header">
+        <div class="pt-card-name">${pt.ln}, ${pt.fn}</div>
+        <div class="pt-card-time">${pt.or_out}</div>
+      </div>
+      <div><span class="pt-card-joint ${pt.joint.toLowerCase()}">${pt.lat} ${pt.joint}</span></div>
+      ${sts.badge ? `<div class="pt-status-badge ${sts.badge}">${sts.label}</div>` : ''}
+      ${pt.isDiabetic ? `<div style="font-size:9px;color:var(--yellow);margin-top:4px">⚠ Diabetic</div>` : ''}
+      ${pt.latex_allergy ? `<div style="font-size:9px;color:var(--red);margin-top:4px;font-weight:700">⚠ LATEX ALLERGY</div>` : ''}
+    </div>
+    `;
+    return card_html;
+  }).join('');
+  document.getElementById('ptCards').innerHTML = html;
+}
+
+function renderTabBar() {
+  const tabs = ['assess', 'orders', 'dc', 'supply'];
+  const tab_names = {assess:'Assess', orders:'Orders', dc:'DC', supply:'Supply'};
+  const html = tabs.map(t => `<button class="tab-btn ${S.tab === t ? 'sel' : ''}" onclick="S.tab='${t}';S.render()">${tab_names[t]}</button>`).join('');
+  document.getElementById('tabBar').innerHTML = html;
+}
+
+function renderContent() {
+  const pt = PTS.find(p => p.id === S.active);
+  const state = S.pts[S.active].state;
+  let content = '';
+
+  if (S.tab === 'assess') content = renderAssess(pt, state);
+  else if (S.tab === 'orders') content = renderOrders(pt, state);
+  else if (S.tab === 'dc') content = renderDC(pt, state);
+  else if (S.tab === 'supply') content = renderSupply(pt, state);
+
+  document.getElementById('contentArea').innerHTML = content;
+}
+
+function renderAssess(pt, state) {
+  if (!state.arrived) {
+    return `
+    <button class="arrive-btn" onclick="arrivePatient(${pt.id})">Arrive Patient</button>
+    <div class="handoff">
+      <div class="handoff-title">OR Handoff</div>
+      <div class="handoff-body">
+        <b>Procedure:</b> ${pt.proc}<br/>
+        <b>Surgeon:</b> ${pt.surgeon}<br/>
+        <b>Anesthesia:</b> ${pt.anes}<br/>
+        <b>EBL:</b> ${pt.ebl}mL<br/>
+        <b>OR Time:</b> ${pt.or_out}
+      </div>
+    </div>
+    `;
+  }
+
+  const elapsed = state.pacu_start ? formatElapsed(NOW.getTime() - state.pacu_start.getTime()) : '—';
+  let html = `<div class="phase-hd"><span class="phase-label">ARRIVED</span><span style="font-size:9px;color:var(--green);font-weight:600">${elapsed}</span></div>`;
+
+  // Handoff section
+  html += `
+  <div class="ck expand">
+    <div class="ck-icon g">📋</div>
+    <div class="ck-body">
+      <div class="ck-label">PACU Handoff</div>
+      <div class="inp-panel">
+        <div style="margin-top:8px">
+          <label class="inp-label">Admitting Nurse</label>
+          <input type="text" class="inp-field" placeholder="Enter name" value="${state.admitting_nurse}" onchange="S.pts[${pt.id}].state.admitting_nurse=this.value;S.render()"/>
+        </div>
+        <div style="margin-top:8px">
+          <label class="inp-label">OR Nurse</label>
+          <input type="text" class="inp-field" placeholder="Enter name" value="${state.or_nurse}" onchange="S.pts[${pt.id}].state.or_nurse=this.value;S.render()"/>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:10px">
+          <label style="flex:1;display:flex;align-items:center;gap:6px"><input type="checkbox" ${state.pt_confirmed ? 'checked' : ''} onchange="S.pts[${pt.id}].state.pt_confirmed=this.checked;S.render()"/>Patient Confirmed</label>
+          <label style="flex:1;display:flex;align-items:center;gap:6px"><input type="checkbox" ${state.siderails ? 'checked' : ''} onchange="S.pts[${pt.id}].state.siderails=this.checked;S.render()"/>Siderails Up</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  `;
+
+  // OR Handoff reference
+  html += `
+  <div class="handoff">
+    <div class="handoff-title">OR Info</div>
+    <div class="handoff-body">
+      <b>Procedure:</b> ${pt.proc}<br/>
+      <b>Surgeon:</b> ${pt.surgeon}<br/>
+      <b>Anesthesia:</b> ${pt.anes}<br/>
+      <b>EBL:</b> ${pt.ebl}mL
+    </div>
+  </div>
+  `;
+
+  // MONITORING phase
+  html += `<div class="phase-hd" style="margin-top:16px"><span class="phase-label">MONITORING</span></div>`;
+
+  // Vitals
+  html += `
+  <div class="ck expand tap" onclick="toggleExpandLog(${pt.id}, 'vitals')">
+    <div class="ck-icon ${state.vitals.length ? 'g' : 'p'}">🌡</div>
+    <div class="ck-body">
+      <div class="ck-top">
+        <div class="ck-label">Vitals</div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span style="font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;background:var(--greenL);color:var(--green);border:1px solid var(--greenB)">🔗 Bluetooth Connected</span>
+          ${state.vitals.length ? `<span class="ck-badge g">${state.vitals.length} sets</span>` : ''}
+        </div>
+      </div>
+      ${renderVitalsExpanded(pt.id, state)}
+    </div>
+  </div>
+  `;
+
+  // Pain
+  const lastPain = state.pain_logs.length ? state.pain_logs[state.pain_logs.length-1] : null;
+  html += `
+  <div class="ck expand tap" onclick="toggleExpandLog(${pt.id}, 'pain')">
+    <div class="ck-icon ${state.pain_logs.length ? 'y' : 'p'}">💊</div>
+    <div class="ck-body">
+      <div class="ck-top">
+        <div class="ck-label">Pain (0-10)</div>
+        ${lastPain ? `<span class="ck-badge ${parseInt(lastPain.value)<=3?'g':'y'}">${lastPain.value}/10 @ ${lastPain.time}</span>` : ''}
+      </div>
+      ${renderExpandedLog(pt.id, 'pain', state.pain_logs)}
+    </div>
+  </div>
+  `;
+
+  // Aldrete
+  const lastAld = state.aldrete_logs.length ? state.aldrete_logs[state.aldrete_logs.length-1] : null;
+  html += `
+  <div class="ck expand tap" onclick="toggleExpandLog(${pt.id}, 'aldrete')">
+    <div class="ck-icon ${state.aldrete_logs.length ? 'g' : 'p'}">📊</div>
+    <div class="ck-body">
+      <div class="ck-top">
+        <div class="ck-label">Aldrete Score</div>
+        ${lastAld ? `<span class="ck-badge ${parseInt(lastAld.value)>=9?'g':'y'}">${lastAld.value} @ ${lastAld.time}</span>` : ''}
+      </div>
+      ${renderExpandedLog(pt.id, 'aldrete', state.aldrete_logs)}
+    </div>
+  </div>
+  `;
+
+  // O2 Therapy
+  const lastO2 = state.o2_logs.length ? state.o2_logs[state.o2_logs.length-1] : null;
+  html += `
+  <div class="ck expand tap" onclick="toggleExpandLog(${pt.id}, 'o2')">
+    <div class="ck-icon ${state.o2_logs.length ? 'g' : 'p'}">💨</div>
+    <div class="ck-body">
+      <div class="ck-top">
+        <div class="ck-label">O₂ Therapy</div>
+        ${lastO2 ? `<span class="ck-badge g">${lastO2.value} @ ${lastO2.time}</span>` : ''}
+      </div>
+      ${renderExpandedLog(pt.id, 'o2', state.o2_logs)}
+    </div>
+  </div>
+  `;
+
+  // Dressing
+  const lastDress = state.dress_logs.length ? state.dress_logs[state.dress_logs.length-1] : null;
+  html += `
+  <div class="ck expand tap" onclick="toggleExpandLog(${pt.id}, 'dress')">
+    <div class="ck-icon ${state.dress_logs.length ? 'g' : 'p'}">🩹</div>
+    <div class="ck-body">
+      <div class="ck-top">
+        <div class="ck-label">Dressing</div>
+        ${lastDress ? `<span class="ck-badge ${lastDress.value==='Clean/Dry'?'g':'y'}">${lastDress.value} @ ${lastDress.time}</span>` : ''}
+      </div>
+      ${renderExpandedLog(pt.id, 'dress', state.dress_logs)}
+    </div>
+  </div>
+  `;
+
+  // Neurovascular
+  const lastNV = state.nv_logs.length ? state.nv_logs[state.nv_logs.length-1] : null;
+  html += `
+  <div class="ck expand tap" onclick="toggleExpandLog(${pt.id}, 'nv')">
+    <div class="ck-icon ${state.nv_logs.length ? 'g' : 'p'}">🩼</div>
+    <div class="ck-body">
+      <div class="ck-top">
+        <div class="ck-label">Neurovascular Check</div>
+        ${lastNV ? `<span class="ck-badge ${lastNV.value==='Intact'?'g':'y'}">${lastNV.value} @ ${lastNV.time}</span>` : ''}
+      </div>
+      ${renderExpandedLog(pt.id, 'nv', state.nv_logs)}
+    </div>
+  </div>
+  `;
+
+  // Nausea
+  const lastNaus = state.nausea_logs.length ? state.nausea_logs[state.nausea_logs.length-1] : null;
+  html += `
+  <div class="ck expand tap" onclick="toggleExpandLog(${pt.id}, 'nausea')">
+    <div class="ck-icon ${state.nausea_logs.length ? 'y' : 'p'}">🤢</div>
+    <div class="ck-body">
+      <div class="ck-top">
+        <div class="ck-label">Nausea</div>
+        ${lastNaus ? `<span class="ck-badge ${lastNaus.value==='None'?'g':'y'}">${lastNaus.value} @ ${lastNaus.time}</span>` : ''}
+      </div>
+      ${renderExpandedLog(pt.id, 'nausea', state.nausea_logs)}
+    </div>
+  </div>
+  `;
+
+  // Cryo (knee only)
+  if (pt.joint === 'Knee') {
+    const lastCryo = state.cryo_logs.length ? state.cryo_logs[state.cryo_logs.length-1] : null;
+    html += `
+    <div class="ck expand tap" onclick="toggleExpandLog(${pt.id}, 'cryo')">
+      <div class="ck-icon ${state.cryo_logs.length ? 'g' : 'p'}">❄️</div>
+      <div class="ck-body">
+        <div class="ck-top">
+          <div class="ck-label">Cryo Unit</div>
+          ${lastCryo ? `<span class="ck-badge g">${lastCryo.value} @ ${lastCryo.time}</span>` : ''}
+        </div>
+        ${renderExpandedLog(pt.id, 'cryo', state.cryo_logs)}
+      </div>
+    </div>
+    `;
+  }
+
+  // Airway
+  const lastAir = state.airway_logs.length ? state.airway_logs[state.airway_logs.length-1] : null;
+  html += `
+  <div class="ck expand tap" onclick="toggleExpandLog(${pt.id}, 'airway')">
+    <div class="ck-icon ${state.airway_logs.length ? 'g' : 'p'}">💨</div>
+    <div class="ck-body">
+      <div class="ck-top">
+        <div class="ck-label">Airway</div>
+        ${lastAir ? `<span class="ck-badge ${lastAir.value==='Clear'?'g':'y'}">${lastAir.value} @ ${lastAir.time}</span>` : ''}
+      </div>
+      ${renderExpandedLog(pt.id, 'airway', state.airway_logs)}
+    </div>
+  </div>
+  `;
+
+  // FUNCTIONAL phase
+  html += `<div class="phase-hd" style="margin-top:16px"><span class="phase-label">FUNCTIONAL</span></div>`;
+
+  html += `
+  <div class="ck">
+    <div class="ck-icon p">📋</div>
+    <div class="ck-body" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+      <label style="flex:1;display:flex;align-items:center;gap:6px;min-width:100px"><input type="checkbox" ${state.voided ? 'checked' : ''} onchange="S.pts[${pt.id}].state.voided=this.checked;S.render()"/>Voided</label>
+      <label style="flex:1;display:flex;align-items:center;gap:6px;min-width:100px"><input type="checkbox" ${state.ambulated ? 'checked' : ''} onchange="S.pts[${pt.id}].state.ambulated=this.checked;S.render()"/>Ambulated</label>
+      <label style="flex:1;display:flex;align-items:center;gap:6px;min-width:100px"><input type="checkbox" ${state.pt_cleared ? 'checked' : ''} onchange="S.pts[${pt.id}].state.pt_cleared=this.checked;S.render()"/>PT Cleared</label>
+    </div>
+  </div>
+  <div class="ck expand">
+    <div class="ck-icon ${state.pt_progress ? 'g' : 'p'}">🏃</div>
+    <div class="ck-body">
+      <div class="ck-top">
+        <div class="ck-label">PT Progress</div>
+        ${(state.pt_progress_log||[]).length ? `<span class="ck-badge g">${state.pt_progress} @ ${state.pt_progress_log[state.pt_progress_log.length-1].time}</span>` : '<span class="ck-badge p">Not Started</span>'}
+      </div>
+      <div class="opt-row" style="margin-top:8px">
+        <button class="opt-btn ${state.pt_progress === 'Chair' ? 'sel' : ''}" onclick="logPTProgress(${pt.id},'Chair')">🪑 Chair</button>
+        <button class="opt-btn ${state.pt_progress === 'Walk' ? 'sel' : ''}" onclick="logPTProgress(${pt.id},'Walk')">🚶 Walk</button>
+        <button class="opt-btn ${state.pt_progress === 'Stairs' ? 'sel' : ''}" onclick="logPTProgress(${pt.id},'Stairs')">🪜 Stairs</button>
+      </div>
+      ${(state.pt_progress_log||[]).length ? `
+      <div style="margin-top:8px;padding:8px;background:var(--card2);border:1px solid var(--border2);border-radius:var(--r)">
+        <div style="font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Progress Log</div>
+        ${(state.pt_progress_log||[]).map(l => `
+          <div style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--border2);display:flex;justify-content:space-between">
+            <strong>${l.value}</strong>
+            <span style="color:var(--green);font-weight:600;font-size:10px">${l.time}</span>
+          </div>
+        `).join('')}
+      </div>` : ''}
+    </div>
+  </div>
+  `;
+
+  html += `
+  <div class="ck expand">
+    <div class="ck-icon p">📊</div>
+    <div class="ck-body">
+      <div class="ck-label">I/O</div>
+      <div class="inp-panel">
+        <div class="inp-grid g3">
+          <div><label class="inp-label">IV In (mL)</label><input type="number" class="inp-field" value="${state.iv_in}" onchange="S.pts[${pt.id}].state.iv_in=parseInt(this.value)||0;S.render()"/></div>
+          <div><label class="inp-label">Urine Out (mL)</label><input type="number" class="inp-field" value="${state.urine_out}" onchange="S.pts[${pt.id}].state.urine_out=parseInt(this.value)||0;S.render()"/></div>
+          <div><label class="inp-label">Drain Out (mL)</label><input type="number" class="inp-field" value="${state.drain_out}" onchange="S.pts[${pt.id}].state.drain_out=parseInt(this.value)||0;S.render()"/></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  `;
+
+  html += `
+  <div class="ck expand">
+    <div class="ck-icon p">💉</div>
+    <div class="ck-body">
+      <div class="ck-label">DVT Prophylaxis</div>
+      <div class="inp-panel">
+        <select class="inp-field" onchange="S.pts[${pt.id}].state.dvt_prophy=this.value;S.render()">
+          <option value="N/A">N/A</option>
+          <option value="ASA 81mg BID">ASA 81mg BID</option>
+          <option value="Enoxaparin 40mg">Enoxaparin 40mg</option>
+          <option value="Mechanical only">Mechanical only</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  `;
+
+  html += `
+  <div class="ck expand">
+    <div class="ck-icon p">📝</div>
+    <div class="ck-body">
+      <div class="ck-label">Nursing Notes</div>
+      <div class="inp-panel">
+        <textarea class="inp-field" style="min-height:80px;resize:vertical" placeholder="Enter nursing notes" onchange="S.pts[${pt.id}].state.nursing_note=this.value;S.render()">${state.nursing_note}</textarea>
+      </div>
+    </div>
+  </div>
+  `;
+
+  return html;
+}
+
+function toggleExpandLog(pt_id, log_type) {
+  event.stopPropagation();
+  const ex = S.pts[pt_id].expanded_logs;
+  ex[log_type] = !ex[log_type];
+  S.render();
+}
+
+function renderVitalsExpanded(pt_id, state) {
+  if (!S.pts[pt_id].expanded_logs['vitals']) return '';
+  const logs = state.vitals;
+  const lastV = logs.length ? logs[logs.length-1] : null;
+  // Sparkline SVG
+  let spark = '';
+  if (logs.length >= 2) {
+    const sbpVals = logs.slice(-6).map(v => v.sbp || 120);
+    const min = Math.min(...sbpVals) - 10, max = Math.max(...sbpVals) + 10;
+    const w = 120, h = 30;
+    const pts = sbpVals.map((v,i) => `${(i/(sbpVals.length-1))*w},${h - ((v-min)/(max-min))*h}`).join(' ');
+    spark = `<svg width="${w}" height="${h}" style="margin:4px 0"><polyline points="${pts}" fill="none" stroke="var(--blue)" stroke-width="2"/></svg>`;
+  }
+  const logRows = logs.map((v,i) => `
+    <div style="font-size:10px;padding:4px 0;border-bottom:1px solid var(--border2);display:flex;justify-content:space-between;align-items:center">
+      <span><strong>${v.sbp||'--'}/${v.dbp||'--'}</strong> HR:${v.hr||'--'} T:${v.temp||'--'} O₂:${v.spo2||'--'}% RR:${v.rr||'--'} — ${v.time}</span>
+      <span class="ck-undo" onclick="event.stopPropagation();removeLog(${pt_id},'vitals',${i})">Undo</span>
+    </div>
+  `).join('');
+  return `
+  <div class="inp-panel" onclick="event.stopPropagation()">
+    ${lastV ? `<div class="vitals-grid">
+      <div class="vital-value"><div class="vital-label">BP</div><div class="vital-number">${lastV.sbp}/${lastV.dbp}</div></div>
+      <div class="vital-value"><div class="vital-label">HR</div><div class="vital-number">${lastV.hr}</div></div>
+      <div class="vital-value"><div class="vital-label">TEMP</div><div class="vital-number">${lastV.temp}°</div></div>
+      <div class="vital-value"><div class="vital-label">SpO₂</div><div class="vital-number">${lastV.spo2}%</div></div>
+      <div class="vital-value"><div class="vital-label">RR</div><div class="vital-number">${lastV.rr}</div></div>
+      <div class="vital-value"><div class="vital-label">TREND</div>${spark}</div>
+    </div>` : ''}
+    <div class="vitals-mode-toggle">
+      <button class="vitals-mode-btn ${S.pts[pt_id].vitals_mode !== 'manual' ? 'sel' : ''}" onclick="event.stopPropagation();S.pts[${pt_id}].vitals_mode='monitor';S.render()">Monitor Auto-Fill</button>
+      <button class="vitals-mode-btn ${S.pts[pt_id].vitals_mode === 'manual' ? 'sel' : ''}" onclick="event.stopPropagation();S.pts[${pt_id}].vitals_mode='manual';S.render()">Manual Entry</button>
+    </div>
+    ${S.pts[pt_id].vitals_mode === 'manual' ? `
+    <div class="inp-grid g3" style="margin-bottom:8px">
+      <div><label class="inp-label">SBP</label><input type="number" class="inp-field" id="mv-sbp-${pt_id}" placeholder="120"/></div>
+      <div><label class="inp-label">DBP</label><input type="number" class="inp-field" id="mv-dbp-${pt_id}" placeholder="80"/></div>
+      <div><label class="inp-label">HR</label><input type="number" class="inp-field" id="mv-hr-${pt_id}" placeholder="72"/></div>
+      <div><label class="inp-label">Temp</label><input type="number" step="0.1" class="inp-field" id="mv-temp-${pt_id}" placeholder="98.6"/></div>
+      <div><label class="inp-label">SpO₂</label><input type="number" class="inp-field" id="mv-spo2-${pt_id}" placeholder="98"/></div>
+      <div><label class="inp-label">RR</label><input type="number" class="inp-field" id="mv-rr-${pt_id}" placeholder="16"/></div>
+    </div>
+    <button class="submit-btn ready" onclick="event.stopPropagation();saveManualVitals(${pt_id})" style="margin-bottom:8px">Save Manual Vitals</button>
+    ` : `
+    <button class="submit-btn ready" onclick="event.stopPropagation();pullBTVitals(${pt_id})" style="margin-bottom:8px">📡 Pull Vitals from Monitor</button>
+    `}
+    ${logRows}
+  </div>`;
+}
+
+function pullBTVitals(pt_id) {
+  const state = S.pts[pt_id].state;
+  const base_sbp = 110 + Math.floor(Math.random()*30);
+  const entry = {
+    sbp: base_sbp, dbp: 60 + Math.floor(Math.random()*20),
+    hr: 60 + Math.floor(Math.random()*30), temp: (97.2 + Math.random()*2).toFixed(1),
+    spo2: 95 + Math.floor(Math.random()*5), rr: 12 + Math.floor(Math.random()*8),
+    time: ft(new Date()), value: 'BT Auto'
+  };
+  state.vitals.push(entry);
+  S.render();
+}
+
+function logPTProgress(pt_id, level) {
+  const state = S.pts[pt_id].state;
+  state.pt_progress = level;
+  state.pt_progress_log.push({value: level, time: ft(new Date())});
+  S.render();
+}
+
+function saveManualVitals(pt_id) {
+  const g = id => parseInt(document.getElementById(id)?.value) || 0;
+  const t = document.getElementById('mv-temp-'+pt_id)?.value || '98.6';
+  const entry = {
+    sbp: g('mv-sbp-'+pt_id), dbp: g('mv-dbp-'+pt_id),
+    hr: g('mv-hr-'+pt_id), temp: parseFloat(t).toFixed(1),
+    spo2: g('mv-spo2-'+pt_id), rr: g('mv-rr-'+pt_id),
+    time: ft(new Date()), value: 'Manual'
+  };
+  if (entry.sbp > 0) { S.pts[pt_id].state.vitals.push(entry); S.render(); }
+}
+
+function renderExpandedLog(pt_id, log_type, logs) {
+  if (!S.pts[pt_id].expanded_logs[log_type]) return '';
+
+  const log_names = {
+    vitals: {opts:['BP','HR','Temp','SpO2','RR'], name:'Vital'},
+    pain: {opts:['0','1','2','3','4','5','6','7','8','9','10'], name:'Pain'},
+    aldrete: {opts:['0','1','2','3','4','5','6','7','8','9','10'], name:'Score'},
+    o2: {opts:['Room Air','NC 2L','NC 4L','Face Mask','Non-Rebreather'], name:'O2'},
+    dress: {opts:['Clean/Dry','Spotting','Mod Drainage','Fully Saturated'], name:'Status'},
+    nv: {opts:['Intact','Diminished','Absent'], name:'Check'},
+    nausea: {opts:['None','Mild','Moderate','Severe'], name:'Level'},
+    cryo: {opts:['On','Off','Repositioned'], name:'Status'},
+    airway: {opts:['Clear','Stridor','Wheezing','Obstructed'], name:'Status'}
+  };
+
+  const info = log_names[log_type];
+  const log_html = logs.map((l,i) => `
+    <div style="font-size:10px;padding:4px 0;border-bottom:1px solid var(--border2)">
+      <strong>${l.value}</strong> - ${l.time}
+      <span class="ck-undo" onclick="removeLog(${pt_id},'${log_type}',${i})">Undo</span>
+    </div>
+  `).join('');
+
+  const lastVal = logs.length ? logs[logs.length-1].value : null;
+  let opts_html = info.opts.map(opt => `<button class="opt-btn ${lastVal === opt ? 'sel' : ''}" onclick="event.stopPropagation();logEntry(${pt_id},'${log_type}','${opt}')">${opt}</button>`).join('');
+
+  return `
+  <div class="inp-panel">
+    <div class="opt-row">${opts_html}</div>
+    ${log_html}
+  </div>
+  `;
+}
+
+function logEntry(pt_id, log_type, value) {
+  const state = S.pts[pt_id].state;
+  const entry = {value, time: ft(NOW)};
+
+  if (log_type === 'vitals') state.vitals.push(entry);
+  else if (log_type === 'pain') state.pain_logs.push(entry);
+  else if (log_type === 'aldrete') state.aldrete_logs.push(entry);
+  else if (log_type === 'o2') state.o2_logs.push(entry);
+  else if (log_type === 'dress') state.dress_logs.push(entry);
+  else if (log_type === 'nv') state.nv_logs.push(entry);
+  else if (log_type === 'nausea') state.nausea_logs.push(entry);
+  else if (log_type === 'cryo') state.cryo_logs.push(entry);
+  else if (log_type === 'airway') state.airway_logs.push(entry);
+
+  S.render();
+}
+
+function removeLog(pt_id, log_type, idx) {
+  const state = S.pts[pt_id].state;
+  if (log_type === 'vitals') state.vitals.splice(idx, 1);
+  else if (log_type === 'pain') state.pain_logs.splice(idx, 1);
+  else if (log_type === 'aldrete') state.aldrete_logs.splice(idx, 1);
+  else if (log_type === 'o2') state.o2_logs.splice(idx, 1);
+  else if (log_type === 'dress') state.dress_logs.splice(idx, 1);
+  else if (log_type === 'nv') state.nv_logs.splice(idx, 1);
+  else if (log_type === 'nausea') state.nausea_logs.splice(idx, 1);
+  else if (log_type === 'cryo') state.cryo_logs.splice(idx, 1);
+  else if (log_type === 'airway') state.airway_logs.splice(idx, 1);
+  S.render();
+}
+
+function arrivePatient(pt_id) {
+  const state = S.pts[pt_id].state;
+  state.arrived = true;
+  state.pacu_start = NOW;
+  S.render();
+}
+
+function renderOrders(pt, state) {
+  let html = '';
+
+  // Standing Orders - Anesthesia
+  html += `
+  <div class="orders-section">
+    <div class="orders-header" onclick="toggleOrders(${pt.id},'anes')">
+      <span class="orders-title">Standing Orders — Anesthesia</span>
+      <span class="orders-arrow ${S.pts[pt.id].open_orders.anes ? 'open' : ''}">▼</span>
+    </div>
+    <div class="orders-body ${S.pts[pt.id].open_orders.anes ? 'open' : ''}" id="body-anes">
+      <div class="order-item"><div class="order-check done">✓</div><div class="order-text"><div class="order-text-drug">Monitor vitals Q5 x30min then Q15 x1hr then Q30</div></div></div>
+      <div class="order-item"><div class="order-check done">✓</div><div class="order-text"><div class="order-text-drug">Aldrete Score Q15 until ≥9</div></div></div>
+      <div class="order-item"><div class="order-check done">✓</div><div class="order-text"><div class="order-text-drug">NV check Q15 x4</div></div></div>
+      <div class="order-item"><div class="order-check done">✓</div><div class="order-text"><div class="order-text-drug">Supplemental O₂ to maintain SpO₂ >94%</div></div></div>
+      <div class="order-item"><div class="order-check done">✓</div><div class="order-text"><div class="order-text-drug">HOB 30° unless contraindicated</div></div></div>
+    </div>
+  </div>
+  `;
+
+  // Standing Orders - Surgical
+  html += `
+  <div class="orders-section">
+    <div class="orders-header" onclick="toggleOrders(${pt.id},'surg')">
+      <span class="orders-title">Standing Orders — Surgical</span>
+      <span class="orders-arrow ${S.pts[pt.id].open_orders.surg ? 'open' : ''}">▼</span>
+    </div>
+    <div class="orders-body ${S.pts[pt.id].open_orders.surg ? 'open' : ''}" id="body-surg">
+      ${pt.joint === 'Knee' ? '<div class="order-item"><div class="order-check">□</div><div class="order-text"><div class="order-text-drug">Cryo unit to surgical site</div></div></div>' : ''}
+      <div class="order-item"><div class="order-check">□</div><div class="order-text"><div class="order-text-drug">DVT prophylaxis per protocol</div></div></div>
+      <div class="order-item"><div class="order-check">□</div><div class="order-text"><div class="order-text-drug">Dressing check Q30</div></div></div>
+      <div class="order-item"><div class="order-check">□</div><div class="order-text"><div class="order-text-drug">Drain output monitoring</div></div></div>
+      <div class="order-item"><div class="order-check">□</div><div class="order-text"><div class="order-text-drug">Weight bearing as tolerated</div></div></div>
+      <div class="order-item"><div class="order-check">□</div><div class="order-text"><div class="order-text-drug">Clear liquids → advance diet as tolerated</div></div></div>
+      <div class="order-item"><div class="order-check">□</div><div class="order-text"><div class="order-text-drug">Foley catheter management PRN</div></div></div>
+      <div class="order-item"><div class="order-check">□</div><div class="order-text"><div class="order-text-drug">Fall precautions</div></div></div>
+    </div>
+  </div>
+  `;
+
+  // PRN Medications
+  const prn_meds = {
+    'Anesthesia PRNs': [
+      {name:'Ondansetron', dose:'4mg'},
+      {name:'Dexamethasone', dose:'4mg'},
+      {name:'Scopolamine', dose:'0.4mg'},
+      {name:'Ephedrine', dose:'10mg'},
+      {name:'Phenylephrine', dose:'100mcg'},
+      {name:'Glycopyrrolate', dose:'0.2mg'}
+    ],
+    'Surgical PRNs': [
+      {name:'Dilaudid', dose:'0.5mg'},
+      {name:'Morphine', dose:'2mg'},
+      {name:'Ketorolac', dose:'15mg'},
+      {name:'Acetaminophen', dose:'1g'},
+      {name:'Gabapentin', dose:'300mg'},
+      {name:'Oxycodone', dose:'5mg'}
+    ],
+    'DC Medications': [
+      {name:'Oxycodone', dose:'5mg'},
+      {name:'Acetaminophen', dose:'500mg'},
+      {name:'Aspirin', dose:'81mg'},
+      {name:'Gabapentin', dose:'300mg'}
+    ]
+  };
+
+  Object.keys(prn_meds).forEach(cat => {
+    const isOpen = S.pts[pt.id].open_orders[cat];
+    html += `
+    <div class="orders-section">
+      <div class="orders-header" onclick="toggleOrders(${pt.id},'${cat}')">
+        <span class="orders-title">${cat}</span>
+        <span class="orders-arrow ${isOpen ? 'open' : ''}">▼</span>
+      </div>
+      <div class="orders-body ${isOpen ? 'open' : ''}"
+        ${prn_meds[cat].map(m => {
+          const given = state.med_log.filter(l => l.med === m.name);
+          return `
+          <div class="abx-entry" style="flex-direction:column;align-items:stretch">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div><strong>${m.name}</strong> <span style="color:var(--t3)">${m.dose}</span>${given.length ? ` <span style="font-size:9px;color:var(--green);font-weight:600">(x${given.length})</span>` : ''}</div>
+              <button class="abx-pending" onclick="event.stopPropagation();giveMed(${pt.id},'${m.name}')">Give</button>
+            </div>
+            ${given.length ? `<div style="margin-top:4px">${given.map(g => `<div style="font-size:9px;color:var(--green);padding:1px 0">✓ Given ${g.time}</div>`).join('')}</div>` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    `;
+  });
+
+  // Med admin log
+  if (state.med_log.length) {
+    html += `<div class="orders-section"><div class="orders-title" style="padding:8px 0">Administration Log</div>`;
+    state.med_log.forEach((l,i) => {
+      html += `<div style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--border2)"><strong>${l.med}</strong> — ${l.time}</div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Free text medication notes
+  html += `
+  <div class="orders-section">
+    <div class="orders-title" style="padding:8px 0">Medication Notes</div>
+    <textarea class="inp-field" style="min-height:60px;resize:vertical;margin-top:4px" placeholder="Additional medication orders or notes..." onchange="S.pts[${pt.id}].state.med_notes=this.value">${state.med_notes}</textarea>
+  </div>
+  `;
+
+  return html;
+}
+
+function toggleOrders(pt_id, section) {
+  event.stopPropagation();
+  const oo = S.pts[pt_id].open_orders;
+  oo[section] = !oo[section];
+  S.render();
+}
+
+function giveMed(pt_id, med_name) {
+  const state = S.pts[pt_id].state;
+  const entry = {med: med_name, time: ft(new Date())};
+  state.med_log.push(entry);
+  S.render();
+}
+
+function renderDC(pt, state) {
+  const blockers = [];
+  if (state.vitals.length < 3) blockers.push('Vitals < 3 sets');
+  if (!state.education.wound || !state.education.meds || !state.education.activity || !state.education.warnings) blockers.push('Education incomplete');
+  if (!state.logistics.rx_confirmed || !state.logistics.adult_present) blockers.push('Logistics incomplete');
+  if (state.aldrete_logs.length > 0 && parseInt(state.aldrete_logs[state.aldrete_logs.length - 1].value) < 9) blockers.push('Aldrete < 9');
+  if (state.nv_logs.length > 0 && state.nv_logs[state.nv_logs.length - 1].value !== 'Intact') blockers.push('NV not intact');
+  if (state.dress_logs.length > 0 && state.dress_logs[state.dress_logs.length - 1].value === 'Fully Saturated') blockers.push('Dressing saturated');
+  if (!state.voided) blockers.push('Not voided');
+  if (!state.ambulated) blockers.push('Not ambulated');
+  if (!state.pt_cleared) blockers.push('PT not cleared');
+
+  let html = '';
+
+  if (blockers.length > 0) {
+    html += `
+    <div class="dc-blocker">
+      <div class="dc-blocker-title">⚠ DC Blockers</div>
+      <div class="dc-blocker-list">
+        ${blockers.map(b => `<li>${b}</li>`).join('')}
+      </div>
+    </div>
+    `;
+  }
+
+  // DC Criteria
+  html += `
+  <div class="phase-hd"><span class="phase-label">DC Criteria Checklist</span><button class="complete-all-inline" onclick="selectAllDC(${pt.id},'dc_criteria')">✓ Select All</button></div>
+  <div class="ck expand">
+    <div class="ck-icon p">📋</div>
+    <div class="ck-body">
+      <div class="inp-panel">
+        <div><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${state.dc_criteria.teaching ? 'checked' : ''} onchange="S.pts[${pt.id}].state.dc_criteria.teaching=this.checked;S.render()"/>Teaching complete</label></div>
+        <div><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${state.dc_criteria.swallow ? 'checked' : ''} onchange="S.pts[${pt.id}].state.dc_criteria.swallow=this.checked;S.render()"/>Swallowing normally</label></div>
+        <div><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${state.dc_criteria.nausea ? 'checked' : ''} onchange="S.pts[${pt.id}].state.dc_criteria.nausea=this.checked;S.render()"/>Nausea controlled</label></div>
+        <div><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${state.dc_criteria.pain ? 'checked' : ''} onchange="S.pts[${pt.id}].state.dc_criteria.pain=this.checked;S.render()"/>Pain controlled</label></div>
+        <div><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${state.dc_criteria.skin_color ? 'checked' : ''} onchange="S.pts[${pt.id}].state.dc_criteria.skin_color=this.checked;S.render()"/>Normal skin color</label></div>
+        <div><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${state.dc_criteria.motor ? 'checked' : ''} onchange="S.pts[${pt.id}].state.dc_criteria.motor=this.checked;S.render()"/>Motor function adequate</label></div>
+        <div><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${state.dc_criteria.dc_instr ? 'checked' : ''} onchange="S.pts[${pt.id}].state.dc_criteria.dc_instr=this.checked;S.render()"/>DC instructions given</label></div>
+      </div>
+    </div>
+  </div>
+  `;
+
+  // Education
+  html += `
+  <div class="phase-hd"><span class="phase-label">Education</span><button class="complete-all-inline" onclick="selectAllDC(${pt.id},'education')">✓ Select All</button></div>
+  <div class="ck expand">
+    <div class="ck-icon p">📚</div>
+    <div class="ck-body">
+      <div class="inp-panel">
+        <div><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${state.education.wound ? 'checked' : ''} onchange="S.pts[${pt.id}].state.education.wound=this.checked;S.render()"/>Wound care</label></div>
+        <div><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${state.education.meds ? 'checked' : ''} onchange="S.pts[${pt.id}].state.education.meds=this.checked;S.render()"/>Medications</label></div>
+        <div><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${state.education.activity ? 'checked' : ''} onchange="S.pts[${pt.id}].state.education.activity=this.checked;S.render()"/>Activity restrictions</label></div>
+        <div><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${state.education.warnings ? 'checked' : ''} onchange="S.pts[${pt.id}].state.education.warnings=this.checked;S.render()"/>Warning signs</label></div>
+        <div><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${state.education.cryo_or_precautions ? 'checked' : ''} onchange="S.pts[${pt.id}].state.education.cryo_or_precautions=this.checked;S.render()"/>Cryo/precautions</label></div>
+        <div><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${state.education.pt_ex ? 'checked' : ''} onchange="S.pts[${pt.id}].state.education.pt_ex=this.checked;S.render()"/>PT exercises</label></div>
+        <div><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${state.education.followup ? 'checked' : ''} onchange="S.pts[${pt.id}].state.education.followup=this.checked;S.render()"/>Follow-up appt</label></div>
+        <div><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${state.education.dvt ? 'checked' : ''} onchange="S.pts[${pt.id}].state.education.dvt=this.checked;S.render()"/>DVT prevention</label></div>
+      </div>
+    </div>
+  </div>
+  `;
+
+  // Logistics
+  html += `
+  <div class="phase-hd"><span class="phase-label">Logistics</span><button class="complete-all-inline" onclick="selectAllDC(${pt.id},'logistics')">✓ Select All</button></div>
+  <div class="ck expand">
+    <div class="ck-icon p">✅</div>
+    <div class="ck-body">
+      <div class="inp-panel">
+        <div><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${state.logistics.rx_confirmed ? 'checked' : ''} onchange="S.pts[${pt.id}].state.logistics.rx_confirmed=this.checked;S.render()"/>Rx confirmed</label></div>
+        <div><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${state.logistics.adult_present ? 'checked' : ''} onchange="S.pts[${pt.id}].state.logistics.adult_present=this.checked;S.render()"/>Responsible adult present</label></div>
+      </div>
+    </div>
+  </div>
+  `;
+
+  if (blockers.length === 0) {
+    html += `
+    <div class="dc-summary">
+      <div class="dc-summary-title">✓ READY FOR DISCHARGE</div>
+      <div class="dc-summary-row"><strong>${pt.ln}, ${pt.fn}</strong></div>
+      <div class="dc-summary-row"><strong>${pt.proc}</strong></div>
+      <button class="dc-discharge-btn" onclick="dischargePatient(${pt.id})">Discharge Patient</button>
+    </div>
+    `;
+  }
+
+  return html;
+}
+
+function selectAllDC(pt_id, section) {
+  const obj = S.pts[pt_id].state[section];
+  Object.keys(obj).forEach(k => obj[k] = true);
+  S.render();
+}
+
+function dischargePatient(pt_id) {
+  const state = S.pts[pt_id].state;
+  state.discharged = true;
+  state.readyDC = false;
+  S.render();
+}
+
+function renderSupply(pt, state) {
+  let html = `<div class="phase-hd"><span class="phase-label">Supply Tracking</span></div>`;
+
+  html += `<div class="supply-grid">`;
+  Object.keys(state.supply).forEach(item => {
+    const supply = state.supply[item];
+    html += `
+    <div class="supply-row">
+      <div class="supply-name">${item}</div>
+      <div class="supply-controls">
+        <div class="supply-count">
+          <label class="supply-label">Pulled:</label>
+          <button class="supply-pm" onclick="S.pts[${pt.id}].state.supply['${item}'].pulled--;S.render()">−</button>
+          <span style="min-width:30px;text-align:center;font-weight:600">${supply.pulled}</span>
+          <button class="supply-pm" onclick="S.pts[${pt.id}].state.supply['${item}'].pulled++;S.render()">+</button>
+        </div>
+        <div class="supply-count">
+          <label class="supply-label">Used:</label>
+          <button class="supply-pm" onclick="S.pts[${pt.id}].state.supply['${item}'].used--;S.render()">−</button>
+          <span style="min-width:30px;text-align:center;font-weight:600">${supply.used}</span>
+          <button class="supply-pm" onclick="S.pts[${pt.id}].state.supply['${item}'].used++;S.render()">+</button>
+        </div>
+      </div>
+    </div>
+    `;
+  });
+  html += `</div>`;
+
+  return html;
+}
+
+function formatElapsed(ms) {
+  const mins = Math.floor(ms / 60000);
+  const hrs = Math.floor(mins / 60);
+  if (hrs > 0) return hrs + 'h ' + (mins % 60) + 'm';
+  return mins + 'm';
+}
+
+// Render on load
+S.render();
+
+// Update elapsed time every second
+setInterval(() => {
+  const pt = PTS.find(p => p.id === S.active);
+  if (pt && S.pts[S.active].state.pacu_start) {
+    S.render();
+  }
+}, 1000);
+</script>
+</body>
+</html>
